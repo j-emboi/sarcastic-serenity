@@ -10,7 +10,7 @@ export class WaveScene extends BaseScene {
   protected time: number = 0;
 
   init(gl: any): void {
-    console.log('Initializing OGL WaveScene');
+    console.log('Initializing OGL WaveScene with simple animation');
     
     // Create wave shader program
     this.waveProgram = new Program(gl, {
@@ -47,8 +47,8 @@ export class WaveScene extends BaseScene {
       this.waveProgram.uniforms.audioLevel.value = audioLevel;
       this.waveProgram.uniforms.serendipity.value = serendipity;
       
-      // Debug logging every second
-      if (Math.floor(this.time / 1000) % 1 === 0) {
+      // Debug logging every 2 seconds
+      if (Math.floor(this.time / 1000) % 2 === 0) {
         console.log('WaveScene update:', {
           time: this.time * 0.001,
           audioLevel,
@@ -99,32 +99,25 @@ export class WaveScene extends BaseScene {
       void main() {
         vec2 uv = vUv;
         
-        // Simple, visible wave animation
-        float wave1 = sin(vTime * 2.0 + uv.x * 10.0) * 0.5 + 0.5;
-        float wave2 = sin(vTime * 1.5 + uv.x * 15.0) * 0.3 + 0.5;
-        float wave3 = sin(vTime * 3.0 + uv.y * 8.0) * 0.2 + 0.5;
-        
-        // Combine waves
-        float waveHeight = (wave1 + wave2 + wave3) / 3.0;
+        // Super simple animated gradient
+        float wave = sin(vTime * 1.0 + uv.x * 5.0) * 0.5 + 0.5;
         
         // Ocean colors
-        vec3 oceanBlue = vec3(0.1, 0.3, 0.8);
-        vec3 deepBlue = vec3(0.0, 0.1, 0.4);
-        vec3 lightBlue = vec3(0.4, 0.6, 1.0);
+        vec3 color1 = vec3(0.0, 0.3, 0.8);  // Deep blue
+        vec3 color2 = vec3(0.4, 0.7, 1.0);  // Light blue
+        vec3 color3 = vec3(0.1, 0.5, 0.9);  // Medium blue
         
-        // Create gradient based on wave height
-        vec3 color;
-        if (uv.y < waveHeight) {
-          color = mix(oceanBlue, deepBlue, uv.y);
-        } else {
-          color = mix(lightBlue, oceanBlue, (uv.y - waveHeight) * 2.0);
-        }
+        // Create animated gradient
+        vec3 color = mix(color1, color2, wave);
+        color = mix(color, color3, sin(vTime * 0.5 + uv.y * 3.0) * 0.5 + 0.5);
         
-        // Add some movement to the colors
-        color += vec3(0.1) * sin(vTime * 1.0 + uv.x * 5.0);
+        // Add some movement
+        color += vec3(0.1) * sin(vTime * 2.0 + uv.x * 10.0);
         
         // Audio reactivity
-        color += vec3(0.1) * vAudioLevel * sin(vTime * 5.0 + uv.x * 20.0);
+        if (vAudioLevel > 0.1) {
+          color += vec3(0.2) * vAudioLevel * sin(vTime * 5.0 + uv.x * 20.0);
+        }
         
         gl_FragColor = vec4(color, 1.0);
       }
