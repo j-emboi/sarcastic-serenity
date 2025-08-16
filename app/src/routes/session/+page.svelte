@@ -36,7 +36,6 @@
     nextQuoteTimeout = window.setTimeout(() => {
       if (!ended) {
         scheduleNextQuote();
-        scheduleNextQuoteWithJitter();
       }
     }, initialDelay);
 
@@ -72,17 +71,27 @@
   function scheduleNextQuoteWithJitter() {
     if (!settingsValue || timeLeft <= 0 || ended) return;
     
+    // Don't schedule new quotes if we're currently speaking
+    if (speaking) {
+      // Wait a bit and try again
+      nextQuoteTimeout = window.setTimeout(() => {
+        if (!ended) {
+          scheduleNextQuoteWithJitter();
+        }
+      }, 1000); // Check again in 1 second
+      return;
+    }
+    
     const delay = quoteManager.getNextQuoteTime();
     nextQuoteTimeout = window.setTimeout(() => {
       if (!ended) {
         scheduleNextQuote();
-        scheduleNextQuoteWithJitter();
       }
     }, delay);
   }
 
   function scheduleNextQuote() {
-    if (ended) return;
+    if (ended || speaking) return; // Don't generate new quotes if already speaking
     
     const nextQuote = quoteManager.getQuote({
       persona: settingsValue?.persona || 'student',
@@ -111,10 +120,18 @@
       
       utterance.onend = () => {
         speaking = false;
+        // Schedule next quote after current one finishes
+        if (!ended) {
+          scheduleNextQuoteWithJitter();
+        }
       };
       
       utterance.onerror = () => {
         speaking = false;
+        // Schedule next quote even if current one had an error
+        if (!ended) {
+          scheduleNextQuoteWithJitter();
+        }
       };
       
       speechSynthesis.speak(utterance);
