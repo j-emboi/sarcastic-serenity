@@ -1,6 +1,5 @@
 import { Program, Mesh, Plane, Geometry, Transform } from 'ogl';
 import { BaseScene } from './BaseScene';
-import * as Matter from 'matter-js';
 
 export type AnimationType = 
   | 'flowing-particles'
@@ -11,12 +10,15 @@ export type AnimationType =
   | 'cosmic-dust'
   | 'energy-field';
 
-interface PhysicsParticle {
-  body: Matter.Body;
-  color: { r: number; g: number; b: number };
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
   life: number;
   maxLife: number;
-  type: 'particle' | 'spark' | 'bubble';
+  color: { r: number; g: number; b: number };
+  size: number;
 }
 
 export class ParticleScene extends BaseScene {
@@ -29,30 +31,17 @@ export class ParticleScene extends BaseScene {
   private currentAnimation: AnimationType = 'flowing-particles';
   private animationId: number | null = null;
 
-  // Physics engine components
-  private engine: Matter.Engine | null = null;
-  private world: Matter.World | null = null;
-  private particles: PhysicsParticle[] = [];
-  private bounds: Matter.Body[] = [];
-
-  // Physics settings
-  private readonly MAX_PARTICLES = 50; // Reduced for better performance
-  private readonly PARTICLE_RADIUS = 5;
-  private readonly GRAVITY = { x: 0, y: 0.1, scale: 0.001 };
-  private readonly WIND_FORCE = { x: 0.02, y: 0 };
+  // Pure JavaScript particle system
+  private particles: Particle[] = [];
+  private readonly MAX_PARTICLES = 100;
+  private readonly GRAVITY = 0.1;
+  private readonly WIND = 0.02;
+  private readonly BOUNCE = 0.8;
+  private readonly FRICTION = 0.99;
 
   init(gl: any): void {
-    console.log('Initializing Physics-Based ParticleScene');
+    console.log('Initializing Pure WebGL ParticleScene');
     
-    // Initialize Matter.js physics engine
-    this.engine = Matter.Engine.create({
-      gravity: this.GRAVITY
-    });
-    this.world = this.engine.world;
-
-    // Create invisible boundaries
-    this.createBoundaries();
-
     // Create particle shader program
     this.particleProgram = new Program(gl, {
       vertex: this.createParticleVertexShader(),
@@ -78,218 +67,124 @@ export class ParticleScene extends BaseScene {
 
     this.addMesh(this.particleMesh);
     
-    // Start physics simulation
-    this.startPhysicsSimulation();
+    // Initialize particles
+    this.initializeParticles();
     
-    console.log('Physics-Based ParticleScene initialization complete');
+    console.log('Pure WebGL ParticleScene initialization complete');
   }
 
-  private createBoundaries(): void {
-    if (!this.world) return;
-
-    const canvas = { width: window.innerWidth, height: window.innerHeight };
-    const thickness = 50;
-
-    // Create invisible walls
-    const walls = [
-      // Top wall
-      Matter.Bodies.rectangle(canvas.width / 2, -thickness / 2, canvas.width, thickness, { isStatic: true }),
-      // Bottom wall
-      Matter.Bodies.rectangle(canvas.width / 2, canvas.height + thickness / 2, canvas.width, thickness, { isStatic: true }),
-      // Left wall
-      Matter.Bodies.rectangle(-thickness / 2, canvas.height / 2, thickness, canvas.height, { isStatic: true }),
-      // Right wall
-      Matter.Bodies.rectangle(canvas.width + thickness / 2, canvas.height / 2, thickness, canvas.height, { isStatic: true })
-    ];
-
-    walls.forEach(wall => {
-      wall.render.visible = false; // Make walls invisible
-      this.bounds.push(wall);
-      if (this.world) {
-        Matter.World.add(this.world, wall);
-      }
-    });
-  }
-
-  private startPhysicsSimulation(): void {
-    if (!this.engine) return;
-
-    // Run physics simulation
-    const runPhysics = () => {
-      if (this.engine) {
-        Matter.Engine.update(this.engine, 1000 / 60); // 60 FPS physics
-      }
-      this.updateParticles();
-      this.animationId = requestAnimationFrame(runPhysics);
-    };
-
-    runPhysics();
-  }
-
-  private updateParticles(): void {
-    // Update particle lifetimes and remove dead particles
-    this.particles = this.particles.filter(particle => {
-      particle.life -= 1;
-      return particle.life > 0;
-    });
-
-    // Apply wind force to particles
-    this.particles.forEach(particle => {
-      Matter.Body.applyForce(particle.body, particle.body.position, this.WIND_FORCE);
-    });
-
-    // Spawn new particles
-    this.spawnParticles();
-  }
-
-  private spawnParticles(): void {
-    if (this.particles.length >= this.MAX_PARTICLES) return;
-
-    const canvas = { width: window.innerWidth, height: window.innerHeight };
-    const spawnRate = 1; // particles per frame
-
-    for (let i = 0; i < spawnRate; i++) {
-      if (this.particles.length >= this.MAX_PARTICLES) break;
-
-      const particle = this.createParticle();
-      if (particle) {
-        this.particles.push(particle);
-        if (this.world) {
-          Matter.World.add(this.world, particle.body);
-        }
-      }
+  private initializeParticles(): void {
+    this.particles = [];
+    for (let i = 0; i < this.MAX_PARTICLES; i++) {
+      this.particles.push(this.createParticle());
     }
   }
 
-  private createParticle(): PhysicsParticle | null {
+  private createParticle(): Particle {
     const canvas = { width: window.innerWidth, height: window.innerHeight };
     
     // Spawn position based on animation type
-    let spawnX: number, spawnY: number;
+    let x: number, y: number, vx: number, vy: number;
     
     switch (this.currentAnimation) {
       case 'flowing-particles':
-        spawnX = Math.random() * canvas.width;
-        spawnY = -this.PARTICLE_RADIUS;
+        x = Math.random() * canvas.width;
+        y = -10;
+        vx = (Math.random() - 0.5) * 2;
+        vy = Math.random() * 3 + 1;
         break;
       case 'fireworks':
-        spawnX = canvas.width / 2 + (Math.random() - 0.5) * 100;
-        spawnY = canvas.height + this.PARTICLE_RADIUS;
+        x = canvas.width / 2 + (Math.random() - 0.5) * 100;
+        y = canvas.height + 10;
+        vx = (Math.random() - 0.5) * 8;
+        vy = -Math.random() * 10 - 5;
         break;
       case 'spiral-galaxy':
         const angle = Math.random() * Math.PI * 2;
         const radius = Math.random() * 200;
-        spawnX = canvas.width / 2 + Math.cos(angle) * radius;
-        spawnY = canvas.height / 2 + Math.sin(angle) * radius;
-        break;
-      default:
-        spawnX = Math.random() * canvas.width;
-        spawnY = Math.random() * canvas.height;
-    }
-
-    // Create physics body
-    const body = Matter.Bodies.circle(spawnX, spawnY, this.PARTICLE_RADIUS, {
-      restitution: 0.8,
-      friction: 0.1,
-      density: 0.001,
-      render: { visible: false }
-    });
-
-    // Initial velocity based on animation type
-    switch (this.currentAnimation) {
-      case 'flowing-particles':
-        Matter.Body.setVelocity(body, {
-          x: (Math.random() - 0.5) * 2,
-          y: Math.random() * 3 + 1
-        });
-        break;
-      case 'fireworks':
-        Matter.Body.setVelocity(body, {
-          x: (Math.random() - 0.5) * 8,
-          y: -Math.random() * 10 - 5
-        });
-        break;
-      case 'spiral-galaxy':
+        x = canvas.width / 2 + Math.cos(angle) * radius;
+        y = canvas.height / 2 + Math.sin(angle) * radius;
         const velocity = Math.random() * 3 + 1;
-        const direction = Math.atan2(spawnY - canvas.height / 2, spawnX - canvas.width / 2);
-        Matter.Body.setVelocity(body, {
-          x: Math.cos(direction) * velocity,
-          y: Math.sin(direction) * velocity
-        });
+        vx = Math.cos(angle) * velocity;
+        vy = Math.sin(angle) * velocity;
         break;
       default:
-        Matter.Body.setVelocity(body, {
-          x: (Math.random() - 0.5) * 4,
-          y: (Math.random() - 0.5) * 4
-        });
+        x = Math.random() * canvas.width;
+        y = Math.random() * canvas.height;
+        vx = (Math.random() - 0.5) * 4;
+        vy = (Math.random() - 0.5) * 4;
     }
 
-    // Particle properties
-    const particle: PhysicsParticle = {
-      body,
+    return {
+      x,
+      y,
+      vx,
+      vy,
+      life: 300 + Math.random() * 200,
+      maxLife: 300 + Math.random() * 200,
       color: {
         r: 0.2 + Math.random() * 0.6,
         g: 0.4 + Math.random() * 0.4,
         b: 0.6 + Math.random() * 0.4
       },
-      life: 300 + Math.random() * 200,
-      maxLife: 300 + Math.random() * 200,
-      type: Math.random() > 0.7 ? 'spark' : 'particle'
+      size: 3 + Math.random() * 5
     };
+  }
 
-    return particle;
+  private updateParticles(): void {
+    const canvas = { width: window.innerWidth, height: window.innerHeight };
+    
+    // Update existing particles
+    this.particles = this.particles.filter(particle => {
+      // Update life
+      particle.life -= 1;
+      if (particle.life <= 0) return false;
+      
+      // Apply physics
+      particle.vy += this.GRAVITY; // Gravity
+      particle.vx += this.WIND; // Wind
+      
+      // Apply friction
+      particle.vx *= this.FRICTION;
+      particle.vy *= this.FRICTION;
+      
+      // Update position
+      particle.x += particle.vx;
+      particle.y += particle.vy;
+      
+      // Bounce off boundaries
+      if (particle.x < 0 || particle.x > canvas.width) {
+        particle.vx *= -this.BOUNCE;
+        particle.x = Math.max(0, Math.min(canvas.width, particle.x));
+      }
+      if (particle.y < 0 || particle.y > canvas.height) {
+        particle.vy *= -this.BOUNCE;
+        particle.y = Math.max(0, Math.min(canvas.height, particle.y));
+      }
+      
+      return true;
+    });
+    
+    // Spawn new particles to maintain count
+    while (this.particles.length < this.MAX_PARTICLES) {
+      this.particles.push(this.createParticle());
+    }
   }
 
   setAnimationType(type: AnimationType): void {
     console.log('ParticleScene: Switching to animation type:', type);
     this.currentAnimation = type;
     
-    // Clear existing particles when switching animations
-    this.clearParticles();
-    
-    // Adjust physics settings based on animation
-    this.adjustPhysicsForAnimation(type);
-  }
-
-  private clearParticles(): void {
-    if (this.world) {
-      this.particles.forEach(particle => {
-        if (this.world) {
-          Matter.World.remove(this.world, particle.body);
-        }
-      });
-    }
-    this.particles = [];
-  }
-
-  private adjustPhysicsForAnimation(type: AnimationType): void {
-    if (!this.engine) return;
-
-    switch (type) {
-      case 'flowing-particles':
-        this.engine.gravity = { x: 0, y: 0.1, scale: 0.001 };
-        this.WIND_FORCE.x = 0.02;
-        break;
-      case 'fireworks':
-        this.engine.gravity = { x: 0, y: 0.2, scale: 0.001 };
-        this.WIND_FORCE.x = 0;
-        break;
-      case 'spiral-galaxy':
-        this.engine.gravity = { x: 0, y: 0, scale: 0.001 };
-        this.WIND_FORCE.x = 0.01;
-        break;
-      default:
-        this.engine.gravity = { x: 0, y: 0.05, scale: 0.001 };
-        this.WIND_FORCE.x = 0.01;
-    }
+    // Clear existing particles and reinitialize
+    this.initializeParticles();
   }
 
   getAnimationTypes(): { type: AnimationType; name: string; description: string }[] {
     return [
-      { type: 'flowing-particles', name: 'Flowing Particles', description: 'Physics-based flowing particle streams' },
+      { type: 'flowing-particles', name: 'Flowing Particles', description: 'Pure WebGL flowing particle streams' },
       { type: 'wave-patterns', name: 'Wave Patterns', description: 'Organic wave interference patterns' },
       { type: 'spiral-galaxy', name: 'Spiral Galaxy', description: 'Spiral galaxy formation with physics' },
-      { type: 'fireworks', name: 'Fireworks', description: 'Physics-based particle explosions' },
+      { type: 'fireworks', name: 'Fireworks', description: 'Pure WebGL particle explosions' },
       { type: 'floating-particles', name: 'Floating Particles', description: 'Calming floating particle physics' },
       { type: 'cosmic-dust', name: 'Cosmic Dust', description: 'Floating cosmic particles with gravity' },
       { type: 'energy-field', name: 'Energy Field', description: 'Electric energy field physics' }
@@ -298,6 +193,9 @@ export class ParticleScene extends BaseScene {
 
   update(deltaTime: number, audioLevel: number = 0, serendipity: number = 0.1): void {
     this.time += deltaTime;
+
+    // Update particle physics
+    this.updateParticles();
 
     if (this.particleProgram) {
       this.particleProgram.uniforms.time.value = this.time;
@@ -312,16 +210,17 @@ export class ParticleScene extends BaseScene {
   private updateShaderWithParticleData(): void {
     if (!this.particleProgram) return;
 
-    // Convert particle physics data to shader uniforms
+    // Convert particle data to shader uniforms
     const particlePositions: number[] = [];
     const particleColors: number[] = [];
     const particleLives: number[] = [];
+    const particleSizes: number[] = [];
 
     this.particles.forEach(particle => {
       // Normalize positions to 0-1 range
       particlePositions.push(
-        particle.body.position.x / window.innerWidth,
-        particle.body.position.y / window.innerHeight
+        particle.x / window.innerWidth,
+        particle.y / window.innerHeight
       );
       
       particleColors.push(
@@ -331,6 +230,7 @@ export class ParticleScene extends BaseScene {
       );
       
       particleLives.push(particle.life / particle.maxLife);
+      particleSizes.push(particle.size / 10); // Normalize size
     });
 
     // Pad arrays to fixed size for shader
@@ -343,11 +243,15 @@ export class ParticleScene extends BaseScene {
     while (particleLives.length < this.MAX_PARTICLES) {
       particleLives.push(0);
     }
+    while (particleSizes.length < this.MAX_PARTICLES) {
+      particleSizes.push(0);
+    }
 
     // Update shader uniforms
     this.particleProgram.uniforms.particlePositions = { value: new Float32Array(particlePositions) };
     this.particleProgram.uniforms.particleColors = { value: new Float32Array(particleColors) };
     this.particleProgram.uniforms.particleLives = { value: new Float32Array(particleLives) };
+    this.particleProgram.uniforms.particleSizes = { value: new Float32Array(particleSizes) };
     this.particleProgram.uniforms.particleCount = { value: this.particles.length };
   }
 
@@ -389,26 +293,28 @@ export class ParticleScene extends BaseScene {
       varying float vAudioLevel;
       varying float vSerendipity;
       
-      uniform float particlePositions[100]; // MAX_PARTICLES * 2
-      uniform float particleColors[150];    // MAX_PARTICLES * 3
-      uniform float particleLives[50];      // MAX_PARTICLES
+      uniform float particlePositions[200]; // MAX_PARTICLES * 2
+      uniform float particleColors[300];    // MAX_PARTICLES * 3
+      uniform float particleLives[100];     // MAX_PARTICLES
+      uniform float particleSizes[100];     // MAX_PARTICLES
       uniform int particleCount;
       
       void main() {
         vec2 uv = vUv;
         vec3 color = vec3(0.0);
         
-        // Render physics-based particles
-        for (int i = 0; i < 50; i++) {
+        // Render particles
+        for (int i = 0; i < 100; i++) {
           if (i >= particleCount) break;
           
           vec2 particlePos = vec2(particlePositions[i * 2], particlePositions[i * 2 + 1]);
           vec3 particleColor = vec3(particleColors[i * 3], particleColors[i * 3 + 1], particleColors[i * 3 + 2]);
           float life = particleLives[i];
+          float size = particleSizes[i];
           
           // Calculate distance to particle
           float dist = length(uv - particlePos);
-          float radius = 0.03; // Particle radius
+          float radius = size * 0.02; // Particle radius based on size
           
           // Create soft particle
           float particle = smoothstep(radius, 0.0, dist) * life;
@@ -442,15 +348,8 @@ export class ParticleScene extends BaseScene {
       cancelAnimationFrame(this.animationId);
     }
     
-    // Clean up physics engine
-    if (this.world) {
-      this.clearParticles();
-      this.bounds.forEach(bound => {
-        if (this.world) {
-          Matter.World.remove(this.world, bound);
-        }
-      });
-    }
+    // Clear particles
+    this.particles = [];
     
     super.destroy();
   }
