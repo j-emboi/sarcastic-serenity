@@ -48,8 +48,8 @@ const DEFAULT_SETTINGS: AppSettings = {
 	aiVoiceRate: 0, // Normal speed
 	aiVoiceVolume: 80, // Good volume level
 	// Unified Voice defaults
-	selectedVoiceType: 'browser', // Default to browser TTS
-	selectedVoiceId: undefined // will be auto-selected
+	selectedVoiceType: 'character', // Default to character TTS
+	selectedVoiceId: 'sarcastic_narrator' // Default character voice
 };
 
 const STORAGE_KEY = 'sarcastic-serenity:settings';

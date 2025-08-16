@@ -33,16 +33,13 @@
       characterVoices = await characterVoiceService.getAvailableCharacterVoices();
       voicesLoaded = true;
       
-      // Auto-select Sarcastic Narrator if none selected
-      if (!selectedCharacterId && characterVoices.length > 0) {
-        const defaultVoice = characterVoices.find((v: any) => v.id === 'sarcastic_narrator');
-        if (defaultVoice) {
-          settings.update(s => ({ 
-            ...s, 
-            selectedVoiceType: 'character',
-            selectedVoiceId: defaultVoice.id 
-          }));
-        }
+      // Ensure we have the correct voice type and ID set
+      if (settingsValue && (!settingsValue.selectedVoiceType || settingsValue.selectedVoiceType !== 'character')) {
+        settings.update(s => ({ 
+          ...s, 
+          selectedVoiceType: 'character',
+          selectedVoiceId: selectedCharacterId || 'sarcastic_narrator'
+        }));
       }
     } catch (error) {
       console.error('Failed to load character voices:', error);
@@ -84,7 +81,7 @@
       </button>
     {:else}
       <select 
-        value={selectedCharacterId || ''}
+        value={selectedCharacterId || 'sarcastic_narrator'}
         on:change={(e) => {
           const target = e.target as HTMLSelectElement;
           if (target) {
@@ -171,6 +168,4 @@
       </div>
     {/if}
   {/if}
-  
-
 </div>
