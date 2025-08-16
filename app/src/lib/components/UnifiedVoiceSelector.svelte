@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Voice selector component - handles character voice selection
   import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
   import { characterVoiceService } from '$lib/audio/characterVoiceService';
