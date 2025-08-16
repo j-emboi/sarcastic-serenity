@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings } from '$lib/stores/settings';
-  import { audioEngine } from '$lib/audio/engine';
+  import { externalAudioEngine } from '$lib/audio/externalAudio';
   import { quoteManager } from '$lib/quotes';
   import type { AppSettings } from '$lib/stores/settings';
   
@@ -23,9 +23,9 @@
   // Reactive statement to update audio when settings change
   $: if (settingsValue && !ended) {
     // Update audio preset if it changed
-    audioEngine.stopAll();
+    externalAudioEngine.stopAll();
     if (settingsValue.ambientPreset !== 'none') {
-      audioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
+      externalAudioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
     }
     currentVolume = settingsValue.backgroundVolume;
   }
@@ -41,26 +41,21 @@
     });
 
     // Initialize audio engine
-    audioEngine.ensureContext().then(() => {
-      console.log('Audio engine initialized');
+    externalAudioEngine.ensureContext().then(() => {
+      console.log('External audio engine initialized');
       
       // Start background audio with settings
       if (settingsValue) {
         if (settingsValue.ambientPreset !== 'none') {
-          audioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
+          externalAudioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
         }
         currentVolume = settingsValue.backgroundVolume;
       } else {
         // Fallback to default
-        audioEngine.startPreset('waves', currentVolume, 0.1);
+        externalAudioEngine.startPreset('japanese_garden', currentVolume, 0.1);
       }
-      
-      // Set up audio level callback
-      audioEngine.setAudioLevelCallback((level: number) => {
-        currentAudioLevel = level;
-      });
     }).catch((error) => {
-      console.error('Audio engine initialization error:', error);
+      console.error('External audio engine initialization error:', error);
     });
 
     // Schedule first quote
@@ -78,7 +73,7 @@
         timeLeft -= 1;
         if (timeLeft === 0) {
           ended = true;
-          audioEngine.stopAll();
+          externalAudioEngine.stopAll();
           speechSynthesis.cancel();
           speaking = false;
           if (releaseBg) {
@@ -98,7 +93,6 @@
       if (nextQuoteTimeout) {
         clearTimeout(nextQuoteTimeout);
       }
-      audioEngine.removeAudioLevelCallback();
       unsub();
     };
   });
@@ -161,7 +155,7 @@
     currentVolume = parseFloat(target.value);
     
     // Update background audio volume
-    audioEngine.setBackgroundVolume(currentVolume);
+    externalAudioEngine.setVolume(currentVolume);
   }
 
   function handleVoiceToggle() {
@@ -171,7 +165,7 @@
 
   function handleEndSession() {
     ended = true;
-    audioEngine.stopAll();
+    externalAudioEngine.stopAll();
     speechSynthesis.cancel();
     speaking = false;
     if (releaseBg) {

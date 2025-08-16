@@ -126,16 +126,12 @@
            class="w-full p-2 rounded bg-gray-800 text-white"
          >
            <option value="none">None</option>
-           <option value="waves">Ocean Waves</option>
-           <option value="rain">Rain</option>
-           <option value="birds">Birds</option>
-           <option value="forest">Forest</option>
-           <option value="fireplace">Fireplace</option>
-           <option value="stream">Stream</option>
-           <option value="wind">Wind</option>
-           <option value="pink">Pink Noise</option>
-           <option value="white">White Noise</option>
-           <option value="brown">Brown Noise</option>
+           <option value="japanese_garden">🌿 Japanese Zen Garden</option>
+           <option value="waterfall">🌊 Waterfall</option>
+           <option value="beach">🏖️ Beach</option>
+           <option value="rain">🌧️ Rain</option>
+           <option value="singing_bowls">🔔 Singing Bowls</option>
+           <option value="piano">🎹 Piano</option>
          </select>
        </div>
 
