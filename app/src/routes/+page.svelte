@@ -32,6 +32,27 @@
       Micro-wellness moments with a touch of sarcasm
     </p>
 
+    <!-- Features Overview -->
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
+        <div class="text-3xl mb-2">🌊</div>
+        <h3 class="font-semibold mb-2">Calming Audio</h3>
+        <p class="text-sm text-gray-300">Ocean waves, rain, and other relaxing sounds</p>
+      </div>
+      
+      <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
+        <div class="text-3xl mb-2">🎭</div>
+        <h3 class="font-semibold mb-2">Sarcastic Quotes</h3>
+        <p class="text-sm text-gray-300">Witty, calming quotes with a touch of humor</p>
+      </div>
+      
+      <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
+        <div class="text-3xl mb-2">⏱️</div>
+        <h3 class="font-semibold mb-2">Micro-Moments</h3>
+        <p class="text-sm text-gray-300">Quick 1-3 minute sessions for instant calm</p>
+      </div>
+    </div>
+
     <!-- Session Settings -->
     <div class="bg-white/10 backdrop-blur-sm rounded-lg p-6 space-y-6">
       <h2 class="text-2xl font-semibold">Session Settings</h2>
@@ -142,26 +163,5 @@
      >
        Take a Micro-Break
      </button>
-
-    <!-- Features -->
-    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
-        <div class="text-3xl mb-2">🌊</div>
-        <h3 class="font-semibold mb-2">Calming Audio</h3>
-        <p class="text-sm text-gray-300">Ocean waves, rain, and other relaxing sounds</p>
-      </div>
-      
-      <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
-        <div class="text-3xl mb-2">🎭</div>
-        <h3 class="font-semibold mb-2">Sarcastic Quotes</h3>
-        <p class="text-sm text-gray-300">Witty, calming quotes with a touch of humor</p>
-      </div>
-      
-             <div class="bg-white/5 backdrop-blur-sm rounded-lg p-4">
-         <div class="text-3xl mb-2">⏱️</div>
-         <h3 class="font-semibold mb-2">Micro-Moments</h3>
-         <p class="text-sm text-gray-300">Quick 1-3 minute sessions for instant calm</p>
-       </div>
-    </div>
   </div>
 </div>
