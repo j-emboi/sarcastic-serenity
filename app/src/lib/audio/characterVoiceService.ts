@@ -21,6 +21,8 @@ export interface CharacterVoice {
 
 export class CharacterVoiceService {
   private isPlaying = false;
+  private voiceCache: Map<string, SpeechSynthesisVoice> = new Map();
+  private voicesLoaded = false;
 
   // Enhanced character voice presets with more dramatic differences
   private characterVoices: CharacterVoice[] = [
@@ -99,7 +101,7 @@ export class CharacterVoiceService {
         warmth: 75
       },
       voicePreferences: {
-        gender: 'any',
+        gender: 'male',
         age: 'young',
         accent: 'american'
       }
@@ -107,16 +109,36 @@ export class CharacterVoiceService {
     {
       id: 'dramatic_announcer',
       name: 'Dramatic Announcer',
-      description: 'Booming, theatrical voice with dramatic flair and impact',
+      description: 'Booming, theatrical voice with dramatic flair and gravitas',
       voiceSettings: {
-        pitch: 0.5, // Very low for drama
-        rate: 0.5, // Very slow for impact
+        pitch: 0.7, // Lower for drama
+        rate: 0.5, // Much slower for impact
         volume: 1.0
+      },
+      personality: {
+        enthusiasm: 85,
+        sarcasm: 60,
+        warmth: 40
+      },
+      voicePreferences: {
+        gender: 'male',
+        age: 'mature',
+        accent: 'american'
+      }
+    },
+    {
+      id: 'smooth_operator',
+      name: 'Smooth Operator',
+      description: 'Suave, sophisticated voice with charm and elegance',
+      voiceSettings: {
+        pitch: 0.9, // Slightly lower for sophistication
+        rate: 0.8, // Slower for smoothness
+        volume: 0.85
       },
       personality: {
         enthusiasm: 60,
         sarcasm: 85,
-        warmth: 20
+        warmth: 70
       },
       voicePreferences: {
         gender: 'male',
@@ -125,57 +147,79 @@ export class CharacterVoiceService {
       }
     },
     {
-      id: 'smooth_operator',
-      name: 'Smooth Operator',
-      description: 'Smooth, suave voice with charm and sophistication',
+      id: 'energetic_coach',
+      name: 'Energetic Coach',
+      description: 'Motivational, passionate voice with infectious energy',
       voiceSettings: {
-        pitch: 0.9, // Slightly lower for sophistication
-        rate: 0.8, // Slower for smoothness
-        volume: 0.85
+        pitch: 1.2, // Higher for energy
+        rate: 1.5, // Much faster for enthusiasm
+        volume: 0.95
       },
       personality: {
-        enthusiasm: 50,
-        sarcasm: 75,
-        warmth: 60
+        enthusiasm: 100,
+        sarcasm: 50,
+        warmth: 80
       },
       voicePreferences: {
         gender: 'male',
         age: 'mature',
         accent: 'american'
       }
-    },
-    {
-      id: 'energetic_coach',
-      name: 'Energetic Coach',
-      description: 'High-energy, motivational voice with passion and drive',
-      voiceSettings: {
-        pitch: 1.2, // Higher for energy
-        rate: 1.5, // Much faster for motivation
-        volume: 0.95
-      },
-      personality: {
-        enthusiasm: 100,
-        sarcasm: 40,
-        warmth: 70
-      },
-      voicePreferences: {
-        gender: 'any',
-        age: 'young',
-        accent: 'american'
-      }
     }
   ];
 
+  constructor() {
+    // Initialize voice loading
+    this.initializeVoices();
+  }
+
+  private async initializeVoices(): Promise<void> {
+    if (typeof speechSynthesis === 'undefined') {
+      console.warn('Speech synthesis not available');
+      return;
+    }
+
+    // Wait for voices to load
+    if (speechSynthesis.getVoices().length === 0) {
+      await new Promise<void>((resolve) => {
+        const onVoicesChanged = () => {
+          speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+          resolve();
+        };
+        speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
+        
+        // Fallback timeout
+        setTimeout(resolve, 1000);
+      });
+    }
+
+    this.voicesLoaded = true;
+    this.cacheVoicesForCharacters();
+  }
+
+  private cacheVoicesForCharacters(): void {
+    const voices = speechSynthesis.getVoices();
+    
+    for (const character of this.characterVoices) {
+      const selectedVoice = this.findBestVoiceForCharacter(voices, character);
+      if (selectedVoice) {
+        this.voiceCache.set(character.id, selectedVoice);
+        console.log(`Cached voice for ${character.name}: ${selectedVoice.name}`);
+      }
+    }
+  }
+
   async getAvailableCharacterVoices(): Promise<CharacterVoice[]> {
+    // Ensure voices are loaded before returning
+    if (!this.voicesLoaded) {
+      await this.initializeVoices();
+    }
     return this.characterVoices;
   }
 
   async speakWithCharacter(text: string, characterId: string): Promise<void> {
-    if (this.isPlaying) {
-      this.stop();
-    }
-
     const character = this.characterVoices.find(c => c.id === characterId);
+    
     if (!character) {
       console.error('Character voice not found:', characterId);
       return;
@@ -196,6 +240,11 @@ export class CharacterVoiceService {
       return;
     }
 
+    // Ensure voices are loaded
+    if (!this.voicesLoaded) {
+      await this.initializeVoices();
+    }
+
     // Create utterance with character settings
     const utterance = new SpeechSynthesisUtterance(text);
     
@@ -204,12 +253,21 @@ export class CharacterVoiceService {
     utterance.pitch = character.voiceSettings.pitch;
     utterance.volume = character.voiceSettings.volume;
 
-    // Enhanced voice selection based on character preferences
-    const voices = speechSynthesis.getVoices();
-    let selectedVoice = this.findBestVoiceForCharacter(voices, character);
+    // Use cached voice for consistency
+    let selectedVoice = this.voiceCache.get(character.id);
+    
+    // If no cached voice, find and cache one
+    if (!selectedVoice) {
+      const voices = speechSynthesis.getVoices();
+      selectedVoice = this.findBestVoiceForCharacter(voices, character);
+      if (selectedVoice) {
+        this.voiceCache.set(character.id, selectedVoice);
+      }
+    }
 
     if (selectedVoice) {
       utterance.voice = selectedVoice;
+      console.log(`Using voice for ${character.name}: ${selectedVoice.name}`);
     }
 
     // Set up completion handlers
