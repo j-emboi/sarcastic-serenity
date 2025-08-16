@@ -98,123 +98,32 @@ export class WaveScene extends BaseScene {
       varying float vAudioLevel;
       varying float vSerendipity;
       
-      // Noise function for organic movement
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-      }
-      
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        
-        float a = hash(i);
-        float b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0));
-        float d = hash(i + vec2(1.0, 1.0));
-        
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-      }
-      
-      // Particle-based ocean effect
       void main() {
         vec2 uv = vUv;
         
-        // Create multiple particle layers
-        float particles1 = 0.0;
-        float particles2 = 0.0;
-        float particles3 = 0.0;
+        // Simple moving ocean waves
+        float wave1 = sin(vTime * 2.0 + uv.x * 8.0) * 0.5 + 0.5;
+        float wave2 = sin(vTime * 1.5 + uv.x * 12.0) * 0.4 + 0.5;
+        float wave3 = sin(vTime * 2.5 + uv.y * 6.0) * 0.3 + 0.5;
         
-        // Layer 1: Fast moving particles
-        for(int i = 0; i < 20; i++) {
-          float fi = float(i);
-          vec2 pos = vec2(
-            mod(fi * 7.0 + vTime * 2.0, 1.0),
-            mod(fi * 13.0 + vTime * 1.5, 1.0)
-          );
-          float dist = length(uv - pos);
-          particles1 += smoothstep(0.1, 0.0, dist) * 0.5;
-        }
-        
-        // Layer 2: Medium speed particles
-        for(int i = 0; i < 15; i++) {
-          float fi = float(i);
-          vec2 pos = vec2(
-            mod(fi * 11.0 + vTime * 1.0, 1.0),
-            mod(fi * 17.0 + vTime * 0.8, 1.0)
-          );
-          float dist = length(uv - pos);
-          particles2 += smoothstep(0.15, 0.0, dist) * 0.4;
-        }
-        
-        // Layer 3: Slow moving particles
-        for(int i = 0; i < 10; i++) {
-          float fi = float(i);
-          vec2 pos = vec2(
-            mod(fi * 19.0 + vTime * 0.5, 1.0),
-            mod(fi * 23.0 + vTime * 0.3, 1.0)
-          );
-          float dist = length(uv - pos);
-          particles3 += smoothstep(0.2, 0.0, dist) * 0.3;
-        }
-        
-        // Combine particle layers
-        float totalParticles = particles1 + particles2 + particles3;
-        
-        // Create flowing water effect
-        vec2 flow = vec2(
-          noise(uv * 3.0 + vTime * 0.5),
-          noise(uv * 3.0 + vTime * 0.7 + 100.0)
-        );
+        // Combine waves
+        float waveHeight = (wave1 + wave2 + wave3) / 3.0;
         
         // Ocean colors
-        vec3 deepBlue = vec3(0.0, 0.2, 0.6);
-        vec3 oceanBlue = vec3(0.0, 0.5, 0.8);
+        vec3 deepBlue = vec3(0.0, 0.3, 0.7);
+        vec3 oceanBlue = vec3(0.0, 0.5, 0.9);
         vec3 lightBlue = vec3(0.4, 0.7, 1.0);
-        vec3 white = vec3(1.0, 1.0, 1.0);
         
-        // Create base ocean color
-        vec3 color = mix(deepBlue, oceanBlue, uv.y);
-        color = mix(color, lightBlue, flow.x * 0.3);
+        // Create ocean color based on wave height
+        vec3 color = mix(deepBlue, oceanBlue, waveHeight);
+        color = mix(color, lightBlue, uv.y * 0.5);
         
-        // Add particle effects
-        color = mix(color, white, totalParticles * 0.8);
+        // Add some movement to the color
+        color += vec3(0.1) * sin(vTime * 1.0 + uv.x * 10.0);
+        color += vec3(0.05) * sin(vTime * 0.8 + uv.y * 8.0);
         
-        // Add flowing water movement
-        color += vec3(0.1) * sin(vTime * 3.0 + uv.x * 10.0 + flow.x * 5.0);
-        color += vec3(0.1) * sin(vTime * 2.0 + uv.y * 8.0 + flow.y * 5.0);
-        
-        // Add wave ripples
-        float ripple = sin(vTime * 4.0 + length(uv - vec2(0.5)) * 20.0) * 0.1;
-        color += vec3(0.1) * ripple;
-        
-        // Audio reactivity - make particles more intense
-        if (vAudioLevel > 0.0) {
-          float audioBoost = vAudioLevel * 3.0;
-          color += vec3(0.3) * audioBoost * sin(vTime * 8.0 + uv.x * 15.0);
-          color += vec3(0.2) * audioBoost * sin(vTime * 6.0 + uv.y * 12.0);
-          
-          // Add more particles with audio
-          for(int i = 0; i < 5; i++) {
-            float fi = float(i);
-            vec2 pos = vec2(
-              mod(fi * 29.0 + vTime * 4.0, 1.0),
-              mod(fi * 31.0 + vTime * 3.0, 1.0)
-            );
-            float dist = length(uv - pos);
-            color += vec3(0.2) * audioBoost * smoothstep(0.05, 0.0, dist);
-          }
-        }
-        
-        // Add some sparkle
-        float sparkle = sin(vTime * 10.0 + uv.x * 50.0) * sin(vTime * 8.0 + uv.y * 40.0) * 0.1;
-        color += vec3(0.1) * sparkle;
-        
-        // Ensure colors are bright and saturated
+        // Ensure colors are bright and visible
         color = clamp(color, 0.0, 1.0);
-        
-        // Add brightness boost
-        color = color * 1.2;
         
         gl_FragColor = vec4(color, 1.0);
       }
