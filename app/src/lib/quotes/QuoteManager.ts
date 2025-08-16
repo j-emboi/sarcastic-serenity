@@ -18,8 +18,8 @@ export class QuoteManager {
 	private usedQuotes: Set<string> = new Set();
 	private sessionSeed: number;
 	private lastQuoteTime: number = 0;
-	private baseInterval: number = 15; // Base 15 seconds (much shorter)
-	private jitterRange: number = 5; // ±5 seconds (less jitter)
+	private baseInterval: number = 8; // Base 8 seconds (much more frequent)
+	private jitterRange: number = 3; // ±3 seconds (less jitter)
 
 	constructor() {
 		// Generate a session seed for reproducible randomness
