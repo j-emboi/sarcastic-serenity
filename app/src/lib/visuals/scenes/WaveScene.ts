@@ -10,7 +10,7 @@ export class WaveScene extends BaseScene {
   protected time: number = 0;
 
   init(gl: any): void {
-    console.log('Initializing OGL WaveScene with DRAMATIC animation');
+    console.log('Initializing OGL WaveScene with FULL VIEWPORT dramatic animation');
     
     // Create wave shader program
     this.waveProgram = new Program(gl, {
@@ -26,7 +26,7 @@ export class WaveScene extends BaseScene {
 
     this.addProgram(this.waveProgram);
 
-    // Create full-screen quad for wave rendering
+    // Create full-screen quad for wave rendering - ensure it covers entire viewport
     const geometry = new Plane(gl, { width: 2, height: 2 });
     
     this.waveMesh = new Mesh(gl, {
@@ -36,7 +36,7 @@ export class WaveScene extends BaseScene {
 
     this.addMesh(this.waveMesh);
     
-    console.log('OGL WaveScene initialization complete');
+    console.log('OGL WaveScene initialization complete - full viewport coverage');
   }
 
   update(deltaTime: number, audioLevel: number = 0, serendipity: number = 0.1): void {
@@ -100,36 +100,47 @@ export class WaveScene extends BaseScene {
       void main() {
         vec2 uv = vUv;
         
-        // DRAMATIC wave animation - much faster and more visible
-        float wave1 = sin(vTime * 5.0 + uv.x * 8.0) * 0.5 + 0.5;
-        float wave2 = sin(vTime * 3.0 + uv.x * 12.0) * 0.3 + 0.5;
-        float wave3 = sin(vTime * 7.0 + uv.y * 6.0) * 0.4 + 0.5;
+        // EXTREMELY DRAMATIC wave animation - impossible to miss
+        float wave1 = sin(vTime * 8.0 + uv.x * 10.0) * 0.5 + 0.5;
+        float wave2 = sin(vTime * 6.0 + uv.x * 15.0) * 0.4 + 0.5;
+        float wave3 = sin(vTime * 10.0 + uv.y * 8.0) * 0.5 + 0.5;
+        float wave4 = sin(vTime * 4.0 + uv.x * 20.0 + uv.y * 12.0) * 0.3 + 0.5;
         
-        // Combine waves for dramatic effect
-        float waveHeight = (wave1 + wave2 + wave3) / 3.0;
+        // Combine waves for maximum dramatic effect
+        float waveHeight = (wave1 + wave2 + wave3 + wave4) / 4.0;
         
-        // Very bright, contrasting colors
-        vec3 color1 = vec3(0.0, 0.8, 1.0);  // Bright cyan
-        vec3 color2 = vec3(0.0, 0.2, 0.8);  // Deep blue
-        vec3 color3 = vec3(0.5, 0.9, 1.0);  // Light blue
+        // SUPER BRIGHT, HIGH CONTRAST colors
+        vec3 color1 = vec3(0.0, 1.0, 1.0);  // Pure cyan
+        vec3 color2 = vec3(0.0, 0.0, 1.0);  // Pure blue
+        vec3 color3 = vec3(1.0, 1.0, 1.0);  // Pure white
+        vec3 color4 = vec3(0.0, 0.5, 1.0);  // Sky blue
         
-        // Create dramatic color changes
+        // Create dramatic color changes with high contrast
         vec3 color = mix(color1, color2, waveHeight);
-        color = mix(color, color3, sin(vTime * 2.0 + uv.y * 4.0) * 0.5 + 0.5);
+        color = mix(color, color3, sin(vTime * 3.0 + uv.y * 6.0) * 0.5 + 0.5);
+        color = mix(color, color4, sin(vTime * 5.0 + uv.x * 8.0) * 0.5 + 0.5);
         
-        // Add pulsing effect
-        color += vec3(0.3) * sin(vTime * 4.0) * 0.5 + 0.5;
+        // Add INTENSE pulsing effect
+        color += vec3(0.5) * sin(vTime * 6.0) * 0.5 + 0.5;
         
-        // Add moving stripes
-        color += vec3(0.2) * sin(vTime * 6.0 + uv.x * 15.0);
+        // Add moving stripes that are very obvious
+        color += vec3(0.4) * sin(vTime * 12.0 + uv.x * 25.0);
+        color += vec3(0.3) * sin(vTime * 8.0 + uv.y * 20.0);
         
-        // Audio reactivity - very obvious
+        // Add diagonal moving patterns
+        color += vec3(0.2) * sin(vTime * 7.0 + uv.x * 15.0 + uv.y * 10.0);
+        
+        // Audio reactivity - EXTREMELY obvious
         if (vAudioLevel > 0.0) {
-          color += vec3(0.5) * vAudioLevel * sin(vTime * 10.0 + uv.x * 25.0);
+          color += vec3(0.8) * vAudioLevel * sin(vTime * 15.0 + uv.x * 30.0);
+          color += vec3(0.6) * vAudioLevel * sin(vTime * 10.0 + uv.y * 25.0);
         }
         
-        // Ensure colors are bright and visible
+        // Ensure colors are bright and saturated
         color = clamp(color, 0.0, 1.0);
+        
+        // Add some brightness boost
+        color = color * 1.2;
         
         gl_FragColor = vec4(color, 1.0);
       }
