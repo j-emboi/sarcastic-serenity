@@ -18,20 +18,16 @@ export interface AppSettings {
 	durationMinutes: number;
 	persona: Persona;
 	roastIntensity: number; // 0..4
-	backgroundVolume: number; // 0..1
-	ambientPreset: 'none' | 'japanese_garden' | 'waterfall' | 'beach' | 'rain' | 'singing_bowls' | 'piano';
 	// Voice settings
 	voiceId?: string; // voice URI for reliable identification
-	voicePitch: number; // 0.5..2.0, default 1.8 for "puppet" vibe
-	voiceRate: number; // 0.1..10.0, default 1.12
+	voicePitch: number; // 0.5..2.0, default 1.0 (normal)
+	voiceRate: number; // 0.1..10.0, default 1.0 (normal)
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
 	durationMinutes: 1, // Micro-wellness: start with 1 minute
 	persona: 'student',
 	roastIntensity: 4, // Nuclear sarcasm by default
-	backgroundVolume: 0.4,
-			ambientPreset: 'japanese_garden',
 	// Voice defaults for normal speech
 	voiceId: undefined, // will be auto-selected
 	voicePitch: 1.0, // Normal pitch

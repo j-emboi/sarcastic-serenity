@@ -119,50 +119,7 @@
          </select>
        </div>
 
-       <!-- Background Audio -->
-       <div class="space-y-2">
-         <label for="audio-select" class="block text-sm font-medium">Background Audio</label>
-         <select 
-           id="audio-select"
-           value={settingsValue?.ambientPreset || 'japanese_garden'}
-           on:change={(e) => {
-             const target = e.target as HTMLSelectElement;
-             if (settingsValue && target) {
-               settings.update(s => ({ ...s, ambientPreset: target.value as any }));
-             }
-           }}
-           class="w-full p-2 rounded bg-gray-800 text-white"
-         >
-           <option value="none">None</option>
-           <option value="japanese_garden">🌿 Spring Day Forest</option>
-           <option value="waterfall">⚡ Distant Thunder</option>
-           <option value="beach">🏖️ Waves Crashing on Rock Beach</option>
-           <option value="rain">🌧️ Rain On Roof</option>
-           <option value="singing_bowls">🔥 Daytime Forest Bonfire</option>
-           <option value="piano">🌿 Spring Day Forest (Alternative)</option>
-         </select>
-       </div>
 
-       <!-- Volume -->
-       <div class="space-y-2">
-         <label for="volume-slider" class="block text-sm font-medium">Background Volume</label>
-         <input 
-           id="volume-slider"
-           type="range" 
-           min="0" 
-           max="1" 
-           step="0.1" 
-           value={settingsValue?.backgroundVolume || 0.4}
-           on:input={(e) => {
-             const target = e.target as HTMLInputElement;
-             if (settingsValue && target) {
-               settings.update(s => ({ ...s, backgroundVolume: parseFloat(target.value) }));
-             }
-           }}
-           class="w-full"
-         />
-         <span class="text-sm">{Math.round((settingsValue?.backgroundVolume || 0) * 100)}%</span>
-       </div>
 
       <!-- Voice Settings -->
       <VoiceSelector />

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings } from '$lib/stores/settings';
-  import { externalAudioEngine } from '$lib/audio/externalAudio';
+  
   import { quoteManager } from '$lib/quotes';
   import type { AppSettings } from '$lib/stores/settings';
   
@@ -13,22 +13,11 @@
   let voiceReady = false;
   let releaseBg: (() => void) | null = null;
   let nextQuoteTimeout: number | null = null;
-  let currentVolume = 0.4;
+
   let ended = false;
   let interval: number;
 
-  // Audio level monitoring
-  let currentAudioLevel = 0;
 
-  // Reactive statement to update audio when settings change
-  $: if (settingsValue && !ended) {
-    // Update audio preset if it changed
-    externalAudioEngine.stopAll();
-    if (settingsValue.ambientPreset !== 'none') {
-      externalAudioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
-    }
-    currentVolume = settingsValue.backgroundVolume;
-  }
 
   onMount(() => {
     // Subscribe to settings
@@ -40,23 +29,7 @@
       }
     });
 
-    // Initialize audio engine
-    externalAudioEngine.ensureContext().then(() => {
-      console.log('External audio engine initialized');
-      
-      // Start background audio with settings
-      if (settingsValue) {
-        if (settingsValue.ambientPreset !== 'none') {
-          externalAudioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
-        }
-        currentVolume = settingsValue.backgroundVolume;
-      } else {
-        // Fallback to default
-        externalAudioEngine.startPreset('japanese_garden', currentVolume, 0.1);
-      }
-    }).catch((error) => {
-      console.error('External audio engine initialization error:', error);
-    });
+
 
     // Schedule first quote
     const initialDelay = quoteManager.getInitialDelay();
@@ -73,7 +46,6 @@
         timeLeft -= 1;
         if (timeLeft === 0) {
           ended = true;
-          externalAudioEngine.stopAll();
           speechSynthesis.cancel();
           speaking = false;
           if (releaseBg) {
@@ -150,13 +122,7 @@
     }
   }
 
-  function handleVolumeChange(event: Event) {
-    const target = event.target as HTMLInputElement;
-    currentVolume = parseFloat(target.value);
-    
-    // Update background audio volume
-    externalAudioEngine.setVolume(currentVolume);
-  }
+
 
   function handleVoiceToggle() {
     // Toggle voice on/off (simplified - just enable/disable TTS)
@@ -165,7 +131,6 @@
 
   function handleEndSession() {
     ended = true;
-    externalAudioEngine.stopAll();
     speechSynthesis.cancel();
     speaking = false;
     if (releaseBg) {
@@ -211,23 +176,8 @@
        </div>
      {/if}
 
-    <!-- Audio Controls -->
+    <!-- Voice Controls -->
     <div class="space-y-4 mb-8">
-      <div class="flex items-center gap-4">
-        <label for="session-volume" class="text-sm">Volume:</label>
-        <input 
-          id="session-volume"
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.1" 
-          value={currentVolume}
-          on:input={handleVolumeChange}
-          class="w-32"
-        />
-        <span class="text-sm">{Math.round(currentVolume * 100)}%</span>
-      </div>
-
       <div class="flex items-center gap-4">
         <label for="voice-toggle" class="text-sm">Voice Guidance:</label>
         <button 
@@ -237,18 +187,6 @@
         >
           {voiceReady ? 'ON' : 'OFF'}
         </button>
-      </div>
-
-      <!-- Audio Level Indicator -->
-      <div class="flex items-center gap-2 text-sm">
-        <span>Audio Level:</span>
-        <div class="w-20 h-2 bg-gray-600 rounded-full overflow-hidden">
-          <div 
-            class="h-full bg-blue-400 transition-all duration-100"
-            style="width: {Math.round(currentAudioLevel * 100)}%"
-          ></div>
-        </div>
-        <span class="w-8 text-xs">{Math.round(currentAudioLevel * 100)}%</span>
       </div>
     </div>
 
