@@ -108,7 +108,7 @@
 
 <div class="space-y-4">
   <div class="space-y-2">
-    <label class="block text-sm font-medium">Voice Selection</label>
+    <label for="voice-select" class="block text-sm font-medium">Voice Selection</label>
     
     {#if !voicesLoaded}
       <div class="text-sm text-gray-500">Loading available voices...</div>
@@ -116,6 +116,7 @@
       <div class="text-sm text-red-500">No voices available. Please check your system TTS settings.</div>
     {:else}
       <select 
+        id="voice-select"
         value={voiceId || ''}
         on:change={(e) => {
           const target = e.target as HTMLSelectElement;
@@ -152,9 +153,10 @@
   </div>
   
   <div class="grid gap-4 md:grid-cols-2">
-    <label class="space-y-2">
+    <label for="pitch-slider" class="space-y-2">
       <span class="block text-sm font-medium">Pitch: {voicePitch.toFixed(1)}</span>
       <input 
+        id="pitch-slider"
         type="range" 
         min="0.5" 
         max="2.0" 
@@ -171,9 +173,10 @@
       <span class="text-xs text-blue-200">Lower = deeper, Higher = squeakier</span>
     </label>
     
-    <label class="space-y-2">
+    <label for="rate-slider" class="space-y-2">
       <span class="block text-sm font-medium">Speed: {voiceRate.toFixed(1)}</span>
       <input 
+        id="rate-slider"
         type="range" 
         min="0.5" 
         max="2.0" 

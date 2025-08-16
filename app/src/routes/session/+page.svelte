@@ -214,8 +214,9 @@
     <!-- Audio Controls -->
     <div class="space-y-4 mb-8">
       <div class="flex items-center gap-4">
-        <label class="text-sm">Volume:</label>
+        <label for="session-volume" class="text-sm">Volume:</label>
         <input 
+          id="session-volume"
           type="range" 
           min="0" 
           max="1" 
@@ -228,8 +229,9 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <label class="text-sm">Voice Guidance:</label>
+        <label for="voice-toggle" class="text-sm">Voice Guidance:</label>
         <button 
+          id="voice-toggle"
           class="px-3 py-1 rounded text-sm {voiceReady ? 'bg-green-600' : 'bg-gray-600'}"
           on:click={handleVoiceToggle}
         >

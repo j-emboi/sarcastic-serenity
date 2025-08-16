@@ -59,12 +59,14 @@
       
              <!-- Duration -->
        <div class="space-y-2">
-         <label class="block text-sm font-medium">Session Duration</label>
+         <label for="duration-select" class="block text-sm font-medium">Session Duration</label>
          <select 
+           id="duration-select"
            value={settingsValue?.durationMinutes || 1}
            on:change={(e) => {
-             if (settingsValue && e.target instanceof HTMLSelectElement) {
-               settings.update(s => ({ ...s, durationMinutes: parseInt(e.target.value) }));
+             const target = e.target as HTMLSelectElement;
+             if (settingsValue && target) {
+               settings.update(s => ({ ...s, durationMinutes: parseInt(target.value) }));
              }
            }}
            class="w-full p-2 rounded bg-gray-800 text-white"
@@ -77,12 +79,14 @@
 
              <!-- Persona -->
        <div class="space-y-2">
-         <label class="block text-sm font-medium">Persona</label>
+         <label for="persona-select" class="block text-sm font-medium">Persona</label>
          <select 
+           id="persona-select"
            value={settingsValue?.persona || 'student'}
            on:change={(e) => {
-             if (settingsValue && e.target instanceof HTMLSelectElement) {
-               settings.update(s => ({ ...s, persona: e.target.value as any }));
+             const target = e.target as HTMLSelectElement;
+             if (settingsValue && target) {
+               settings.update(s => ({ ...s, persona: target.value as any }));
              }
            }}
            class="w-full p-2 rounded bg-gray-800 text-white"
@@ -95,12 +99,14 @@
 
        <!-- Roast Intensity -->
        <div class="space-y-2">
-         <label class="block text-sm font-medium">Sarcasm Level</label>
+         <label for="sarcasm-select" class="block text-sm font-medium">Sarcasm Level</label>
          <select 
+           id="sarcasm-select"
            value={settingsValue?.roastIntensity || 4}
            on:change={(e) => {
-             if (settingsValue && e.target instanceof HTMLSelectElement) {
-               settings.update(s => ({ ...s, roastIntensity: parseInt(e.target.value) }));
+             const target = e.target as HTMLSelectElement;
+             if (settingsValue && target) {
+               settings.update(s => ({ ...s, roastIntensity: parseInt(target.value) }));
              }
            }}
            class="w-full p-2 rounded bg-gray-800 text-white"
@@ -115,12 +121,14 @@
 
        <!-- Background Audio -->
        <div class="space-y-2">
-         <label class="block text-sm font-medium">Background Audio</label>
+         <label for="audio-select" class="block text-sm font-medium">Background Audio</label>
          <select 
-           value={settingsValue?.ambientPreset || 'waves'}
+           id="audio-select"
+           value={settingsValue?.ambientPreset || 'japanese_garden'}
            on:change={(e) => {
-             if (settingsValue && e.target instanceof HTMLSelectElement) {
-               settings.update(s => ({ ...s, ambientPreset: e.target.value as any }));
+             const target = e.target as HTMLSelectElement;
+             if (settingsValue && target) {
+               settings.update(s => ({ ...s, ambientPreset: target.value as any }));
              }
            }}
            class="w-full p-2 rounded bg-gray-800 text-white"
@@ -137,16 +145,18 @@
 
        <!-- Volume -->
        <div class="space-y-2">
-         <label class="block text-sm font-medium">Background Volume</label>
+         <label for="volume-slider" class="block text-sm font-medium">Background Volume</label>
          <input 
+           id="volume-slider"
            type="range" 
            min="0" 
            max="1" 
            step="0.1" 
            value={settingsValue?.backgroundVolume || 0.4}
            on:input={(e) => {
-             if (settingsValue && e.target instanceof HTMLInputElement) {
-               settings.update(s => ({ ...s, backgroundVolume: parseFloat(e.target.value) }));
+             const target = e.target as HTMLInputElement;
+             if (settingsValue && target) {
+               settings.update(s => ({ ...s, backgroundVolume: parseFloat(target.value) }));
              }
            }}
            class="w-full"
