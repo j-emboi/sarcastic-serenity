@@ -169,15 +169,14 @@
 
 
 
-    <!-- Quote Display -->
-    {#if quote}
-      <div class="max-w-xl text-balance text-lg rounded-lg bg-white/10 p-6 shadow-lg backdrop-blur-sm">
+    <!-- Quote Display - Fixed height to prevent layout shifts -->
+    <div class="max-w-xl text-balance text-lg rounded-lg bg-white/10 p-6 shadow-lg backdrop-blur-sm min-h-[120px] flex items-center justify-center">
+      {#if quote}
         <p class="italic">"{quote}"</p>
-        {#if speaking}
-          <div class="text-sm text-blue-300 mt-2">🔊 Speaking...</div>
-        {/if}
-      </div>
-    {/if}
+      {:else}
+        <p class="text-gray-400 italic">Waiting for wisdom...</p>
+      {/if}
+    </div>
 
          <!-- End Session Button -->
      <button 
