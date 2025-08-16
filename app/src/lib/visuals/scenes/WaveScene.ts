@@ -101,11 +101,11 @@ export class WaveScene extends BaseScene {
       void main() {
         vec2 uv = vUv;
         
-        // DRAMATIC wave animation optimized for full viewport - more obvious movement
-        float wave1 = sin(vTime * 12.0 + uv.x * 6.0) * 0.5 + 0.5;
-        float wave2 = sin(vTime * 8.0 + uv.x * 10.0) * 0.4 + 0.5;
-        float wave3 = sin(vTime * 15.0 + uv.y * 5.0) * 0.5 + 0.5;
-        float wave4 = sin(vTime * 6.0 + uv.x * 8.0 + uv.y * 6.0) * 0.3 + 0.5;
+        // DRAMATIC wave animation with smaller, more visible waves
+        float wave1 = sin(vTime * 12.0 + uv.x * 20.0) * 0.5 + 0.5;
+        float wave2 = sin(vTime * 8.0 + uv.x * 25.0) * 0.4 + 0.5;
+        float wave3 = sin(vTime * 15.0 + uv.y * 18.0) * 0.5 + 0.5;
+        float wave4 = sin(vTime * 6.0 + uv.x * 30.0 + uv.y * 22.0) * 0.3 + 0.5;
         
         // Combine waves for maximum dramatic effect
         float waveHeight = (wave1 + wave2 + wave3 + wave4) / 4.0;
@@ -118,23 +118,23 @@ export class WaveScene extends BaseScene {
         
         // Create dramatic color changes with high contrast
         vec3 color = mix(color1, color2, waveHeight);
-        color = mix(color, color3, sin(vTime * 4.0 + uv.y * 4.0) * 0.5 + 0.5);
-        color = mix(color, color4, sin(vTime * 7.0 + uv.x * 6.0) * 0.5 + 0.5);
+        color = mix(color, color3, sin(vTime * 4.0 + uv.y * 15.0) * 0.5 + 0.5);
+        color = mix(color, color4, sin(vTime * 7.0 + uv.x * 18.0) * 0.5 + 0.5);
         
         // Add INTENSE pulsing effect
         color += vec3(0.5) * sin(vTime * 8.0) * 0.5 + 0.5;
         
         // Add moving stripes that are very obvious at full viewport
-        color += vec3(0.4) * sin(vTime * 18.0 + uv.x * 15.0);
-        color += vec3(0.3) * sin(vTime * 12.0 + uv.y * 12.0);
+        color += vec3(0.4) * sin(vTime * 18.0 + uv.x * 35.0);
+        color += vec3(0.3) * sin(vTime * 12.0 + uv.y * 28.0);
         
         // Add diagonal moving patterns
-        color += vec3(0.2) * sin(vTime * 10.0 + uv.x * 8.0 + uv.y * 6.0);
+        color += vec3(0.2) * sin(vTime * 10.0 + uv.x * 25.0 + uv.y * 20.0);
         
         // Audio reactivity - EXTREMELY obvious
         if (vAudioLevel > 0.0) {
-          color += vec3(0.8) * vAudioLevel * sin(vTime * 20.0 + uv.x * 20.0);
-          color += vec3(0.6) * vAudioLevel * sin(vTime * 15.0 + uv.y * 15.0);
+          color += vec3(0.8) * vAudioLevel * sin(vTime * 20.0 + uv.x * 40.0);
+          color += vec3(0.6) * vAudioLevel * sin(vTime * 15.0 + uv.y * 35.0);
         }
         
         // Ensure colors are bright and saturated
