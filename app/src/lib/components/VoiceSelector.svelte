@@ -123,7 +123,7 @@
             settings.update(s => ({ ...s, voiceId: target.value || undefined }));
           }
         }}
-        class="w-full rounded border p-2 text-sm"
+        class="w-full p-2 rounded bg-gray-800 text-white border-gray-600"
         disabled={!voicesLoaded}
       >
         {#each sortedGroups as group}

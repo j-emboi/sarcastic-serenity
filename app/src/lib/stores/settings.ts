@@ -29,7 +29,7 @@ export interface AppSettings {
 const DEFAULT_SETTINGS: AppSettings = {
 	durationMinutes: 1, // Micro-wellness: start with 1 minute
 	persona: 'student',
-	roastIntensity: 2, // Match UI default
+	roastIntensity: 4, // Nuclear sarcasm by default
 	backgroundVolume: 0.4,
 	ambientPreset: 'waves',
 	// Voice defaults for "puppet" vibe
