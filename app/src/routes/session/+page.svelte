@@ -528,16 +528,22 @@
         }
       }}
     >
-      <option value="waves">Ocean Waves</option>
-      <option value="aurora">Aurora Borealis</option>
-      <option value="lavalamp">Lava Lamp</option>
-      <option value="zengarden">Zen Garden</option>
-      <option value="fireworks">Fireworks</option>
-      <option value="cosmic">Cosmic Galaxy</option>
-      <option value="particles">Flowing Particles</option>
-      <option value="marbling">Marbling</option>
-      <option value="blob">Blob</option>
-      <option value="breathing">Breathing Guide</option>
+      {#if sceneManager}
+        {#each sceneManager.getAvailableScenes() as scene}
+          <option value={scene.id}>{scene.name}</option>
+        {/each}
+      {:else}
+        <option value="waves">Ocean Waves</option>
+        <option value="aurora">Aurora Borealis</option>
+        <option value="lavalamp">Lava Lamp</option>
+        <option value="zengarden">Zen Garden</option>
+        <option value="fireworks">Fireworks</option>
+        <option value="cosmic">Cosmic Galaxy</option>
+        <option value="particles">Physics Particles</option>
+        <option value="marbling">Marbling</option>
+        <option value="blob">Blob</option>
+        <option value="breathing">Breathing Guide</option>
+      {/if}
     </select>
   </div>
   
