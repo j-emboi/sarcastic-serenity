@@ -23,6 +23,7 @@ export class CharacterVoiceService {
   private isPlaying = false;
   private voiceCache: Map<string, SpeechSynthesisVoice> = new Map();
   private voicesLoaded = false;
+  private debugMode = true; // Enable debugging for testing
 
   // Enhanced character voice presets with more dramatic differences
   private characterVoices: CharacterVoice[] = [
@@ -173,23 +174,96 @@ export class CharacterVoiceService {
     this.initializeVoices();
   }
 
+  // Debug method to get voice system status
+  getVoiceSystemStatus(): any {
+    return {
+      voicesLoaded: this.voicesLoaded,
+      voiceCacheSize: this.voiceCache.size,
+      availableVoices: typeof speechSynthesis !== 'undefined' ? speechSynthesis.getVoices().length : 0,
+      cachedVoices: Array.from(this.voiceCache.entries()).map(([id, voice]) => ({
+        characterId: id,
+        voiceName: voice.name,
+        voiceLang: voice.lang
+      })),
+      characterVoices: this.characterVoices.map(c => ({
+        id: c.id,
+        name: c.name,
+        preferences: c.voicePreferences
+      }))
+    };
+  }
+
+  // Test method to verify voice consistency
+  async testVoiceConsistency(characterId: string): Promise<any> {
+    const character = this.characterVoices.find(c => c.id === characterId);
+    if (!character) {
+      return { error: 'Character not found' };
+    }
+
+    // Ensure voices are loaded
+    if (!this.voicesLoaded) {
+      await this.initializeVoices();
+    }
+
+    const voices = speechSynthesis.getVoices();
+    const cachedVoice = this.voiceCache.get(characterId);
+    const freshVoice = this.findBestVoiceForCharacter(voices, character);
+
+    return {
+      character: {
+        id: character.id,
+        name: character.name,
+        preferences: character.voicePreferences
+      },
+      cachedVoice: cachedVoice ? {
+        name: cachedVoice.name,
+        lang: cachedVoice.lang,
+        voiceURI: cachedVoice.voiceURI
+      } : null,
+      freshVoice: freshVoice ? {
+        name: freshVoice.name,
+        lang: freshVoice.lang,
+        voiceURI: freshVoice.voiceURI
+      } : null,
+      isConsistent: cachedVoice && freshVoice && cachedVoice.voiceURI === freshVoice.voiceURI,
+      totalVoices: voices.length,
+      englishVoices: voices.filter(v => /en/i.test(v.lang)).length
+    };
+  }
+
   private async initializeVoices(): Promise<void> {
     if (typeof speechSynthesis === 'undefined') {
       console.warn('Speech synthesis not available');
       return;
     }
 
+    if (this.debugMode) {
+      console.log('🎤 Initializing voice system...');
+    }
+
     // Wait for voices to load
     if (speechSynthesis.getVoices().length === 0) {
+      if (this.debugMode) {
+        console.log('🎤 Waiting for voices to load...');
+      }
+      
       await new Promise<void>((resolve) => {
         const onVoicesChanged = () => {
           speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged);
+          if (this.debugMode) {
+            console.log('🎤 Voices loaded via voiceschanged event');
+          }
           resolve();
         };
         speechSynthesis.addEventListener('voiceschanged', onVoicesChanged);
         
         // Fallback timeout
-        setTimeout(resolve, 1000);
+        setTimeout(() => {
+          if (this.debugMode) {
+            console.log('🎤 Voices loaded via timeout fallback');
+          }
+          resolve();
+        }, 1000);
       });
     }
 
@@ -200,11 +274,21 @@ export class CharacterVoiceService {
   private cacheVoicesForCharacters(): void {
     const voices = speechSynthesis.getVoices();
     
+    if (this.debugMode) {
+      console.log(`🎤 Caching voices for ${this.characterVoices.length} characters from ${voices.length} available voices`);
+    }
+    
     for (const character of this.characterVoices) {
       const selectedVoice = this.findBestVoiceForCharacter(voices, character);
       if (selectedVoice) {
         this.voiceCache.set(character.id, selectedVoice);
-        console.log(`Cached voice for ${character.name}: ${selectedVoice.name}`);
+        if (this.debugMode) {
+          console.log(`🎤 Cached voice for ${character.name}: ${selectedVoice.name} (${selectedVoice.lang})`);
+        }
+      } else {
+        if (this.debugMode) {
+          console.warn(`🎤 No suitable voice found for ${character.name}`);
+        }
       }
     }
   }

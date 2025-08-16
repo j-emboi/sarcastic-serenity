@@ -20,9 +20,13 @@
   let characterVoices: any[] = [];
   let voicesLoaded = false;
   let isLoading = false;
+  let voiceSystemStatus: any = null;
+  let consistencyTestResults: any = null;
+  let isTestingConsistency = false;
   
   onMount(async () => {
     await loadCharacterVoices();
+    await getVoiceSystemStatus();
   });
   
   async function loadCharacterVoices() {
@@ -45,6 +49,28 @@
       console.error('Failed to load character voices:', error);
     } finally {
       isLoading = false;
+    }
+  }
+
+  async function getVoiceSystemStatus() {
+    try {
+      voiceSystemStatus = characterVoiceService.getVoiceSystemStatus();
+    } catch (error) {
+      console.error('Failed to get voice system status:', error);
+    }
+  }
+
+  async function testVoiceConsistency() {
+    if (isTestingConsistency || !selectedCharacterId) return;
+    
+    isTestingConsistency = true;
+    try {
+      consistencyTestResults = await characterVoiceService.testVoiceConsistency(selectedCharacterId);
+    } catch (error) {
+      console.error('Failed to test voice consistency:', error);
+      consistencyTestResults = { error: error.message };
+    } finally {
+      isTestingConsistency = false;
     }
   }
 </script>
@@ -142,4 +168,73 @@
       </div>
     {/if}
   {/if}
+
+  <!-- Voice System Testing (Debug) -->
+  <div class="space-y-2">
+    <h3 class="text-sm font-medium text-yellow-400">🔧 Voice System Testing</h3>
+    
+    <div class="space-y-2">
+      <button 
+        on:click={testVoiceConsistency}
+        disabled={isTestingConsistency || !selectedCharacterId}
+        class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50"
+      >
+        {isTestingConsistency ? 'Testing...' : 'Test Voice Consistency'}
+      </button>
+      
+      <button 
+        on:click={getVoiceSystemStatus}
+        class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+      >
+        Get Voice System Status
+      </button>
+    </div>
+
+    <!-- Voice System Status -->
+    {#if voiceSystemStatus}
+      <div class="bg-green-900/20 border border-green-600/30 rounded-lg p-3 space-y-2">
+        <h4 class="text-sm font-semibold text-green-200">Voice System Status</h4>
+        <div class="text-xs text-green-300 space-y-1">
+          <div><strong>Voices Loaded:</strong> {voiceSystemStatus.voicesLoaded ? '✅' : '❌'}</div>
+          <div><strong>Voice Cache Size:</strong> {voiceSystemStatus.voiceCacheSize}</div>
+          <div><strong>Available Voices:</strong> {voiceSystemStatus.availableVoices}</div>
+          <div><strong>Character Voices:</strong> {voiceSystemStatus.characterVoices.length}</div>
+        </div>
+        
+        {#if voiceSystemStatus.cachedVoices.length > 0}
+          <div class="text-xs text-green-300">
+            <div><strong>Cached Voices:</strong></div>
+            {#each voiceSystemStatus.cachedVoices as cached}
+              <div class="ml-2">• {cached.characterId}: {cached.voiceName} ({cached.voiceLang})</div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
+
+    <!-- Consistency Test Results -->
+    {#if consistencyTestResults}
+      <div class="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3 space-y-2">
+        <h4 class="text-sm font-semibold text-yellow-200">Voice Consistency Test</h4>
+        {#if consistencyTestResults.error}
+          <div class="text-xs text-red-300">❌ {consistencyTestResults.error}</div>
+        {:else}
+          <div class="text-xs text-yellow-300 space-y-1">
+            <div><strong>Character:</strong> {consistencyTestResults.character.name}</div>
+            <div><strong>Consistent:</strong> {consistencyTestResults.isConsistent ? '✅' : '❌'}</div>
+            <div><strong>Total Voices:</strong> {consistencyTestResults.totalVoices}</div>
+            <div><strong>English Voices:</strong> {consistencyTestResults.englishVoices}</div>
+            
+            {#if consistencyTestResults.cachedVoice}
+              <div><strong>Cached Voice:</strong> {consistencyTestResults.cachedVoice.name} ({consistencyTestResults.cachedVoice.lang})</div>
+            {/if}
+            
+            {#if consistencyTestResults.freshVoice}
+              <div><strong>Fresh Voice:</strong> {consistencyTestResults.freshVoice.name} ({consistencyTestResults.freshVoice.lang})</div>
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </div>
 </div>
