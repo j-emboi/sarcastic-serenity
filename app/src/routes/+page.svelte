@@ -2,9 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings, initSettingsFromStorage, getAvailablePersonas } from '$lib/stores/settings';
-  import VoiceSelector from '$lib/components/VoiceSelector.svelte';
-  import AIVoiceSelector from '$lib/components/AIVoiceSelector.svelte';
-  import CharacterVoiceSelector from '$lib/components/CharacterVoiceSelector.svelte';
+  import UnifiedVoiceSelector from '$lib/components/UnifiedVoiceSelector.svelte';
   import type { AppSettings } from '$lib/stores/settings';
 
   let settingsValue: AppSettings | null = null;
@@ -126,15 +124,7 @@
       <!-- Voice Settings -->
       <div class="space-y-4">
         <h3 class="text-lg font-semibold">Voice Settings</h3>
-        <CharacterVoiceSelector />
-        <div class="border-t border-gray-600 pt-4">
-          <h4 class="text-md font-medium mb-2">AI Voices</h4>
-          <AIVoiceSelector />
-        </div>
-        <div class="border-t border-gray-600 pt-4">
-          <h4 class="text-md font-medium mb-2">Browser TTS (Fallback)</h4>
-          <VoiceSelector />
-        </div>
+        <UnifiedVoiceSelector />
       </div>
     </div>
 

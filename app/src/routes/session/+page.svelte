@@ -109,9 +109,9 @@
       speaking = true;
       
       try {
-        if (settingsValue?.useCharacterVoice && settingsValue?.selectedCharacterId) {
-          // Use Character Voice (Priority 1)
-          await characterVoiceService.speakWithCharacter(quote, settingsValue.selectedCharacterId);
+        if (settingsValue?.selectedVoiceType === 'character' && settingsValue?.selectedVoiceId) {
+          // Use Character Voice
+          await characterVoiceService.speakWithCharacter(quote, settingsValue.selectedVoiceId);
           
           // Character voice service handles its own completion
           const checkInterval = setInterval(() => {
@@ -124,10 +124,10 @@
             }
           }, 100);
           
-        } else if (settingsValue?.useAIVoice && settingsValue?.aiVoiceId) {
-          // Use AI Voice (Priority 2)
+        } else if (settingsValue?.selectedVoiceType === 'ai' && settingsValue?.selectedVoiceId) {
+          // Use AI Voice
           const aiSettings = {
-            voiceId: settingsValue.aiVoiceId,
+            voiceId: settingsValue.selectedVoiceId,
             pitch: settingsValue.aiVoicePitch || 0,
             rate: settingsValue.aiVoiceRate || 0,
             volume: settingsValue.aiVoiceVolume || 80
@@ -154,9 +154,9 @@
           utterance.volume = 0.7;
           
           // Set the selected voice if available
-          if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
+          if (settingsValue && settingsValue.selectedVoiceId && typeof speechSynthesis !== 'undefined') {
             const voices = speechSynthesis.getVoices();
-            const voiceId = settingsValue.voiceId;
+            const voiceId = settingsValue.selectedVoiceId;
             const selectedVoice = voices.find(v => v.voiceURI === voiceId);
             if (selectedVoice) {
               utterance.voice = selectedVoice;
