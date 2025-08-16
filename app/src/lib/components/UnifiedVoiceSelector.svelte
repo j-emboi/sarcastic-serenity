@@ -173,9 +173,5 @@
     {/if}
   {/if}
   
-  <!-- Info Notice -->
-  <div class="text-xs text-gray-400 bg-gray-800/50 p-3 rounded">
-    <strong>Character Voices:</strong> These voices use browser TTS with audio effects to create unique character personalities. 
-    Each voice has been tuned to match the sarcastic and entertaining tone of the app.
-  </div>
+
 </div>
