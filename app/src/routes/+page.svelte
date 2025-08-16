@@ -76,7 +76,7 @@
        <div class="space-y-2">
          <label class="block text-sm font-medium">Sarcasm Level</label>
          <select 
-           value={settingsValue?.roastIntensity || 2}
+           value={settingsValue?.roastIntensity || 4}
            on:change={(e) => {
              if (settingsValue && e.target instanceof HTMLSelectElement) {
                settings.update(s => ({ ...s, roastIntensity: parseInt(e.target.value) }));

@@ -111,9 +111,18 @@
       if (voiceReady) {
         speaking = true;
         const utterance = new SpeechSynthesisUtterance(quote);
-        utterance.rate = 0.8;
-        utterance.pitch = 0.9;
+        utterance.rate = settingsValue?.voiceRate || 1.12;
+        utterance.pitch = settingsValue?.voicePitch || 1.8;
         utterance.volume = 0.7;
+        
+        // Set the selected voice if available
+        if (settingsValue?.voiceId && typeof speechSynthesis !== 'undefined') {
+          const voices = speechSynthesis.getVoices();
+          const selectedVoice = voices.find(v => v.voiceURI === settingsValue.voiceId);
+          if (selectedVoice) {
+            utterance.voice = selectedVoice;
+          }
+        }
         
         utterance.onend = () => {
           speaking = false;

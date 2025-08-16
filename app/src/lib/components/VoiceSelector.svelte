@@ -1,9 +1,21 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { settings } from '$lib/stores/settings';
   
-  export let voiceId: string | undefined = undefined;
-  export let voicePitch: number = 1.8;
-  export let voiceRate: number = 1.12;
+  let settingsValue: any = null;
+  
+  onMount(() => {
+    const unsubscribe = settings.subscribe(value => {
+      settingsValue = value;
+    });
+    
+    return unsubscribe;
+  });
+  
+  // Get values from settings store
+  $: voiceId = settingsValue?.voiceId;
+  $: voicePitch = settingsValue?.voicePitch || 1.8;
+  $: voiceRate = settingsValue?.voiceRate || 1.12;
   
   let voices: SpeechSynthesisVoice[] = [];
   let voicesLoaded = false;
@@ -104,7 +116,13 @@
       <div class="text-sm text-red-500">No voices available. Please check your system TTS settings.</div>
     {:else}
       <select 
-        bind:value={voiceId} 
+        value={voiceId || ''}
+        on:change={(e) => {
+          const target = e.target as HTMLSelectElement;
+          if (target) {
+            settings.update(s => ({ ...s, voiceId: target.value || undefined }));
+          }
+        }}
         class="w-full rounded border p-2 text-sm"
         disabled={!voicesLoaded}
       >
@@ -141,7 +159,13 @@
         min="0.5" 
         max="2.0" 
         step="0.1" 
-        bind:value={voicePitch} 
+        value={voicePitch}
+        on:input={(e) => {
+          const target = e.target as HTMLInputElement;
+          if (target) {
+            settings.update(s => ({ ...s, voicePitch: parseFloat(target.value) }));
+          }
+        }}
         class="w-full" 
       />
       <span class="text-xs text-gray-500">Lower = deeper, Higher = squeakier</span>
@@ -154,7 +178,13 @@
         min="0.5" 
         max="2.0" 
         step="0.1" 
-        bind:value={voiceRate} 
+        value={voiceRate}
+        on:input={(e) => {
+          const target = e.target as HTMLInputElement;
+          if (target) {
+            settings.update(s => ({ ...s, voiceRate: parseFloat(target.value) }));
+          }
+        }}
         class="w-full" 
       />
       <span class="text-xs text-gray-500">Slower = more dramatic, Faster = more energetic</span>
