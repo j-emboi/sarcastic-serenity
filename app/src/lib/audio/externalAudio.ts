@@ -321,16 +321,21 @@ export class ExternalAudioEngine {
 	}
 
 	stopCurrent(): void {
+		console.log('Stopping current audio source...');
 		if (this.currentSource) {
 			try {
 				this.currentSource.stop();
 				this.currentSource.disconnect();
+				console.log('Audio source stopped successfully');
 			} catch (error) {
 				console.warn('Error stopping current audio source:', error);
 			}
 			this.currentSource = null;
+		} else {
+			console.log('No current audio source to stop');
 		}
 		this.isPlaying = false;
+		console.log('Audio stopped, isPlaying set to false');
 	}
 
 	setVolume(volume: number): void {
@@ -349,7 +354,23 @@ export class ExternalAudioEngine {
 	}
 
 	stopAll(): void {
+		console.log('stopAll() called on external audio engine');
 		this.stopCurrent();
+	}
+
+	// Additional methods to match the old AudioEngine interface
+	setBackgroundVolume(volume: number): void {
+		this.setVolume(volume);
+	}
+
+	removeAudioLevelCallback(): void {
+		// Not implemented in this version, but keeping interface compatibility
+		console.log('Audio level callback removed');
+	}
+
+	setAudioLevelCallback(callback: (level: number) => void): void {
+		// Not implemented in this version, but keeping interface compatibility
+		console.log('Audio level callback set (not implemented in external audio engine)');
 	}
 }
 
