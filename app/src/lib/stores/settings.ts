@@ -25,7 +25,7 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-	durationMinutes: 1, // Micro-wellness: start with 1 minute
+	durationMinutes: 3, // Micro-wellness: extended to 3 minutes
 	persona: 'student',
 	roastIntensity: 4, // Nuclear sarcasm by default
 	// Voice defaults for normal speech
