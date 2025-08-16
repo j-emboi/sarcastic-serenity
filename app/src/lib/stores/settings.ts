@@ -1,5 +1,4 @@
 import { writable, type Writable } from 'svelte/store';
-import type { BreathingAnimationType } from '../breathing/types';
 
 export type Persona = 'student' | 'working_adult' | 'creator' | 'teacher' | 'caregiver';
 export type ProfanityLevel = 'off' | 'medium' | 'strict';
@@ -21,8 +20,6 @@ export interface AppSettings {
 	roastIntensity: number; // 0..4
 	profanity: ProfanityLevel; // default 'off' (unsafe)
 	serendipity: number; // 0..1
-	breathingEnabled: boolean;
-	breathingAnimation: BreathingAnimationType;
 	backgroundVolume: number; // 0..1
 	backgroundSrc?: string; // path under /audio, e.g. '/audio/loop.mp3'
 	ambientPreset: 'none' | 'waves' | 'rain' | 'birds' | 'pink';
@@ -38,8 +35,6 @@ const DEFAULT_SETTINGS: AppSettings = {
 	roastIntensity: 1, // Gentler by default for micro-moments
 	profanity: 'off',
 	serendipity: 0.1,
-	breathingEnabled: false,
-	breathingAnimation: 'expanding-circle',
 	backgroundVolume: 0.4,
 	backgroundSrc: '',
 	ambientPreset: 'waves',

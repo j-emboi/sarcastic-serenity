@@ -6,7 +6,6 @@
   import type { AppSettings } from '$lib/stores/settings';
 
   let settingsValue: AppSettings | null = null;
-  let showAnimationPreview = false;
 
   onMount(() => {
     initSettingsFromStorage();
@@ -19,14 +18,6 @@
 
   function startSession() {
     goto('/session');
-  }
-
-  function closeAnimationPreview() {
-    showAnimationPreview = false;
-  }
-
-  function openAnimationPreview() {
-    showAnimationPreview = true;
   }
 </script>
 
