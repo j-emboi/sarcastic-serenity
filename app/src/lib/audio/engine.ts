@@ -398,7 +398,249 @@ export class AudioEngine {
 		this.proceduralNodes.push(out);
 	}
 
-	async startPreset(preset: 'waves' | 'rain' | 'birds' | 'pink', volume: number, serendipity: number = 0.1): Promise<void> {
+	async startForest(volume: number, serendipity: number = 0.1): Promise<void> {
+		const ctx = await this.ensureContext();
+		this.clearProcedural();
+		
+		// Base forest ambience (wind through trees)
+		const bufferSize = 2 * ctx.sampleRate;
+		const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+		const src = ctx.createBufferSource(); 
+		src.buffer = buffer; 
+		src.loop = true;
+		
+		// Filter for forest-like frequencies
+		const hp = ctx.createBiquadFilter(); 
+		hp.type = 'highpass'; 
+		hp.frequency.value = 200;
+		const lp = ctx.createBiquadFilter(); 
+		lp.type = 'lowpass'; 
+		lp.frequency.value = 3000;
+		
+		const baseGain = ctx.createGain(); 
+		baseGain.gain.value = volume * 0.4;
+		src.connect(hp).connect(lp).connect(baseGain).connect(this.backgroundGain);
+		src.start();
+		
+		// Add bird chirps (less frequent than dedicated birds preset)
+		const birdGain = ctx.createGain(); 
+		birdGain.gain.value = 0; 
+		birdGain.connect(this.backgroundGain);
+		
+		const makeForestBird = () => {
+			const osc = ctx.createOscillator();
+			osc.type = 'triangle';
+			const g = ctx.createGain(); 
+			g.gain.value = 0; 
+			osc.connect(g).connect(birdGain);
+			
+			const now = ctx.currentTime;
+			const startFreq = 1200 + Math.random() * 1500;
+			const endFreq = 600 + Math.random() * 800;
+			osc.frequency.setValueAtTime(startFreq, now);
+			osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.15);
+			g.gain.linearRampToValueAtTime(volume * 0.3 * serendipity, now + 0.02);
+			g.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+			osc.start(now);
+			osc.stop(now + 0.25);
+			
+			// Less frequent than dedicated birds preset
+			const baseInterval = 3000 + Math.random() * 8000;
+			const serendipityMultiplier = 1 - (serendipity * 0.5);
+			setTimeout(makeForestBird, baseInterval * serendipityMultiplier);
+			this.proceduralNodes.push(osc, g);
+		};
+		
+		// Start first bird after a delay
+		setTimeout(makeForestBird, 2000 + Math.random() * 5000);
+		this.proceduralNodes.push(src, hp, lp, baseGain, birdGain);
+	}
+
+	async startFireplace(volume: number, serendipity: number = 0.1): Promise<void> {
+		const ctx = await this.ensureContext();
+		this.clearProcedural();
+		
+		// Base crackling fire sound
+		const bufferSize = 2 * ctx.sampleRate;
+		const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+		const src = ctx.createBufferSource(); 
+		src.buffer = buffer; 
+		src.loop = true;
+		
+		// Filter for fire-like frequencies (low to mid)
+		const hp = ctx.createBiquadFilter(); 
+		hp.type = 'highpass'; 
+		hp.frequency.value = 100;
+		const lp = ctx.createBiquadFilter(); 
+		lp.type = 'lowpass'; 
+		lp.frequency.value = 2000;
+		
+		const baseGain = ctx.createGain(); 
+		baseGain.gain.value = volume * 0.5;
+		src.connect(hp).connect(lp).connect(baseGain).connect(this.backgroundGain);
+		src.start();
+		
+		// Add crackling pops
+		const popGain = ctx.createGain(); 
+		popGain.gain.value = 0; 
+		popGain.connect(this.backgroundGain);
+		
+		const makePop = () => {
+			const popSrc = ctx.createBufferSource();
+			popSrc.buffer = buffer;
+			const popFilter = ctx.createBiquadFilter();
+			popFilter.type = 'bandpass';
+			popFilter.frequency.value = 800 + Math.random() * 1200;
+			popFilter.Q.value = 3 + Math.random() * 2;
+			
+			const now = ctx.currentTime;
+			popGain.gain.cancelScheduledValues(now);
+			popGain.gain.setValueAtTime(0, now);
+			popGain.gain.linearRampToValueAtTime(volume * 0.6 * serendipity, now + 0.01);
+			popGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+			
+			popSrc.connect(popFilter).connect(popGain);
+			popSrc.start(now);
+			popSrc.stop(now + 0.15);
+			
+			// Schedule next pop
+			const baseInterval = 200 + Math.random() * 800;
+			const serendipityMultiplier = 1 - (serendipity * 0.6);
+			setTimeout(makePop, baseInterval * serendipityMultiplier);
+			this.proceduralNodes.push(popSrc, popFilter);
+		};
+		
+		// Start first pop after a delay
+		setTimeout(makePop, 1000 + Math.random() * 2000);
+		this.proceduralNodes.push(src, hp, lp, baseGain, popGain);
+	}
+
+	async startStream(volume: number, serendipity: number = 0.1): Promise<void> {
+		const ctx = await this.ensureContext();
+		this.clearProcedural();
+		
+		// Base water flow sound
+		const bufferSize = 2 * ctx.sampleRate;
+		const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+		const src = ctx.createBufferSource(); 
+		src.buffer = buffer; 
+		src.loop = true;
+		
+		// Filter for water-like frequencies
+		const hp = ctx.createBiquadFilter(); 
+		hp.type = 'highpass'; 
+		hp.frequency.value = 800;
+		const lp = ctx.createBiquadFilter(); 
+		lp.type = 'lowpass'; 
+		lp.frequency.value = 6000;
+		
+		const baseGain = ctx.createGain(); 
+		baseGain.gain.value = volume * 0.6;
+		src.connect(hp).connect(lp).connect(baseGain).connect(this.backgroundGain);
+		src.start();
+		
+		// Add water splashes
+		const splashGain = ctx.createGain(); 
+		splashGain.gain.value = 0; 
+		splashGain.connect(this.backgroundGain);
+		
+		const makeSplash = () => {
+			const splashSrc = ctx.createBufferSource();
+			splashSrc.buffer = buffer;
+			const splashFilter = ctx.createBiquadFilter();
+			splashFilter.type = 'bandpass';
+			splashFilter.frequency.value = 2000 + Math.random() * 3000;
+			splashFilter.Q.value = 2 + Math.random() * 2;
+			
+			const now = ctx.currentTime;
+			splashGain.gain.cancelScheduledValues(now);
+			splashGain.gain.setValueAtTime(0, now);
+			splashGain.gain.linearRampToValueAtTime(volume * 0.4 * serendipity, now + 0.02);
+			splashGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+			
+			splashSrc.connect(splashFilter).connect(splashGain);
+			splashSrc.start(now);
+			splashSrc.stop(now + 0.3);
+			
+			// Schedule next splash
+			const baseInterval = 1500 + Math.random() * 3000;
+			const serendipityMultiplier = 1 - (serendipity * 0.4);
+			setTimeout(makeSplash, baseInterval * serendipityMultiplier);
+			this.proceduralNodes.push(splashSrc, splashFilter);
+		};
+		
+		// Start first splash after a delay
+		setTimeout(makeSplash, 2000 + Math.random() * 4000);
+		this.proceduralNodes.push(src, hp, lp, baseGain, splashGain);
+	}
+
+	async startWind(volume: number, serendipity: number = 0.1): Promise<void> {
+		const ctx = await this.ensureContext();
+		this.clearProcedural();
+		
+		// Base wind sound
+		const bufferSize = 2 * ctx.sampleRate;
+		const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+		const src = ctx.createBufferSource(); 
+		src.buffer = buffer; 
+		src.loop = true;
+		
+		// Filter for wind-like frequencies (low to mid)
+		const hp = ctx.createBiquadFilter(); 
+		hp.type = 'highpass'; 
+		hp.frequency.value = 150;
+		const lp = ctx.createBiquadFilter(); 
+		lp.type = 'lowpass'; 
+		lp.frequency.value = 1500;
+		
+		const baseGain = ctx.createGain(); 
+		baseGain.gain.value = volume * 0.5;
+		src.connect(hp).connect(lp).connect(baseGain).connect(this.backgroundGain);
+		src.start();
+		
+		// Add wind gusts
+		const gustGain = ctx.createGain(); 
+		gustGain.gain.value = 0; 
+		gustGain.connect(this.backgroundGain);
+		
+		const makeGust = () => {
+			const gustSrc = ctx.createBufferSource();
+			gustSrc.buffer = buffer;
+			const gustFilter = ctx.createBiquadFilter();
+			gustFilter.type = 'lowpass';
+			gustFilter.frequency.value = 800 + Math.random() * 700;
+			
+			const now = ctx.currentTime;
+			gustGain.gain.cancelScheduledValues(now);
+			gustGain.gain.setValueAtTime(0, now);
+			gustGain.gain.linearRampToValueAtTime(volume * 0.7 * serendipity, now + 0.5);
+			gustGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0);
+			
+			gustSrc.connect(gustFilter).connect(gustGain);
+			gustSrc.start(now);
+			gustSrc.stop(now + 2.0);
+			
+			// Schedule next gust
+			const baseInterval = 4000 + Math.random() * 8000;
+			const serendipityMultiplier = 1 - (serendipity * 0.3);
+			setTimeout(makeGust, baseInterval * serendipityMultiplier);
+			this.proceduralNodes.push(gustSrc, gustFilter);
+		};
+		
+		// Start first gust after a delay
+		setTimeout(makeGust, 3000 + Math.random() * 5000);
+		this.proceduralNodes.push(src, hp, lp, baseGain, gustGain);
+	}
+
+	async startPreset(preset: 'waves' | 'rain' | 'birds' | 'pink' | 'forest' | 'fireplace' | 'stream' | 'wind' | 'white' | 'brown', volume: number, serendipity: number = 0.1): Promise<void> {
 		console.log('Starting audio preset:', preset, 'volume:', volume, 'serendipity:', serendipity);
 		switch (preset) {
 			case 'waves':
@@ -407,6 +649,18 @@ export class AudioEngine {
 				return this.startRain(volume, serendipity);
 			case 'birds':
 				return this.startBirds(volume, serendipity);
+			case 'forest':
+				return this.startForest(volume, serendipity);
+			case 'fireplace':
+				return this.startFireplace(volume, serendipity);
+			case 'stream':
+				return this.startStream(volume, serendipity);
+			case 'wind':
+				return this.startWind(volume, serendipity);
+			case 'white':
+				return this.startProceduralNoise('white', volume, serendipity);
+			case 'brown':
+				return this.startProceduralNoise('brown', volume, serendipity);
 			case 'pink':
 			default:
 				return this.startProceduralNoise('pink', volume, serendipity);

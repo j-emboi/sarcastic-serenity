@@ -19,7 +19,7 @@ export interface AppSettings {
 	persona: Persona;
 	roastIntensity: number; // 0..4
 	backgroundVolume: number; // 0..1
-	ambientPreset: 'none' | 'waves' | 'rain' | 'birds' | 'pink';
+	ambientPreset: 'none' | 'waves' | 'rain' | 'birds' | 'pink' | 'forest' | 'fireplace' | 'stream' | 'wind' | 'white' | 'brown';
 	// Voice settings
 	voiceId?: string; // voice URI for reliable identification
 	voicePitch: number; // 0.5..2.0, default 1.8 for "puppet" vibe
