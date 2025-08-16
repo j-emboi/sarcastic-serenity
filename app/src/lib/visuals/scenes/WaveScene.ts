@@ -101,15 +101,15 @@ export class WaveScene extends BaseScene {
       void main() {
         vec2 uv = vUv;
         
-        // DRAMATIC wave animation with MORE waves and FASTER movement
-        float wave1 = sin(vTime * 20.0 + uv.x * 15.0) * 0.5 + 0.5;
-        float wave2 = sin(vTime * 15.0 + uv.x * 20.0) * 0.4 + 0.5;
-        float wave3 = sin(vTime * 25.0 + uv.y * 12.0) * 0.5 + 0.5;
-        float wave4 = sin(vTime * 12.0 + uv.x * 18.0 + uv.y * 15.0) * 0.3 + 0.5;
-        float wave5 = sin(vTime * 18.0 + uv.x * 25.0) * 0.4 + 0.5;
-        float wave6 = sin(vTime * 22.0 + uv.y * 20.0) * 0.3 + 0.5;
-        float wave7 = sin(vTime * 16.0 + uv.x * 12.0 + uv.y * 18.0) * 0.4 + 0.5;
-        float wave8 = sin(vTime * 30.0 + uv.x * 30.0) * 0.2 + 0.5;
+        // ULTRA-FAST wave animation with MAXIMUM movement
+        float wave1 = sin(vTime * 40.0 + uv.x * 15.0) * 0.5 + 0.5;
+        float wave2 = sin(vTime * 35.0 + uv.x * 20.0) * 0.4 + 0.5;
+        float wave3 = sin(vTime * 50.0 + uv.y * 12.0) * 0.5 + 0.5;
+        float wave4 = sin(vTime * 25.0 + uv.x * 18.0 + uv.y * 15.0) * 0.3 + 0.5;
+        float wave5 = sin(vTime * 45.0 + uv.x * 25.0) * 0.4 + 0.5;
+        float wave6 = sin(vTime * 55.0 + uv.y * 20.0) * 0.3 + 0.5;
+        float wave7 = sin(vTime * 30.0 + uv.x * 12.0 + uv.y * 18.0) * 0.4 + 0.5;
+        float wave8 = sin(vTime * 60.0 + uv.x * 30.0) * 0.2 + 0.5;
         
         // Combine ALL waves for maximum dramatic effect
         float waveHeight = (wave1 + wave2 + wave3 + wave4 + wave5 + wave6 + wave7 + wave8) / 8.0;
@@ -120,36 +120,44 @@ export class WaveScene extends BaseScene {
         vec3 color3 = vec3(1.0, 1.0, 1.0);  // Pure white
         vec3 color4 = vec3(0.0, 0.5, 1.0);  // Sky blue
         
-        // Create dramatic color changes with high contrast
+        // Create dramatic color changes with ULTRA-FAST movement
         vec3 color = mix(color1, color2, waveHeight);
-        color = mix(color, color3, sin(vTime * 8.0 + uv.y * 10.0) * 0.5 + 0.5);
-        color = mix(color, color4, sin(vTime * 12.0 + uv.x * 15.0) * 0.5 + 0.5);
+        color = mix(color, color3, sin(vTime * 20.0 + uv.y * 10.0) * 0.5 + 0.5);
+        color = mix(color, color4, sin(vTime * 25.0 + uv.x * 15.0) * 0.5 + 0.5);
         
         // Add INTENSE pulsing effect
-        color += vec3(0.5) * sin(vTime * 15.0) * 0.5 + 0.5;
+        color += vec3(0.5) * sin(vTime * 30.0) * 0.5 + 0.5;
         
-        // Add moving stripes that are very obvious at full viewport
-        color += vec3(0.4) * sin(vTime * 25.0 + uv.x * 25.0);
-        color += vec3(0.3) * sin(vTime * 20.0 + uv.y * 20.0);
+        // Add moving stripes that are ULTRA-FAST
+        color += vec3(0.4) * sin(vTime * 50.0 + uv.x * 25.0);
+        color += vec3(0.3) * sin(vTime * 40.0 + uv.y * 20.0);
         
         // Add diagonal moving patterns
-        color += vec3(0.2) * sin(vTime * 18.0 + uv.x * 20.0 + uv.y * 15.0);
+        color += vec3(0.2) * sin(vTime * 35.0 + uv.x * 20.0 + uv.y * 15.0);
         
         // Add more complex wave patterns
-        color += vec3(0.3) * sin(vTime * 14.0 + uv.x * 22.0) * sin(vTime * 10.0 + uv.y * 18.0);
-        color += vec3(0.2) * sin(vTime * 16.0 + uv.x * 28.0) * cos(vTime * 12.0 + uv.y * 25.0);
+        color += vec3(0.3) * sin(vTime * 28.0 + uv.x * 22.0) * sin(vTime * 20.0 + uv.y * 18.0);
+        color += vec3(0.2) * sin(vTime * 32.0 + uv.x * 28.0) * cos(vTime * 24.0 + uv.y * 25.0);
         
-        // Audio reactivity - EXTREMELY obvious
+        // ULTRA-SENSITIVE audio reactivity - EXTREMELY obvious
         if (vAudioLevel > 0.0) {
-          color += vec3(0.8) * vAudioLevel * sin(vTime * 35.0 + uv.x * 30.0);
-          color += vec3(0.6) * vAudioLevel * sin(vTime * 25.0 + uv.y * 25.0);
+          // Much more sensitive audio detection
+          float audioBoost = vAudioLevel * 2.0; // Double the sensitivity
+          color += vec3(1.0) * audioBoost * sin(vTime * 70.0 + uv.x * 30.0);
+          color += vec3(0.8) * audioBoost * sin(vTime * 50.0 + uv.y * 25.0);
+          color += vec3(0.6) * audioBoost * sin(vTime * 60.0 + uv.x * 35.0 + uv.y * 20.0);
+          color += vec3(0.4) * audioBoost * sin(vTime * 45.0 + uv.x * 40.0) * cos(vTime * 35.0 + uv.y * 30.0);
         }
+        
+        // Add constant movement even without audio
+        color += vec3(0.2) * sin(vTime * 25.0 + uv.x * 18.0);
+        color += vec3(0.15) * sin(vTime * 20.0 + uv.y * 22.0);
         
         // Ensure colors are bright and saturated
         color = clamp(color, 0.0, 1.0);
         
         // Add some brightness boost
-        color = color * 1.2;
+        color = color * 1.3;
         
         gl_FragColor = vec4(color, 1.0);
       }
