@@ -167,7 +167,6 @@
         <div class="text-xs text-blue-300">
           <div><strong>Pitch:</strong> {selectedVoice.voiceSettings.pitch.toFixed(1)}</div>
           <div><strong>Rate:</strong> {selectedVoice.voiceSettings.rate.toFixed(1)}</div>
-          <div><strong>Volume:</strong> {(selectedVoice.voiceSettings.volume * 100).toFixed(0)}%</div>
         </div>
       </div>
     {/if}
