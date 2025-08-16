@@ -10,7 +10,7 @@
   let quote = '';
   let settingsValue: AppSettings | null = null;
   let speaking = false;
-  let voiceReady = false;
+
   let releaseBg: (() => void) | null = null;
   let nextQuoteTimeout: number | null = null;
 
@@ -92,42 +92,38 @@
     if (nextQuote) {
       quote = nextQuote.text;
       
-      if (voiceReady) {
-        speaking = true;
-        const utterance = new SpeechSynthesisUtterance(quote);
-        utterance.rate = settingsValue?.voiceRate || 1.0;
-        utterance.pitch = settingsValue?.voicePitch || 1.0;
-        utterance.volume = 0.7;
-        
-        // Set the selected voice if available
-        if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
-          const voices = speechSynthesis.getVoices();
-          const voiceId = settingsValue.voiceId; // Store in local variable to avoid null check issues
-          const selectedVoice = voices.find(v => v.voiceURI === voiceId);
-          if (selectedVoice) {
-            utterance.voice = selectedVoice;
-          }
+      // Always speak the quote (voice is always enabled)
+      speaking = true;
+      const utterance = new SpeechSynthesisUtterance(quote);
+      utterance.rate = settingsValue?.voiceRate || 1.0;
+      utterance.pitch = settingsValue?.voicePitch || 1.0;
+      utterance.volume = 0.7;
+      
+      // Set the selected voice if available
+      if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
+        const voices = speechSynthesis.getVoices();
+        const voiceId = settingsValue.voiceId; // Store in local variable to avoid null check issues
+        const selectedVoice = voices.find(v => v.voiceURI === voiceId);
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
         }
-        
-        utterance.onend = () => {
-          speaking = false;
-        };
-        
-        utterance.onerror = () => {
-          speaking = false;
-        };
-        
-        speechSynthesis.speak(utterance);
       }
+      
+      utterance.onend = () => {
+        speaking = false;
+      };
+      
+      utterance.onerror = () => {
+        speaking = false;
+      };
+      
+      speechSynthesis.speak(utterance);
     }
   }
 
 
 
-  function handleVoiceToggle() {
-    // Toggle voice on/off (simplified - just enable/disable TTS)
-    voiceReady = !voiceReady;
-  }
+
 
   function handleEndSession() {
     ended = true;
@@ -144,12 +140,7 @@
     goto('/');
   }
 
-  // Initialize voice when available
-  if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.onvoiceschanged = () => {
-      voiceReady = true;
-    };
-  }
+
 </script>
 
 <svelte:head>
@@ -176,19 +167,7 @@
        </div>
      {/if}
 
-    <!-- Voice Controls -->
-    <div class="space-y-4 mb-8">
-      <div class="flex items-center gap-4">
-        <label for="voice-toggle" class="text-sm">Voice Guidance:</label>
-        <button 
-          id="voice-toggle"
-          class="px-3 py-1 rounded text-sm {voiceReady ? 'bg-green-600' : 'bg-gray-600'}"
-          on:click={handleVoiceToggle}
-        >
-          {voiceReady ? 'ON' : 'OFF'}
-        </button>
-      </div>
-    </div>
+
 
     <!-- Quote Display -->
     {#if quote}

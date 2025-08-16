@@ -18,8 +18,8 @@ export class QuoteManager {
 	private usedQuotes: Set<string> = new Set();
 	private sessionSeed: number;
 	private lastQuoteTime: number = 0;
-	private baseInterval: number = 35; // Base 35 seconds
-	private jitterRange: number = 10; // ±10 seconds
+	private baseInterval: number = 15; // Base 15 seconds (much shorter)
+	private jitterRange: number = 5; // ±5 seconds (less jitter)
 
 	constructor() {
 		// Generate a session seed for reproducible randomness
@@ -83,9 +83,9 @@ export class QuoteManager {
 	 * Get initial delay for first quote (shorter than regular intervals)
 	 */
 	getInitialDelay(): number {
-		// Start with a much shorter delay for the first quote (5-10 seconds)
-		const baseDelay = 5; // 5 seconds base
-		const jitter = (Math.random() - 0.5) * 5; // ±2.5 seconds
+		// Start with a very short delay for the first quote (2-4 seconds)
+		const baseDelay = 2; // 2 seconds base
+		const jitter = (Math.random() - 0.5) * 2; // ±1 second
 		return (baseDelay + jitter) * 1000;
 	}
 
