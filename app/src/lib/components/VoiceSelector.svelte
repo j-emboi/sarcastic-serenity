@@ -17,10 +17,16 @@
   $: voicePitch = settingsValue?.voicePitch || 1.0;
   $: voiceRate = settingsValue?.voiceRate || 1.0;
   
+  // Debug voice ID changes
+  $: if (voiceId) {
+    console.log('Voice ID updated:', voiceId);
+  }
+  
   let voices: SpeechSynthesisVoice[] = [];
   let voicesLoaded = false;
   let testText = "Hey there, stress ball. Ready for some sarcastic serenity?";
   let isTesting = false;
+  let hasAutoSelectedVoice = false; // Track if we've already auto-selected a voice
   
   onMount(() => {
     // Load voices immediately if available
@@ -36,11 +42,13 @@
       voices = availableVoices;
       voicesLoaded = true;
       
-      // Auto-select first English voice if no voice is selected
-      if (!voiceId) {
+      // Only auto-select first English voice if no voice is selected AND we haven't auto-selected before
+      if (!hasAutoSelectedVoice && !voiceId && !settingsValue?.voiceId) {
         const englishVoice = voices.find(v => /en/i.test(v.lang));
         if (englishVoice) {
-          voiceId = englishVoice.voiceURI;
+          console.log('Auto-selecting English voice:', englishVoice.name);
+          settings.update(s => ({ ...s, voiceId: englishVoice.voiceURI }));
+          hasAutoSelectedVoice = true;
         }
       }
     }
@@ -121,6 +129,7 @@
         on:change={(e) => {
           const target = e.target as HTMLSelectElement;
           if (target) {
+            console.log('Voice selection changed to:', target.value);
             settings.update(s => ({ ...s, voiceId: target.value || undefined }));
           }
         }}
