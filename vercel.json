@@ -1,11 +1,9 @@
 {
-  "name": "sarcastic-serenity",
   "buildCommand": "npm run build",
   "outputDirectory": "build",
   "framework": null,
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "rootDirectory": "app",
   "headers": [
     {
       "source": "/(.*)",

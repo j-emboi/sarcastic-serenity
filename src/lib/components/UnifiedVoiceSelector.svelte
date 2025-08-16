@@ -97,7 +97,6 @@
       <div class="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 space-y-3">
         <div class="flex items-center justify-between">
           <h4 class="font-semibold text-blue-200">🎭 {selectedVoice.name}</h4>
-          <span class="text-xs text-blue-400">Character Voice</span>
         </div>
         
         <p class="text-sm text-blue-100">{selectedVoice.description}</p>
