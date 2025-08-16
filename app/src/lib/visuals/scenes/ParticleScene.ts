@@ -32,14 +32,12 @@ export class ParticleScene extends BaseScene {
   // Physics engine components
   private engine: Matter.Engine | null = null;
   private world: Matter.World | null = null;
-  private render: Matter.Render | null = null;
   private particles: PhysicsParticle[] = [];
   private bounds: Matter.Body[] = [];
-  private forces: Matter.Body[] = [];
 
   // Physics settings
-  private readonly MAX_PARTICLES = 200;
-  private readonly PARTICLE_RADIUS = 3;
+  private readonly MAX_PARTICLES = 50; // Reduced for better performance
+  private readonly PARTICLE_RADIUS = 5;
   private readonly GRAVITY = { x: 0, y: 0.1, scale: 0.001 };
   private readonly WIND_FORCE = { x: 0.02, y: 0 };
 
@@ -54,9 +52,6 @@ export class ParticleScene extends BaseScene {
 
     // Create invisible boundaries
     this.createBoundaries();
-
-    // Create force fields
-    this.createForceFields();
 
     // Create particle shader program
     this.particleProgram = new Program(gl, {
@@ -116,38 +111,6 @@ export class ParticleScene extends BaseScene {
     });
   }
 
-  private createForceFields(): void {
-    if (!this.world) return;
-
-    const canvas = { width: window.innerWidth, height: window.innerHeight };
-
-    // Create attractive force fields
-    const forceFields = [
-      { x: canvas.width * 0.25, y: canvas.height * 0.25, strength: 0.0001 },
-      { x: canvas.width * 0.75, y: canvas.height * 0.75, strength: 0.0001 },
-      { x: canvas.width * 0.5, y: canvas.height * 0.5, strength: 0.00005 }
-    ];
-
-    forceFields.forEach(field => {
-      const forceBody = Matter.Bodies.circle(field.x, field.y, 1, { 
-        isStatic: true,
-        isSensor: true,
-        render: { visible: false }
-      });
-      
-      // Add custom force field data
-      (forceBody as any).forceField = {
-        strength: field.strength,
-        position: { x: field.x, y: field.y }
-      };
-      
-      this.forces.push(forceBody);
-      if (this.world) {
-        Matter.World.add(this.world, forceBody);
-      }
-    });
-  }
-
   private startPhysicsSimulation(): void {
     if (!this.engine) return;
 
@@ -170,34 +133,12 @@ export class ParticleScene extends BaseScene {
       return particle.life > 0;
     });
 
-    // Apply force fields to particles
+    // Apply wind force to particles
     this.particles.forEach(particle => {
-      this.forces.forEach(force => {
-        if ((force as any).forceField) {
-          const field = (force as any).forceField;
-          const distance = Matter.Vector.magnitude(
-            Matter.Vector.sub(particle.body.position, field.position)
-          );
-          
-          if (distance > 0) {
-            const forceVector = Matter.Vector.normalise(
-              Matter.Vector.sub(field.position, particle.body.position)
-            );
-            const forceMagnitude = field.strength / (distance * distance);
-            
-            Matter.Body.applyForce(particle.body, particle.body.position, {
-              x: forceVector.x * forceMagnitude,
-              y: forceVector.y * forceMagnitude
-            });
-          }
-        }
-      });
-
-      // Apply wind force
       Matter.Body.applyForce(particle.body, particle.body.position, this.WIND_FORCE);
     });
 
-    // Spawn new particles based on animation type
+    // Spawn new particles
     this.spawnParticles();
   }
 
@@ -205,7 +146,7 @@ export class ParticleScene extends BaseScene {
     if (this.particles.length >= this.MAX_PARTICLES) return;
 
     const canvas = { width: window.innerWidth, height: window.innerHeight };
-    const spawnRate = 2; // particles per frame
+    const spawnRate = 1; // particles per frame
 
     for (let i = 0; i < spawnRate; i++) {
       if (this.particles.length >= this.MAX_PARTICLES) break;
@@ -313,7 +254,9 @@ export class ParticleScene extends BaseScene {
   private clearParticles(): void {
     if (this.world) {
       this.particles.forEach(particle => {
-        Matter.World.remove(this.world, particle.body);
+        if (this.world) {
+          Matter.World.remove(this.world, particle.body);
+        }
       });
     }
     this.particles = [];
@@ -324,19 +267,19 @@ export class ParticleScene extends BaseScene {
 
     switch (type) {
       case 'flowing-particles':
-        this.engine.gravity = { x: 0, y: 0.1 };
+        this.engine.gravity = { x: 0, y: 0.1, scale: 0.001 };
         this.WIND_FORCE.x = 0.02;
         break;
       case 'fireworks':
-        this.engine.gravity = { x: 0, y: 0.2 };
+        this.engine.gravity = { x: 0, y: 0.2, scale: 0.001 };
         this.WIND_FORCE.x = 0;
         break;
       case 'spiral-galaxy':
-        this.engine.gravity = { x: 0, y: 0 };
+        this.engine.gravity = { x: 0, y: 0, scale: 0.001 };
         this.WIND_FORCE.x = 0.01;
         break;
       default:
-        this.engine.gravity = { x: 0, y: 0.05 };
+        this.engine.gravity = { x: 0, y: 0.05, scale: 0.001 };
         this.WIND_FORCE.x = 0.01;
     }
   }
@@ -446,9 +389,9 @@ export class ParticleScene extends BaseScene {
       varying float vAudioLevel;
       varying float vSerendipity;
       
-      uniform float particlePositions[400]; // MAX_PARTICLES * 2
-      uniform float particleColors[600];    // MAX_PARTICLES * 3
-      uniform float particleLives[200];     // MAX_PARTICLES
+      uniform float particlePositions[100]; // MAX_PARTICLES * 2
+      uniform float particleColors[150];    // MAX_PARTICLES * 3
+      uniform float particleLives[50];      // MAX_PARTICLES
       uniform int particleCount;
       
       void main() {
@@ -456,7 +399,7 @@ export class ParticleScene extends BaseScene {
         vec3 color = vec3(0.0);
         
         // Render physics-based particles
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 50; i++) {
           if (i >= particleCount) break;
           
           vec2 particlePos = vec2(particlePositions[i * 2], particlePositions[i * 2 + 1]);
@@ -465,7 +408,7 @@ export class ParticleScene extends BaseScene {
           
           // Calculate distance to particle
           float dist = length(uv - particlePos);
-          float radius = 0.02; // Particle radius
+          float radius = 0.03; // Particle radius
           
           // Create soft particle
           float particle = smoothstep(radius, 0.0, dist) * life;
@@ -503,10 +446,9 @@ export class ParticleScene extends BaseScene {
     if (this.world) {
       this.clearParticles();
       this.bounds.forEach(bound => {
-        Matter.World.remove(this.world, bound);
-      });
-      this.forces.forEach(force => {
-        Matter.World.remove(this.world, force);
+        if (this.world) {
+          Matter.World.remove(this.world, bound);
+        }
       });
     }
     
