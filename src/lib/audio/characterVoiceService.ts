@@ -25,16 +25,16 @@ export class CharacterVoiceService {
   private voicesLoaded = false;
   private debugMode = true; // Enable debugging for testing
 
-  // Enhanced character voice presets with more dramatic differences
+  // Enhanced character voice presets with optimized settings for better quality
   private characterVoices: CharacterVoice[] = [
     {
       id: 'sarcastic_narrator',
       name: 'Sarcastic Narrator',
       description: 'Deep, gravelly voice with dramatic pauses and dry wit',
       voiceSettings: {
-        pitch: 0.6, // Much lower for deeper voice
-        rate: 0.6, // Much slower for dramatic effect
-        volume: 0.9
+        pitch: 0.75, // Optimized for deeper voice without being too extreme
+        rate: 0.75, // Slower for dramatic effect but still natural
+        volume: 0.85
       },
       personality: {
         enthusiasm: 20,
@@ -52,8 +52,8 @@ export class CharacterVoiceService {
       name: 'Cheerful Host',
       description: 'Bright, bubbly voice with infectious energy and enthusiasm',
       voiceSettings: {
-        pitch: 1.5, // Much higher for cheerfulness
-        rate: 1.4, // Much faster for energy
+        pitch: 1.25, // Higher for cheerfulness but not too extreme
+        rate: 1.2, // Faster for energy but still clear
         volume: 0.9
       },
       personality: {
@@ -72,8 +72,8 @@ export class CharacterVoiceService {
       name: 'Wise Mentor',
       description: 'Smooth, measured voice with wisdom and gentle authority',
       voiceSettings: {
-        pitch: 0.8, // Lower for authority
-        rate: 0.7, // Slower for thoughtfulness
+        pitch: 0.85, // Lower for authority but still warm
+        rate: 0.8, // Slower for thoughtfulness but natural
         volume: 0.8
       },
       personality: {
@@ -92,8 +92,8 @@ export class CharacterVoiceService {
       name: 'Comedic Sidekick',
       description: 'Playful, animated voice with lots of personality and humor',
       voiceSettings: {
-        pitch: 1.3, // Higher for playfulness
-        rate: 1.3, // Faster for energy
+        pitch: 1.15, // Higher for playfulness but not too high
+        rate: 1.1, // Faster for energy but still understandable
         volume: 0.9
       },
       personality: {
@@ -112,9 +112,9 @@ export class CharacterVoiceService {
       name: 'Dramatic Announcer',
       description: 'Booming, theatrical voice with dramatic flair and gravitas',
       voiceSettings: {
-        pitch: 0.7, // Lower for drama
-        rate: 0.5, // Much slower for impact
-        volume: 1.0
+        pitch: 0.8, // Lower for drama but not too extreme
+        rate: 0.65, // Slower for impact but still clear
+        volume: 0.95
       },
       personality: {
         enthusiasm: 85,
@@ -133,7 +133,7 @@ export class CharacterVoiceService {
       description: 'Suave, sophisticated voice with charm and elegance',
       voiceSettings: {
         pitch: 0.9, // Slightly lower for sophistication
-        rate: 0.8, // Slower for smoothness
+        rate: 0.85, // Slower for smoothness but natural
         volume: 0.85
       },
       personality: {
@@ -152,9 +152,9 @@ export class CharacterVoiceService {
       name: 'Energetic Coach',
       description: 'Motivational, passionate voice with infectious energy',
       voiceSettings: {
-        pitch: 1.2, // Higher for energy
-        rate: 1.5, // Much faster for enthusiasm
-        volume: 0.95
+        pitch: 1.1, // Higher for energy but not too extreme
+        rate: 1.3, // Faster for enthusiasm but still clear
+        volume: 0.9
       },
       personality: {
         enthusiasm: 100,
@@ -343,7 +343,7 @@ export class CharacterVoiceService {
     // If no cached voice, find and cache one
     if (!selectedVoice) {
       const voices = speechSynthesis.getVoices();
-      selectedVoice = this.findBestVoiceForCharacter(voices, character);
+      selectedVoice = this.findBestVoiceForCharacter(voices, character) || undefined;
       if (selectedVoice) {
         this.voiceCache.set(character.id, selectedVoice);
       }
@@ -381,78 +381,147 @@ export class CharacterVoiceService {
       const voiceName = voice.name.toLowerCase();
       const voiceLang = voice.lang.toLowerCase();
 
-      // Gender preference
+      // Base score for being an English voice
+      score += 5;
+
+      // Gender preference (higher weight)
       if (character.voicePreferences.gender === 'male') {
         if (voiceName.includes('male') || voiceName.includes('david') || voiceName.includes('james') || 
-            voiceName.includes('john') || voiceName.includes('mike') || voiceName.includes('tom')) {
-          score += 10;
+            voiceName.includes('john') || voiceName.includes('mike') || voiceName.includes('tom') ||
+            voiceName.includes('alex') || voiceName.includes('daniel') || voiceName.includes('mark')) {
+          score += 15;
+        }
+        // Penalize female voices for male characters
+        if (voiceName.includes('female') || voiceName.includes('sarah') || voiceName.includes('emma') || 
+            voiceName.includes('lisa') || voiceName.includes('anna') || voiceName.includes('sophie')) {
+          score -= 10;
         }
       } else if (character.voicePreferences.gender === 'female') {
         if (voiceName.includes('female') || voiceName.includes('sarah') || voiceName.includes('emma') || 
-            voiceName.includes('lisa') || voiceName.includes('anna') || voiceName.includes('sophie')) {
-          score += 10;
+            voiceName.includes('lisa') || voiceName.includes('anna') || voiceName.includes('sophie') ||
+            voiceName.includes('karen') || voiceName.includes('victoria') || voiceName.includes('samantha')) {
+          score += 15;
+        }
+        // Penalize male voices for female characters
+        if (voiceName.includes('male') || voiceName.includes('david') || voiceName.includes('james') || 
+            voiceName.includes('john') || voiceName.includes('mike') || voiceName.includes('tom')) {
+          score -= 10;
         }
       }
 
       // Age preference
       if (character.voicePreferences.age === 'young') {
-        if (voiceName.includes('young') || voiceName.includes('teen') || voiceName.includes('kid')) {
-          score += 5;
+        if (voiceName.includes('young') || voiceName.includes('teen') || voiceName.includes('kid') ||
+            voiceName.includes('alex') || voiceName.includes('emma') || voiceName.includes('sophie')) {
+          score += 8;
         }
       } else if (character.voicePreferences.age === 'mature') {
         if (voiceName.includes('mature') || voiceName.includes('adult') || voiceName.includes('man') || 
-            voiceName.includes('woman')) {
-          score += 5;
+            voiceName.includes('woman') || voiceName.includes('david') || voiceName.includes('sarah')) {
+          score += 8;
         }
       } else if (character.voicePreferences.age === 'elderly') {
-        if (voiceName.includes('elder') || voiceName.includes('senior') || voiceName.includes('old')) {
-          score += 5;
+        if (voiceName.includes('elder') || voiceName.includes('senior') || voiceName.includes('old') ||
+            voiceName.includes('wise') || voiceName.includes('calm')) {
+          score += 8;
         }
       }
 
-      // Accent preference
+      // Accent preference (higher weight for specific characters)
       if (character.voicePreferences.accent === 'british') {
-        if (voiceLang.includes('gb') || voiceName.includes('british') || voiceName.includes('uk')) {
-          score += 8;
+        if (voiceLang.includes('gb') || voiceName.includes('british') || voiceName.includes('uk') ||
+            voiceName.includes('victoria') || voiceName.includes('daniel')) {
+          score += 12;
         }
       } else if (character.voicePreferences.accent === 'american') {
-        if (voiceLang.includes('us') || voiceName.includes('american') || voiceName.includes('us')) {
-          score += 8;
+        if (voiceLang.includes('us') || voiceName.includes('american') || voiceName.includes('us') ||
+            voiceName.includes('alex') || voiceName.includes('sarah') || voiceName.includes('david')) {
+          score += 12;
         }
       }
 
-      // Character-specific voice matching
+      // Character-specific voice matching (enhanced)
       switch (character.id) {
         case 'sarcastic_narrator':
-          if (voiceName.includes('deep') || voiceName.includes('gravel') || voiceName.includes('rough')) {
-            score += 15;
+          if (voiceName.includes('deep') || voiceName.includes('gravel') || voiceName.includes('rough') ||
+              voiceName.includes('david') || voiceName.includes('daniel')) {
+            score += 20;
+          }
+          // Prefer slower, deeper voices
+          if (voiceName.includes('calm') || voiceName.includes('mature')) {
+            score += 10;
           }
           break;
         case 'cheerful_host':
-          if (voiceName.includes('bright') || voiceName.includes('cheerful') || voiceName.includes('happy')) {
-            score += 15;
+          if (voiceName.includes('bright') || voiceName.includes('cheerful') || voiceName.includes('happy') ||
+              voiceName.includes('emma') || voiceName.includes('sophie') || voiceName.includes('sarah')) {
+            score += 20;
+          }
+          // Prefer higher-pitched, energetic voices
+          if (voiceName.includes('young') || voiceName.includes('alex')) {
+            score += 10;
           }
           break;
         case 'wise_mentor':
-          if (voiceName.includes('wise') || voiceName.includes('calm') || voiceName.includes('gentle')) {
-            score += 15;
+          if (voiceName.includes('wise') || voiceName.includes('calm') || voiceName.includes('gentle') ||
+              voiceName.includes('daniel') || voiceName.includes('victoria')) {
+            score += 20;
+          }
+          // Prefer mature, measured voices
+          if (voiceName.includes('mature') || voiceName.includes('elder')) {
+            score += 10;
+          }
+          break;
+        case 'comedic_sidekick':
+          if (voiceName.includes('playful') || voiceName.includes('energetic') || voiceName.includes('alex') ||
+              voiceName.includes('emma') || voiceName.includes('sophie')) {
+            score += 20;
+          }
+          // Prefer young, energetic voices
+          if (voiceName.includes('young') || voiceName.includes('teen')) {
+            score += 10;
           }
           break;
         case 'dramatic_announcer':
-          if (voiceName.includes('dramatic') || voiceName.includes('theatrical') || voiceName.includes('booming')) {
-            score += 15;
+          if (voiceName.includes('dramatic') || voiceName.includes('theatrical') || voiceName.includes('booming') ||
+              voiceName.includes('david') || voiceName.includes('daniel')) {
+            score += 20;
+          }
+          // Prefer deep, authoritative voices
+          if (voiceName.includes('deep') || voiceName.includes('mature')) {
+            score += 10;
           }
           break;
         case 'smooth_operator':
-          if (voiceName.includes('smooth') || voiceName.includes('suave') || voiceName.includes('sophisticated')) {
-            score += 15;
+          if (voiceName.includes('smooth') || voiceName.includes('suave') || voiceName.includes('sophisticated') ||
+              voiceName.includes('daniel') || voiceName.includes('victoria')) {
+            score += 20;
+          }
+          // Prefer refined, elegant voices
+          if (voiceName.includes('mature') || voiceName.includes('calm')) {
+            score += 10;
           }
           break;
         case 'energetic_coach':
-          if (voiceName.includes('energetic') || voiceName.includes('motivational') || voiceName.includes('passionate')) {
-            score += 15;
+          if (voiceName.includes('energetic') || voiceName.includes('motivational') || voiceName.includes('passionate') ||
+              voiceName.includes('alex') || voiceName.includes('david')) {
+            score += 20;
+          }
+          // Prefer strong, confident voices
+          if (voiceName.includes('mature') || voiceName.includes('adult')) {
+            score += 10;
           }
           break;
+      }
+
+      // Quality preferences
+      if (voiceName.includes('premium') || voiceName.includes('enhanced') || voiceName.includes('natural')) {
+        score += 5;
+      }
+
+      // Avoid system voices that might be robotic
+      if (voiceName.includes('system') || voiceName.includes('default') || voiceName.includes('basic')) {
+        score -= 5;
       }
 
       return { voice, score };
@@ -460,6 +529,15 @@ export class CharacterVoiceService {
 
     // Sort by score and return the best match
     scoredVoices.sort((a, b) => b.score - a.score);
+    
+    if (this.debugMode && scoredVoices.length > 0) {
+      console.log(`🎤 Voice selection for ${character.name}:`);
+      console.log(`🎤 Top 3 candidates:`);
+      scoredVoices.slice(0, 3).forEach((candidate, index) => {
+        console.log(`🎤 ${index + 1}. ${candidate.voice.name} (${candidate.voice.lang}) - Score: ${candidate.score}`);
+      });
+    }
+    
     return scoredVoices[0]?.voice || englishVoices[0];
   }
 
