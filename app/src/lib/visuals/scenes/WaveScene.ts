@@ -27,7 +27,8 @@ export class WaveScene extends BaseScene {
     this.addProgram(this.waveProgram);
 
     // Create full-screen quad for wave rendering - ensure it covers entire viewport
-    const geometry = new Plane(gl, { width: 2, height: 2 });
+    // Use larger size to ensure full coverage
+    const geometry = new Plane(gl, { width: 4, height: 4 });
     
     this.waveMesh = new Mesh(gl, {
       geometry,
@@ -36,7 +37,7 @@ export class WaveScene extends BaseScene {
 
     this.addMesh(this.waveMesh);
     
-    console.log('OGL WaveScene initialization complete - full viewport coverage');
+    console.log('OGL WaveScene initialization complete - full viewport coverage with 4x4 plane');
   }
 
   update(deltaTime: number, audioLevel: number = 0, serendipity: number = 0.1): void {

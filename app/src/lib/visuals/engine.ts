@@ -67,7 +67,7 @@ export class VisualEngine {
 
       // Create camera
       this.camera = new Camera(this.renderer.gl);
-      this.camera.position.z = 5;
+      this.camera.position.z = 1; // Move camera closer for full viewport coverage
 
       // Add canvas to container
       this.container.appendChild(this.renderer.gl.canvas);
