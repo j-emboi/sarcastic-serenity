@@ -5,6 +5,7 @@
   
   import { quoteManager } from '$lib/quotes';
   import { aiVoiceService } from '$lib/audio/aiVoiceService';
+  import { characterVoiceService } from '$lib/audio/characterVoiceService';
   import type { AppSettings } from '$lib/stores/settings';
   
   let timeLeft = 60; // Start with 1 minute default
@@ -48,6 +49,7 @@
           ended = true;
           speechSynthesis.cancel();
           aiVoiceService.stop();
+          characterVoiceService.stop();
           speaking = false;
           if (releaseBg) {
             releaseBg();
@@ -107,8 +109,23 @@
       speaking = true;
       
       try {
-        if (settingsValue?.useAIVoice && settingsValue?.aiVoiceId) {
-          // Use AI Voice
+        if (settingsValue?.useCharacterVoice && settingsValue?.selectedCharacterId) {
+          // Use Character Voice (Priority 1)
+          await characterVoiceService.speakWithCharacter(quote, settingsValue.selectedCharacterId);
+          
+          // Character voice service handles its own completion
+          const checkInterval = setInterval(() => {
+            if (!characterVoiceService.isCurrentlyPlaying()) {
+              clearInterval(checkInterval);
+              speaking = false;
+              if (!ended) {
+                scheduleNextQuoteWithJitter();
+              }
+            }
+          }, 100);
+          
+        } else if (settingsValue?.useAIVoice && settingsValue?.aiVoiceId) {
+          // Use AI Voice (Priority 2)
           const aiSettings = {
             voiceId: settingsValue.aiVoiceId,
             pitch: settingsValue.aiVoicePitch || 0,
@@ -130,7 +147,7 @@
           }, 100);
           
         } else {
-          // Use Browser TTS
+          // Use Browser TTS (Fallback)
           const utterance = new SpeechSynthesisUtterance(quote);
           utterance.rate = settingsValue?.voiceRate || 1.0;
           utterance.pitch = settingsValue?.voicePitch || 1.0;
