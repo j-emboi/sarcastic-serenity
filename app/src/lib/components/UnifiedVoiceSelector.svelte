@@ -19,7 +19,6 @@
   let characterVoices: any[] = [];
   let voicesLoaded = false;
   let isLoading = false;
-  let isTesting = false;
   
   onMount(async () => {
     await loadCharacterVoices();
@@ -45,19 +44,6 @@
       console.error('Failed to load character voices:', error);
     } finally {
       isLoading = false;
-    }
-  }
-  
-  async function testCharacterVoice(characterId: string) {
-    if (!characterId || isTesting) return;
-    
-    isTesting = true;
-    try {
-      await characterVoiceService.testCharacterVoice(characterId);
-    } catch (error) {
-      console.error('Character voice test failed:', error);
-    } finally {
-      isTesting = false;
     }
   }
 </script>
@@ -100,18 +86,6 @@
           </option>
         {/each}
       </select>
-      
-      <div class="flex items-center gap-2">
-        <button 
-          type="button"
-          on:click={() => testCharacterVoice(selectedCharacterId)}
-          disabled={!selectedCharacterId || isTesting}
-          class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:opacity-50"
-        >
-          {isTesting ? 'Testing...' : 'Test Voice'}
-        </button>
-        <span class="text-xs text-blue-200">"Hey there, stress ball. Ready for some sarcastic serenity?"</span>
-      </div>
     {/if}
   </div>
   

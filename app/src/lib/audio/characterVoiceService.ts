@@ -414,11 +414,6 @@ export class CharacterVoiceService {
     return this.isPlaying || (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking);
   }
 
-  async testCharacterVoice(characterId: string): Promise<void> {
-    const testText = "Hey there, stress ball. Ready for some sarcastic serenity?";
-    await this.speakWithCharacter(testText, characterId);
-  }
-
   // Get character voice by ID
   getCharacterVoice(characterId: string): CharacterVoice | undefined {
     return this.characterVoices.find(c => c.id === characterId);
