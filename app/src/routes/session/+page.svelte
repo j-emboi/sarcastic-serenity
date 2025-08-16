@@ -111,8 +111,8 @@
       if (voiceReady) {
         speaking = true;
         const utterance = new SpeechSynthesisUtterance(quote);
-        utterance.rate = settingsValue?.voiceRate || 1.12;
-        utterance.pitch = settingsValue?.voicePitch || 1.8;
+        utterance.rate = settingsValue?.voiceRate || 1.0;
+        utterance.pitch = settingsValue?.voicePitch || 1.0;
         utterance.volume = 0.7;
         
         // Set the selected voice if available

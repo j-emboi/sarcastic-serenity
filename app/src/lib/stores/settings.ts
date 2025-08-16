@@ -32,10 +32,10 @@ const DEFAULT_SETTINGS: AppSettings = {
 	roastIntensity: 4, // Nuclear sarcasm by default
 	backgroundVolume: 0.4,
 	ambientPreset: 'waves',
-	// Voice defaults for "puppet" vibe
+	// Voice defaults for normal speech
 	voiceId: undefined, // will be auto-selected
-	voicePitch: 1.8,
-	voiceRate: 1.12
+	voicePitch: 1.0, // Normal pitch
+	voiceRate: 1.0 // Normal speed
 };
 
 const STORAGE_KEY = 'sarcastic-serenity:settings';

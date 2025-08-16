@@ -14,8 +14,8 @@
   
   // Get values from settings store
   $: voiceId = settingsValue?.voiceId;
-  $: voicePitch = settingsValue?.voicePitch || 1.8;
-  $: voiceRate = settingsValue?.voiceRate || 1.12;
+  $: voicePitch = settingsValue?.voicePitch || 1.0;
+  $: voiceRate = settingsValue?.voiceRate || 1.0;
   
   let voices: SpeechSynthesisVoice[] = [];
   let voicesLoaded = false;
@@ -146,7 +146,7 @@
         >
           {isTesting ? 'Testing...' : 'Test Voice'}
         </button>
-        <span class="text-xs text-gray-500">"{testText}"</span>
+        <span class="text-xs text-blue-200">"{testText}"</span>
       </div>
     {/if}
   </div>
@@ -168,7 +168,7 @@
         }}
         class="w-full" 
       />
-      <span class="text-xs text-gray-500">Lower = deeper, Higher = squeakier</span>
+      <span class="text-xs text-blue-200">Lower = deeper, Higher = squeakier</span>
     </label>
     
     <label class="space-y-2">
@@ -187,7 +187,7 @@
         }}
         class="w-full" 
       />
-      <span class="text-xs text-gray-500">Slower = more dramatic, Faster = more energetic</span>
+      <span class="text-xs text-blue-200">Slower = more dramatic, Faster = more energetic</span>
     </label>
   </div>
   
