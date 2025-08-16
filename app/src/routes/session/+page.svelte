@@ -103,7 +103,7 @@
     const nextQuote = quoteManager.getQuote({
       persona: settingsValue?.persona || 'student',
       intensity: settingsValue?.roastIntensity || 2,
-      profanity: settingsValue?.profanity || 'off'
+      profanity: 'off' // Default to allowing all quotes
     });
     if (nextQuote) {
       quote = nextQuote.text;

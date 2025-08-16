@@ -18,30 +18,16 @@ export interface AppSettings {
 	durationMinutes: number;
 	persona: Persona;
 	roastIntensity: number; // 0..4
-	profanity: ProfanityLevel; // default 'off' (unsafe)
-	serendipity: number; // 0..1
 	backgroundVolume: number; // 0..1
-	backgroundSrc?: string; // path under /audio, e.g. '/audio/loop.mp3'
 	ambientPreset: 'none' | 'waves' | 'rain' | 'birds' | 'pink';
-	// Voice settings
-	voiceId?: string; // voice URI for reliable identification
-	voicePitch: number; // 0.5..2.0, default 1.8 for "puppet" vibe
-	voiceRate: number; // 0.1..10.0, default 1.12
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
 	durationMinutes: 1, // Micro-wellness: start with 1 minute
 	persona: 'student',
-	roastIntensity: 1, // Gentler by default for micro-moments
-	profanity: 'off',
-	serendipity: 0.1,
+	roastIntensity: 2, // Match UI default
 	backgroundVolume: 0.4,
-	backgroundSrc: '',
-	ambientPreset: 'waves',
-	// Voice defaults for "puppet" vibe
-	voiceId: undefined, // will be auto-selected
-	voicePitch: 1.8,
-	voiceRate: 1.12
+	ambientPreset: 'waves'
 };
 
 const STORAGE_KEY = 'sarcastic-serenity:settings';
