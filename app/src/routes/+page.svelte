@@ -134,12 +134,12 @@
            class="w-full p-2 rounded bg-gray-800 text-white"
          >
            <option value="none">None</option>
-           <option value="japanese_garden">🌿 Japanese Zen Garden</option>
-           <option value="waterfall">🌊 Waterfall</option>
-           <option value="beach">🏖️ Beach</option>
-           <option value="rain">🌧️ Rain</option>
-           <option value="singing_bowls">🔔 Singing Bowls</option>
-           <option value="piano">🎹 Piano</option>
+           <option value="japanese_garden">🌿 Spring Day Forest</option>
+           <option value="waterfall">⚡ Distant Thunder</option>
+           <option value="beach">🏖️ Waves Crashing on Rock Beach</option>
+           <option value="rain">🌧️ Rain On Roof</option>
+           <option value="singing_bowls">🔥 Daytime Forest Bonfire</option>
+           <option value="piano">🌿 Spring Day Forest (Alternative)</option>
          </select>
        </div>
 

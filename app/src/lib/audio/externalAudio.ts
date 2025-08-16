@@ -7,14 +7,14 @@ export class ExternalAudioEngine {
 	private currentVolume = 0.4;
 	private isPlaying = false;
 
-	// Audio URLs from myNoise.net
+	// Real audio files from the audio folder
 	private readonly AUDIO_URLS = {
-		japanese_garden: 'https://mynoise.net/NoiseMachines/japaneseGardenSoundscapeGenerator.php',
-		waterfall: 'https://mynoise.net/NoiseMachines/waterfallSoundGenerator.php',
-		beach: 'https://mynoise.net/NoiseMachines/pebbleBeachNoiseGenerator.php',
-		rain: 'https://mynoise.net/NoiseMachines/rainNoiseGenerator.php',
-		singing_bowls: 'https://mynoise.net/NoiseMachines/singingBowlsDroneGenerator.php',
-		piano: 'https://mynoise.net/NoiseMachines/acousticPianoSoundscapeGenerator.php'
+		japanese_garden: '/audio/Spring Day Forest.mp3',
+		waterfall: '/audio/Distant Thunder.mp3',
+		beach: '/audio/Waves Crashing on Rock Beach.mp3',
+		rain: '/audio/Rain On Roof.mp3',
+		singing_bowls: '/audio/Daytime Forest Bonfire.mp3',
+		piano: '/audio/Spring Day Forest.mp3' // Using forest as piano alternative
 	};
 
 	async ensureContext(): Promise<AudioContext> {
@@ -47,22 +47,34 @@ export class ExternalAudioEngine {
 		}
 
 		try {
-			// For now, we'll use placeholder URLs since direct streaming from myNoise requires authentication
-			// In a real implementation, you'd need to either:
-			// 1. Download and host the audio files locally
-			// 2. Use myNoise API if available
-			// 3. Create similar high-quality procedural audio
+			const audioUrl = this.AUDIO_URLS[preset as keyof typeof this.AUDIO_URLS];
+			if (!audioUrl) {
+				console.error(`No audio URL found for preset: ${preset}`);
+				return null;
+			}
 			
-			console.log(`Loading audio for preset: ${preset}`);
+			console.log(`Loading real audio file for preset: ${preset} from ${audioUrl}`);
 			
-			// Create a high-quality procedural version as fallback
-			const buffer = await this.createHighQualityProceduralAudio(preset, ctx);
-			this.audioBuffers.set(preset, buffer);
-			return buffer;
+			// Fetch the audio file
+			const response = await fetch(audioUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch audio: ${response.statusText}`);
+			}
+			
+			const arrayBuffer = await response.arrayBuffer();
+			const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+			
+			this.audioBuffers.set(preset, audioBuffer);
+			console.log(`Successfully loaded audio for ${preset}, duration: ${audioBuffer.duration}s`);
+			return audioBuffer;
 			
 		} catch (error) {
 			console.error(`Failed to load audio for ${preset}:`, error);
-			return null;
+			// Fallback to procedural audio if real audio fails
+			console.log(`Falling back to procedural audio for ${preset}`);
+			const buffer = await this.createHighQualityProceduralAudio(preset, ctx);
+			this.audioBuffers.set(preset, buffer);
+			return buffer;
 		}
 	}
 
