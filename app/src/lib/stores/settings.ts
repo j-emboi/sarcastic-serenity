@@ -22,6 +22,12 @@ export interface AppSettings {
 	voiceId?: string; // voice URI for reliable identification
 	voicePitch: number; // 0.5..2.0, default 1.0 (normal)
 	voiceRate: number; // 0.1..10.0, default 1.0 (normal)
+	// AI Voice settings
+	useAIVoice: boolean; // Whether to use AI voice instead of browser TTS
+	aiVoiceId?: string; // AI voice ID
+	aiVoicePitch: number; // -50 to 50, default 0
+	aiVoiceRate: number; // -50 to 50, default 0
+	aiVoiceVolume: number; // 0 to 100, default 80
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -31,7 +37,13 @@ const DEFAULT_SETTINGS: AppSettings = {
 	// Voice defaults for normal speech
 	voiceId: undefined, // will be auto-selected
 	voicePitch: 1.0, // Normal pitch
-	voiceRate: 1.0 // Normal speed
+	voiceRate: 1.0, // Normal speed
+	// AI Voice defaults
+	useAIVoice: false, // Default to browser TTS
+	aiVoiceId: undefined, // will be auto-selected
+	aiVoicePitch: 0, // Normal pitch
+	aiVoiceRate: 0, // Normal speed
+	aiVoiceVolume: 80 // Good volume level
 };
 
 const STORAGE_KEY = 'sarcastic-serenity:settings';

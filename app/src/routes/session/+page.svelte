@@ -4,6 +4,7 @@
   import { settings } from '$lib/stores/settings';
   
   import { quoteManager } from '$lib/quotes';
+  import { aiVoiceService } from '$lib/audio/aiVoiceService';
   import type { AppSettings } from '$lib/stores/settings';
   
   let timeLeft = 60; // Start with 1 minute default
@@ -46,6 +47,7 @@
         if (timeLeft === 0) {
           ended = true;
           speechSynthesis.cancel();
+          aiVoiceService.stop();
           speaking = false;
           if (releaseBg) {
             releaseBg();
@@ -90,7 +92,7 @@
     }, delay);
   }
 
-  function scheduleNextQuote() {
+  async function scheduleNextQuote() {
     if (ended || speaking) return; // Don't generate new quotes if already speaking
     
     const nextQuote = quoteManager.getQuote({
@@ -103,38 +105,70 @@
       
       // Always speak the quote (voice is always enabled)
       speaking = true;
-      const utterance = new SpeechSynthesisUtterance(quote);
-      utterance.rate = settingsValue?.voiceRate || 1.0;
-      utterance.pitch = settingsValue?.voicePitch || 1.0;
-      utterance.volume = 0.7;
       
-      // Set the selected voice if available
-      if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
-        const voices = speechSynthesis.getVoices();
-        const voiceId = settingsValue.voiceId; // Store in local variable to avoid null check issues
-        const selectedVoice = voices.find(v => v.voiceURI === voiceId);
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
+      try {
+        if (settingsValue?.useAIVoice && settingsValue?.aiVoiceId) {
+          // Use AI Voice
+          const aiSettings = {
+            voiceId: settingsValue.aiVoiceId,
+            pitch: settingsValue.aiVoicePitch || 0,
+            rate: settingsValue.aiVoiceRate || 0,
+            volume: settingsValue.aiVoiceVolume || 80
+          };
+          
+          await aiVoiceService.speak(quote, aiSettings);
+          
+          // AI voice service handles its own completion, so we need to check periodically
+          const checkInterval = setInterval(() => {
+            if (!aiVoiceService.isCurrentlyPlaying()) {
+              clearInterval(checkInterval);
+              speaking = false;
+              if (!ended) {
+                scheduleNextQuoteWithJitter();
+              }
+            }
+          }, 100);
+          
+        } else {
+          // Use Browser TTS
+          const utterance = new SpeechSynthesisUtterance(quote);
+          utterance.rate = settingsValue?.voiceRate || 1.0;
+          utterance.pitch = settingsValue?.voicePitch || 1.0;
+          utterance.volume = 0.7;
+          
+          // Set the selected voice if available
+          if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
+            const voices = speechSynthesis.getVoices();
+            const voiceId = settingsValue.voiceId;
+            const selectedVoice = voices.find(v => v.voiceURI === voiceId);
+            if (selectedVoice) {
+              utterance.voice = selectedVoice;
+            }
+          }
+          
+          utterance.onend = () => {
+            speaking = false;
+            if (!ended) {
+              scheduleNextQuoteWithJitter();
+            }
+          };
+          
+          utterance.onerror = () => {
+            speaking = false;
+            if (!ended) {
+              scheduleNextQuoteWithJitter();
+            }
+          };
+          
+          speechSynthesis.speak(utterance);
+        }
+      } catch (error) {
+        console.error('Failed to speak quote:', error);
+        speaking = false;
+        if (!ended) {
+          scheduleNextQuoteWithJitter();
         }
       }
-      
-      utterance.onend = () => {
-        speaking = false;
-        // Schedule next quote after current one finishes
-        if (!ended) {
-          scheduleNextQuoteWithJitter();
-        }
-      };
-      
-      utterance.onerror = () => {
-        speaking = false;
-        // Schedule next quote even if current one had an error
-        if (!ended) {
-          scheduleNextQuoteWithJitter();
-        }
-      };
-      
-      speechSynthesis.speak(utterance);
     }
   }
 
