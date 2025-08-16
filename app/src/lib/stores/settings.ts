@@ -4,6 +4,17 @@ import type { BreathingAnimationType } from '../breathing/types';
 export type Persona = 'student' | 'working_adult' | 'creator' | 'teacher' | 'caregiver';
 export type ProfanityLevel = 'off' | 'medium' | 'strict';
 
+// Utility function to get all available personas
+export function getAvailablePersonas(): { value: Persona; label: string }[] {
+	return [
+		{ value: 'student', label: 'Student' },
+		{ value: 'working_adult', label: 'Working Adult' },
+		{ value: 'creator', label: 'Creator' },
+		{ value: 'teacher', label: 'Teacher' },
+		{ value: 'caregiver', label: 'Caregiver' }
+	];
+}
+
 export interface AppSettings {
 	durationMinutes: number;
 	persona: Persona;

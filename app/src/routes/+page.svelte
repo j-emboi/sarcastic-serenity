@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { settings, initSettingsFromStorage } from '$lib/stores/settings';
+  import { settings, initSettingsFromStorage, getAvailablePersonas } from '$lib/stores/settings';
   import VoiceSelector from '$lib/components/VoiceSelector.svelte';
   import type { AppSettings } from '$lib/stores/settings';
 
@@ -75,11 +75,9 @@
            }}
            class="w-full p-2 rounded bg-gray-800 text-white"
          >
-           <option value="student">Student</option>
-           <option value="working_adult">Working Adult</option>
-           <option value="creator">Creator</option>
-           <option value="teacher">Teacher</option>
-           <option value="caregiver">Caregiver</option>
+           {#each getAvailablePersonas() as persona}
+             <option value={persona.value}>{persona.label}</option>
+           {/each}
          </select>
        </div>
 
