@@ -20,6 +20,16 @@
   // Audio level monitoring
   let currentAudioLevel = 0;
 
+  // Reactive statement to update audio when settings change
+  $: if (settingsValue && !ended) {
+    // Update audio preset if it changed
+    audioEngine.stopAll();
+    if (settingsValue.ambientPreset !== 'none') {
+      audioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
+    }
+    currentVolume = settingsValue.backgroundVolume;
+  }
+
   onMount(() => {
     // Subscribe to settings
     const unsub = settings.subscribe(value => {
@@ -34,8 +44,16 @@
     audioEngine.ensureContext().then(() => {
       console.log('Audio engine initialized');
       
-      // Start background audio
-      audioEngine.startPreset('waves', currentVolume, 0.1);
+      // Start background audio with settings
+      if (settingsValue) {
+        if (settingsValue.ambientPreset !== 'none') {
+          audioEngine.startPreset(settingsValue.ambientPreset, settingsValue.backgroundVolume, 0.1);
+        }
+        currentVolume = settingsValue.backgroundVolume;
+      } else {
+        // Fallback to default
+        audioEngine.startPreset('waves', currentVolume, 0.1);
+      }
       
       // Set up audio level callback
       audioEngine.setAudioLevelCallback((level: number) => {
@@ -116,9 +134,10 @@
         utterance.volume = 0.7;
         
         // Set the selected voice if available
-        if (settingsValue?.voiceId && typeof speechSynthesis !== 'undefined') {
+        if (settingsValue && settingsValue.voiceId && typeof speechSynthesis !== 'undefined') {
           const voices = speechSynthesis.getVoices();
-          const selectedVoice = voices.find(v => v.voiceURI === settingsValue.voiceId);
+          const voiceId = settingsValue.voiceId; // Store in local variable to avoid null check issues
+          const selectedVoice = voices.find(v => v.voiceURI === voiceId);
           if (selectedVoice) {
             utterance.voice = selectedVoice;
           }
