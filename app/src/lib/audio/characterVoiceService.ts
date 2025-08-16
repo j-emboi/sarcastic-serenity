@@ -1,137 +1,97 @@
 export interface CharacterVoice {
   id: string;
   name: string;
-  character: string;
   description: string;
-  era: string;
-  legalStatus: 'public_domain' | 'creative_commons' | 'fair_use' | 'original';
   voiceSettings: {
-    pitch: number; // -50 to 50
-    rate: number; // -50 to 50
-    volume: number; // 0 to 100
-    effects: VoiceEffect[];
+    pitch: number; // 0.5..2.0
+    rate: number; // 0.1..10.0
+    volume: number; // 0..1
   };
   personality: {
     enthusiasm: number; // 0-100
-    playfulness: number; // 0-100
+    sarcasm: number; // 0-100
     warmth: number; // 0-100
   };
 }
 
-export interface VoiceEffect {
-  type: 'pitch_shift' | 'formant_shift' | 'chorus' | 'reverb' | 'distortion' | 'compression';
-  intensity: number; // 0-100
-  parameters: Record<string, number>;
-}
-
 export class CharacterVoiceService {
-  private audioContext: AudioContext | null = null;
-  private currentAudio: AudioBufferSourceNode | null = null;
   private isPlaying = false;
 
-  // Public Domain Mickey Mouse Voice (Steamboat Willie era - 1928)
-  private mickeyMouseVoice: CharacterVoice = {
-    id: 'mickey_mouse_1928',
-    name: 'Mickey Mouse (1928)',
-    character: 'Mickey Mouse',
-    description: 'Classic Steamboat Willie era Mickey Mouse - cheerful, squeaky, and full of wonder',
-    era: '1928 (Public Domain)',
-    legalStatus: 'public_domain',
-    voiceSettings: {
-      pitch: 25, // Higher pitch for squeaky voice
-      rate: -10, // Slightly slower for character
-      volume: 85,
-      effects: [
-        {
-          type: 'pitch_shift',
-          intensity: 80,
-          parameters: { shift: 4, grainSize: 0.1 }
-        },
-        {
-          type: 'formant_shift',
-          intensity: 60,
-          parameters: { shift: 1.5 }
-        },
-        {
-          type: 'chorus',
-          intensity: 30,
-          parameters: { rate: 1.5, depth: 0.3, feedback: 0.2 }
-        },
-        {
-          type: 'compression',
-          intensity: 40,
-          parameters: { threshold: -20, ratio: 3, attack: 0.1, release: 0.3 }
-        }
-      ]
-    },
-    personality: {
-      enthusiasm: 90,
-      playfulness: 95,
-      warmth: 85
-    }
-  };
-
-  // Additional public domain character voices
+  // Character voice presets using browser TTS with audio effects
   private characterVoices: CharacterVoice[] = [
-    this.mickeyMouseVoice,
     {
-      id: 'steamboat_willie_narrator',
-      name: 'Steamboat Willie Narrator',
-      character: 'Classic Cartoon Narrator',
-      description: 'Narrator from the golden age of animation - warm and engaging',
-      era: '1928-1930s (Public Domain)',
-      legalStatus: 'public_domain',
+      id: 'sarcastic_narrator',
+      name: 'Sarcastic Narrator',
+      description: 'Deep, slow voice with a hint of sarcasm and wit',
       voiceSettings: {
-        pitch: 5,
-        rate: -15,
-        volume: 90,
-        effects: [
-          {
-            type: 'reverb',
-            intensity: 25,
-            parameters: { decay: 1.2, preDelay: 0.1, wet: 0.3 }
-          },
-          {
-            type: 'compression',
-            intensity: 50,
-            parameters: { threshold: -15, ratio: 4, attack: 0.2, release: 0.5 }
-          }
-        ]
+        pitch: 0.8, // Lower pitch for deeper voice
+        rate: 0.8, // Slower rate for dramatic effect
+        volume: 0.9
       },
       personality: {
-        enthusiasm: 70,
-        playfulness: 60,
-        warmth: 90
+        enthusiasm: 30,
+        sarcasm: 95,
+        warmth: 40
       }
     },
     {
-      id: 'classic_cartoon_character',
-      name: 'Classic Cartoon Character',
-      character: 'Golden Age Cartoon',
-      description: 'Inspired by public domain cartoon characters from the 1920s-1930s',
-      era: '1920s-1930s (Public Domain)',
-      legalStatus: 'public_domain',
+      id: 'cheerful_host',
+      name: 'Cheerful Host',
+      description: 'Bright, energetic voice with enthusiasm and positivity',
       voiceSettings: {
-        pitch: 15,
-        rate: -5,
-        volume: 80,
-        effects: [
-          {
-            type: 'pitch_shift',
-            intensity: 50,
-            parameters: { shift: 2, grainSize: 0.15 }
-          },
-          {
-            type: 'chorus',
-            intensity: 20,
-            parameters: { rate: 1.2, depth: 0.2, feedback: 0.1 }
-          }
-        ]
+        pitch: 1.3, // Higher pitch for cheerfulness
+        rate: 1.2, // Faster rate for energy
+        volume: 0.9
       },
       personality: {
-        enthusiasm: 80,
-        playfulness: 85,
-        warmth: 75
+        enthusiasm: 90,
+        sarcasm: 20,
+        warmth: 85
+      }
+    },
+    {
+      id: 'wise_mentor',
+      name: 'Wise Mentor',
+      description: 'Calm, measured voice with wisdom and authority',
+      voiceSettings: {
+        pitch: 0.9, // Slightly lower for authority
+        rate: 0.9, // Slower for thoughtfulness
+        volume: 0.8
+      },
+      personality: {
+        enthusiasm: 50,
+        sarcasm: 60,
+        warmth: 80
+      }
+    },
+    {
+      id: 'comedic_sidekick',
+      name: 'Comedic Sidekick',
+      description: 'Playful, variable voice with humor and charm',
+      voiceSettings: {
+        pitch: 1.1, // Slightly higher for playfulness
+        rate: 1.1, // Moderate speed
+        volume: 0.9
+      },
+      personality: {
+        enthusiasm: 85,
+        sarcasm: 75,
+        warmth: 70
+      }
+    },
+    {
+      id: 'dramatic_announcer',
+      name: 'Dramatic Announcer',
+      description: 'Bold, theatrical voice with dramatic flair',
+      voiceSettings: {
+        pitch: 0.7, // Lower for drama
+        rate: 0.7, // Slower for impact
+        volume: 1.0
+      },
+      personality: {
+        enthusiasm: 70,
+        sarcasm: 80,
+        warmth: 30
       }
     }
   ];
@@ -152,7 +112,6 @@ export class CharacterVoiceService {
     }
 
     try {
-      // Use browser TTS as base and apply character effects
       await this.speakWithCharacterEffects(text, character);
     } catch (error) {
       console.error('Failed to speak with character voice:', error);
@@ -171,22 +130,32 @@ export class CharacterVoiceService {
     const utterance = new SpeechSynthesisUtterance(text);
     
     // Apply character voice settings
-    utterance.rate = Math.max(0.1, Math.min(10, 1 + (character.voiceSettings.rate / 100)));
-    utterance.pitch = Math.max(0.5, Math.min(2, 1 + (character.voiceSettings.pitch / 100)));
-    utterance.volume = Math.max(0, Math.min(1, character.voiceSettings.volume / 100));
+    utterance.rate = character.voiceSettings.rate;
+    utterance.pitch = character.voiceSettings.pitch;
+    utterance.volume = character.voiceSettings.volume;
 
-    // Try to find a suitable voice
+    // Try to find a suitable voice based on character
     const voices = speechSynthesis.getVoices();
     let selectedVoice = voices.find(v => /en/i.test(v.lang));
     
-    // For Mickey Mouse, prefer higher-pitched voices
-    if (character.id === 'mickey_mouse_1928') {
-      const highPitchedVoice = voices.find(v => 
+    // Character-specific voice selection
+    if (character.id === 'sarcastic_narrator' || character.id === 'dramatic_announcer') {
+      // Prefer male voices for deeper characters
+      const maleVoice = voices.find(v => 
         /en/i.test(v.lang) && 
-        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('soprano'))
+        (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('james'))
       );
-      if (highPitchedVoice) {
-        selectedVoice = highPitchedVoice;
+      if (maleVoice) {
+        selectedVoice = maleVoice;
+      }
+    } else if (character.id === 'cheerful_host') {
+      // Prefer female voices for cheerful characters
+      const femaleVoice = voices.find(v => 
+        /en/i.test(v.lang) && 
+        (v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('sarah') || v.name.toLowerCase().includes('emma'))
+      );
+      if (femaleVoice) {
+        selectedVoice = femaleVoice;
       }
     }
 
@@ -231,10 +200,6 @@ export class CharacterVoiceService {
   }
 
   stop(): void {
-    if (this.currentAudio) {
-      this.currentAudio.stop();
-      this.currentAudio = null;
-    }
     this.isPlaying = false;
     
     if (typeof speechSynthesis !== 'undefined') {
@@ -247,7 +212,7 @@ export class CharacterVoiceService {
   }
 
   async testCharacterVoice(characterId: string): Promise<void> {
-    const testText = "Hot dog! This is going to be a swell session!";
+    const testText = "Hey there, stress ball. Ready for some sarcastic serenity?";
     await this.speakWithCharacter(testText, characterId);
   }
 
@@ -256,9 +221,9 @@ export class CharacterVoiceService {
     return this.characterVoices.find(c => c.id === characterId);
   }
 
-  // Get Mickey Mouse voice specifically
-  getMickeyMouseVoice(): CharacterVoice {
-    return this.mickeyMouseVoice;
+  // Get default character voice
+  getDefaultCharacterVoice(): CharacterVoice {
+    return this.characterVoices[0]; // Sarcastic Narrator
   }
 }
 

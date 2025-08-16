@@ -13,26 +13,52 @@
     return unsubscribe;
   });
   
+  // Get values from settings store
+  $: selectedCharacterId = settingsValue?.selectedVoiceId || 'sarcastic_narrator';
+  
+  let characterVoices: any[] = [];
+  let voicesLoaded = false;
+  let isLoading = false;
   let isTesting = false;
   
-  onMount(() => {
-    // Always set Mickey Mouse as the voice
-    settings.update(s => ({ 
-      ...s, 
-      selectedVoiceType: 'character',
-      selectedVoiceId: 'mickey_mouse_1928'
-    }));
+  onMount(async () => {
+    await loadCharacterVoices();
   });
   
-  async function testMickeyVoice() {
-    if (isTesting) return;
+  async function loadCharacterVoices() {
+    if (isLoading) return;
+    
+    isLoading = true;
+    try {
+      characterVoices = await characterVoiceService.getAvailableCharacterVoices();
+      voicesLoaded = true;
+      
+      // Auto-select Sarcastic Narrator if none selected
+      if (!selectedCharacterId && characterVoices.length > 0) {
+        const defaultVoice = characterVoices.find((v: any) => v.id === 'sarcastic_narrator');
+        if (defaultVoice) {
+          settings.update(s => ({ 
+            ...s, 
+            selectedVoiceType: 'character',
+            selectedVoiceId: defaultVoice.id 
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load character voices:', error);
+    } finally {
+      isLoading = false;
+    }
+  }
+  
+  async function testCharacterVoice(characterId: string) {
+    if (!characterId || isTesting) return;
     
     isTesting = true;
     try {
-      const testText = "Hot dog! This is going to be a swell session!";
-      await characterVoiceService.speakWithCharacter(testText, 'mickey_mouse_1928');
+      await characterVoiceService.testCharacterVoice(characterId);
     } catch (error) {
-      console.error('Mickey voice test failed:', error);
+      console.error('Character voice test failed:', error);
     } finally {
       isTesting = false;
     }
@@ -40,85 +66,116 @@
 </script>
 
 <div class="space-y-4">
-  <!-- Mickey Mouse Voice -->
+  <!-- Character Voice Selection -->
   <div class="space-y-2">
-    <h3 class="text-sm font-medium">Voice Selection</h3>
+    <h3 class="text-sm font-medium">Character Voice</h3>
     
-    <div class="bg-purple-900/20 border border-purple-600/30 rounded-lg p-4 space-y-3">
-      <div class="flex items-center justify-between">
-        <h4 class="font-semibold text-purple-200">🎭 Mickey Mouse (1928)</h4>
-        <span class="text-xs text-green-400">🆓 Public Domain</span>
+    {#if isLoading}
+      <div class="text-sm text-gray-500">Loading character voices...</div>
+    {:else if !voicesLoaded || characterVoices.length === 0}
+      <div class="text-sm text-red-500">
+        Failed to load character voices. Please try refreshing.
       </div>
+      <button 
+        on:click={loadCharacterVoices}
+        class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+      >
+        Retry
+      </button>
+    {:else}
+      <select 
+        value={selectedCharacterId || ''}
+        on:change={(e) => {
+          const target = e.target as HTMLSelectElement;
+          if (target) {
+            settings.update(s => ({ 
+              ...s, 
+              selectedVoiceType: 'character',
+              selectedVoiceId: target.value || 'sarcastic_narrator'
+            }));
+          }
+        }}
+        class="w-full p-2 rounded bg-gray-800 text-white border-gray-600"
+      >
+        {#each characterVoices as voice}
+          <option value={voice.id}>
+            {voice.name}
+          </option>
+        {/each}
+      </select>
       
-      <p class="text-sm text-purple-100">
-        Classic Steamboat Willie era Mickey Mouse - cheerful, squeaky, and full of wonder!
-      </p>
-      
-      <div class="text-xs text-purple-300">
-        <div><strong>Era:</strong> 1928 (Public Domain)</div>
-        <div><strong>Character:</strong> Mickey Mouse</div>
-        <div><strong>Legal Status:</strong> Public Domain</div>
-      </div>
-      
-      <!-- Personality Traits -->
-      <div class="space-y-2">
-        <div class="text-xs text-purple-300">
-          <div class="flex justify-between">
-            <span>Enthusiasm</span>
-            <span>90%</span>
-          </div>
-          <div class="w-full bg-purple-800/30 rounded-full h-1.5">
-            <div class="bg-purple-400 h-1.5 rounded-full" style="width: 90%"></div>
-          </div>
-        </div>
-        
-        <div class="text-xs text-purple-300">
-          <div class="flex justify-between">
-            <span>Playfulness</span>
-            <span>95%</span>
-          </div>
-          <div class="w-full bg-purple-800/30 rounded-full h-1.5">
-            <div class="bg-purple-400 h-1.5 rounded-full" style="width: 95%"></div>
-          </div>
-        </div>
-        
-        <div class="text-xs text-purple-300">
-          <div class="flex justify-between">
-            <span>Warmth</span>
-            <span>85%</span>
-          </div>
-          <div class="w-full bg-purple-800/30 rounded-full h-1.5">
-            <div class="bg-purple-400 h-1.5 rounded-full" style="width: 85%"></div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Voice Settings -->
-      <div class="text-xs text-purple-300">
-        <div><strong>Pitch:</strong> +25 (Squeaky)</div>
-        <div><strong>Rate:</strong> -10 (Character)</div>
-        <div><strong>Volume:</strong> 85%</div>
-      </div>
-      
-      <!-- Test Button -->
-      <div class="flex items-center gap-2 pt-2">
+      <div class="flex items-center gap-2">
         <button 
           type="button"
-          on:click={testMickeyVoice}
-          disabled={isTesting}
-          class="text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 disabled:opacity-50"
+          on:click={() => testCharacterVoice(selectedCharacterId)}
+          disabled={!selectedCharacterId || isTesting}
+          class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 disabled:opacity-50"
         >
-          {isTesting ? 'Testing...' : 'Test Mickey Voice'}
+          {isTesting ? 'Testing...' : 'Test Voice'}
         </button>
-        <span class="text-xs text-purple-200">"Hot dog! This is going to be a swell session!"</span>
+        <span class="text-xs text-blue-200">"Hey there, stress ball. Ready for some sarcastic serenity?"</span>
       </div>
-    </div>
-    
-    <!-- Legal Notice -->
-    <div class="text-xs text-gray-400 bg-gray-800/50 p-3 rounded">
-      <strong>Legal Notice:</strong> Mickey Mouse voice is based on the public domain Steamboat Willie era (1928). 
-      This voice is inspired by the golden age of animation and is legally safe to use. 
-      No copyrighted characters or voices are being reproduced.
-    </div>
+    {/if}
+  </div>
+  
+  <!-- Character Voice Details -->
+  {#if selectedCharacterId}
+    {@const selectedVoice = characterVoices.find((v: any) => v.id === selectedCharacterId)}
+    {#if selectedVoice}
+      <div class="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="font-semibold text-blue-200">🎭 {selectedVoice.name}</h4>
+          <span class="text-xs text-blue-400">Character Voice</span>
+        </div>
+        
+        <p class="text-sm text-blue-100">{selectedVoice.description}</p>
+        
+        <!-- Personality Traits -->
+        <div class="space-y-2">
+          <div class="text-xs text-blue-300">
+            <div class="flex justify-between">
+              <span>Enthusiasm</span>
+              <span>{selectedVoice.personality.enthusiasm}%</span>
+            </div>
+            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
+              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.enthusiasm}%"></div>
+            </div>
+          </div>
+          
+          <div class="text-xs text-blue-300">
+            <div class="flex justify-between">
+              <span>Sarcasm</span>
+              <span>{selectedVoice.personality.sarcasm}%</span>
+            </div>
+            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
+              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.sarcasm}%"></div>
+            </div>
+          </div>
+          
+          <div class="text-xs text-blue-300">
+            <div class="flex justify-between">
+              <span>Warmth</span>
+              <span>{selectedVoice.personality.warmth}%</span>
+            </div>
+            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
+              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.warmth}%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Voice Settings -->
+        <div class="text-xs text-blue-300">
+          <div><strong>Pitch:</strong> {selectedVoice.voiceSettings.pitch.toFixed(1)}</div>
+          <div><strong>Rate:</strong> {selectedVoice.voiceSettings.rate.toFixed(1)}</div>
+          <div><strong>Volume:</strong> {(selectedVoice.voiceSettings.volume * 100).toFixed(0)}%</div>
+        </div>
+      </div>
+    {/if}
+  {/if}
+  
+  <!-- Info Notice -->
+  <div class="text-xs text-gray-400 bg-gray-800/50 p-3 rounded">
+    <strong>Character Voices:</strong> These voices use browser TTS with audio effects to create unique character personalities. 
+    Each voice has been tuned to match the sarcastic and entertaining tone of the app.
   </div>
 </div>
