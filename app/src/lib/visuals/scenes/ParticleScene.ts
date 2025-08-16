@@ -1,5 +1,6 @@
 import { Program, Mesh, Plane, Geometry, Transform } from 'ogl';
 import { BaseScene } from './BaseScene';
+import * as Matter from 'matter-js';
 
 export type AnimationType = 
   | 'flowing-particles'
@@ -10,9 +11,17 @@ export type AnimationType =
   | 'cosmic-dust'
   | 'energy-field';
 
+interface PhysicsParticle {
+  body: Matter.Body;
+  color: { r: number; g: number; b: number };
+  life: number;
+  maxLife: number;
+  type: 'particle' | 'spark' | 'bubble';
+}
+
 export class ParticleScene extends BaseScene {
   id = 'particles';
-  name = 'Flowing Particles';
+  name = 'Physics Particles';
 
   private particleProgram: Program | null = null;
   private particleMesh: Mesh | null = null;
@@ -20,9 +29,35 @@ export class ParticleScene extends BaseScene {
   private currentAnimation: AnimationType = 'flowing-particles';
   private animationId: number | null = null;
 
+  // Physics engine components
+  private engine: Matter.Engine | null = null;
+  private world: Matter.World | null = null;
+  private render: Matter.Render | null = null;
+  private particles: PhysicsParticle[] = [];
+  private bounds: Matter.Body[] = [];
+  private forces: Matter.Body[] = [];
+
+  // Physics settings
+  private readonly MAX_PARTICLES = 200;
+  private readonly PARTICLE_RADIUS = 3;
+  private readonly GRAVITY = { x: 0, y: 0.1, scale: 0.001 };
+  private readonly WIND_FORCE = { x: 0.02, y: 0 };
+
   init(gl: any): void {
-    console.log('Initializing OGL ParticleScene with animation:', this.currentAnimation);
+    console.log('Initializing Physics-Based ParticleScene');
     
+    // Initialize Matter.js physics engine
+    this.engine = Matter.Engine.create({
+      gravity: this.GRAVITY
+    });
+    this.world = this.engine.world;
+
+    // Create invisible boundaries
+    this.createBoundaries();
+
+    // Create force fields
+    this.createForceFields();
+
     // Create particle shader program
     this.particleProgram = new Program(gl, {
       vertex: this.createParticleVertexShader(),
@@ -32,8 +67,7 @@ export class ParticleScene extends BaseScene {
         audioLevel: { value: 0 },
         serendipity: { value: 0.1 },
         resolution: { value: [window.innerWidth, window.innerHeight] },
-        animationType: { value: 0 }, // 0 = flowing-particles, 1 = wave-patterns, etc.
-        particleCount: { value: 1000 }
+        particleCount: { value: this.MAX_PARTICLES }
       }
     });
 
@@ -49,35 +83,274 @@ export class ParticleScene extends BaseScene {
 
     this.addMesh(this.particleMesh);
     
-    console.log('OGL ParticleScene initialization complete');
+    // Start physics simulation
+    this.startPhysicsSimulation();
+    
+    console.log('Physics-Based ParticleScene initialization complete');
+  }
+
+  private createBoundaries(): void {
+    if (!this.world) return;
+
+    const canvas = { width: window.innerWidth, height: window.innerHeight };
+    const thickness = 50;
+
+    // Create invisible walls
+    const walls = [
+      // Top wall
+      Matter.Bodies.rectangle(canvas.width / 2, -thickness / 2, canvas.width, thickness, { isStatic: true }),
+      // Bottom wall
+      Matter.Bodies.rectangle(canvas.width / 2, canvas.height + thickness / 2, canvas.width, thickness, { isStatic: true }),
+      // Left wall
+      Matter.Bodies.rectangle(-thickness / 2, canvas.height / 2, thickness, canvas.height, { isStatic: true }),
+      // Right wall
+      Matter.Bodies.rectangle(canvas.width + thickness / 2, canvas.height / 2, thickness, canvas.height, { isStatic: true })
+    ];
+
+    walls.forEach(wall => {
+      wall.render.visible = false; // Make walls invisible
+      this.bounds.push(wall);
+      if (this.world) {
+        Matter.World.add(this.world, wall);
+      }
+    });
+  }
+
+  private createForceFields(): void {
+    if (!this.world) return;
+
+    const canvas = { width: window.innerWidth, height: window.innerHeight };
+
+    // Create attractive force fields
+    const forceFields = [
+      { x: canvas.width * 0.25, y: canvas.height * 0.25, strength: 0.0001 },
+      { x: canvas.width * 0.75, y: canvas.height * 0.75, strength: 0.0001 },
+      { x: canvas.width * 0.5, y: canvas.height * 0.5, strength: 0.00005 }
+    ];
+
+    forceFields.forEach(field => {
+      const forceBody = Matter.Bodies.circle(field.x, field.y, 1, { 
+        isStatic: true,
+        isSensor: true,
+        render: { visible: false }
+      });
+      
+      // Add custom force field data
+      (forceBody as any).forceField = {
+        strength: field.strength,
+        position: { x: field.x, y: field.y }
+      };
+      
+      this.forces.push(forceBody);
+      if (this.world) {
+        Matter.World.add(this.world, forceBody);
+      }
+    });
+  }
+
+  private startPhysicsSimulation(): void {
+    if (!this.engine) return;
+
+    // Run physics simulation
+    const runPhysics = () => {
+      if (this.engine) {
+        Matter.Engine.update(this.engine, 1000 / 60); // 60 FPS physics
+      }
+      this.updateParticles();
+      this.animationId = requestAnimationFrame(runPhysics);
+    };
+
+    runPhysics();
+  }
+
+  private updateParticles(): void {
+    // Update particle lifetimes and remove dead particles
+    this.particles = this.particles.filter(particle => {
+      particle.life -= 1;
+      return particle.life > 0;
+    });
+
+    // Apply force fields to particles
+    this.particles.forEach(particle => {
+      this.forces.forEach(force => {
+        if ((force as any).forceField) {
+          const field = (force as any).forceField;
+          const distance = Matter.Vector.magnitude(
+            Matter.Vector.sub(particle.body.position, field.position)
+          );
+          
+          if (distance > 0) {
+            const forceVector = Matter.Vector.normalise(
+              Matter.Vector.sub(field.position, particle.body.position)
+            );
+            const forceMagnitude = field.strength / (distance * distance);
+            
+            Matter.Body.applyForce(particle.body, particle.body.position, {
+              x: forceVector.x * forceMagnitude,
+              y: forceVector.y * forceMagnitude
+            });
+          }
+        }
+      });
+
+      // Apply wind force
+      Matter.Body.applyForce(particle.body, particle.body.position, this.WIND_FORCE);
+    });
+
+    // Spawn new particles based on animation type
+    this.spawnParticles();
+  }
+
+  private spawnParticles(): void {
+    if (this.particles.length >= this.MAX_PARTICLES) return;
+
+    const canvas = { width: window.innerWidth, height: window.innerHeight };
+    const spawnRate = 2; // particles per frame
+
+    for (let i = 0; i < spawnRate; i++) {
+      if (this.particles.length >= this.MAX_PARTICLES) break;
+
+      const particle = this.createParticle();
+      if (particle) {
+        this.particles.push(particle);
+        if (this.world) {
+          Matter.World.add(this.world, particle.body);
+        }
+      }
+    }
+  }
+
+  private createParticle(): PhysicsParticle | null {
+    const canvas = { width: window.innerWidth, height: window.innerHeight };
+    
+    // Spawn position based on animation type
+    let spawnX: number, spawnY: number;
+    
+    switch (this.currentAnimation) {
+      case 'flowing-particles':
+        spawnX = Math.random() * canvas.width;
+        spawnY = -this.PARTICLE_RADIUS;
+        break;
+      case 'fireworks':
+        spawnX = canvas.width / 2 + (Math.random() - 0.5) * 100;
+        spawnY = canvas.height + this.PARTICLE_RADIUS;
+        break;
+      case 'spiral-galaxy':
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 200;
+        spawnX = canvas.width / 2 + Math.cos(angle) * radius;
+        spawnY = canvas.height / 2 + Math.sin(angle) * radius;
+        break;
+      default:
+        spawnX = Math.random() * canvas.width;
+        spawnY = Math.random() * canvas.height;
+    }
+
+    // Create physics body
+    const body = Matter.Bodies.circle(spawnX, spawnY, this.PARTICLE_RADIUS, {
+      restitution: 0.8,
+      friction: 0.1,
+      density: 0.001,
+      render: { visible: false }
+    });
+
+    // Initial velocity based on animation type
+    switch (this.currentAnimation) {
+      case 'flowing-particles':
+        Matter.Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * 2,
+          y: Math.random() * 3 + 1
+        });
+        break;
+      case 'fireworks':
+        Matter.Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * 8,
+          y: -Math.random() * 10 - 5
+        });
+        break;
+      case 'spiral-galaxy':
+        const velocity = Math.random() * 3 + 1;
+        const direction = Math.atan2(spawnY - canvas.height / 2, spawnX - canvas.width / 2);
+        Matter.Body.setVelocity(body, {
+          x: Math.cos(direction) * velocity,
+          y: Math.sin(direction) * velocity
+        });
+        break;
+      default:
+        Matter.Body.setVelocity(body, {
+          x: (Math.random() - 0.5) * 4,
+          y: (Math.random() - 0.5) * 4
+        });
+    }
+
+    // Particle properties
+    const particle: PhysicsParticle = {
+      body,
+      color: {
+        r: 0.2 + Math.random() * 0.6,
+        g: 0.4 + Math.random() * 0.4,
+        b: 0.6 + Math.random() * 0.4
+      },
+      life: 300 + Math.random() * 200,
+      maxLife: 300 + Math.random() * 200,
+      type: Math.random() > 0.7 ? 'spark' : 'particle'
+    };
+
+    return particle;
   }
 
   setAnimationType(type: AnimationType): void {
     console.log('ParticleScene: Switching to animation type:', type);
     this.currentAnimation = type;
     
-    // Update shader uniform for animation type
-    if (this.particleProgram) {
-      const animationIndex = this.getAnimationIndex(type);
-      this.particleProgram.uniforms.animationType.value = animationIndex;
+    // Clear existing particles when switching animations
+    this.clearParticles();
+    
+    // Adjust physics settings based on animation
+    this.adjustPhysicsForAnimation(type);
+  }
+
+  private clearParticles(): void {
+    if (this.world) {
+      this.particles.forEach(particle => {
+        Matter.World.remove(this.world, particle.body);
+      });
+    }
+    this.particles = [];
+  }
+
+  private adjustPhysicsForAnimation(type: AnimationType): void {
+    if (!this.engine) return;
+
+    switch (type) {
+      case 'flowing-particles':
+        this.engine.gravity = { x: 0, y: 0.1 };
+        this.WIND_FORCE.x = 0.02;
+        break;
+      case 'fireworks':
+        this.engine.gravity = { x: 0, y: 0.2 };
+        this.WIND_FORCE.x = 0;
+        break;
+      case 'spiral-galaxy':
+        this.engine.gravity = { x: 0, y: 0 };
+        this.WIND_FORCE.x = 0.01;
+        break;
+      default:
+        this.engine.gravity = { x: 0, y: 0.05 };
+        this.WIND_FORCE.x = 0.01;
     }
   }
 
   getAnimationTypes(): { type: AnimationType; name: string; description: string }[] {
     return [
-      { type: 'flowing-particles', name: 'Flowing Particles', description: 'Smooth flowing particle streams' },
+      { type: 'flowing-particles', name: 'Flowing Particles', description: 'Physics-based flowing particle streams' },
       { type: 'wave-patterns', name: 'Wave Patterns', description: 'Organic wave interference patterns' },
-      { type: 'spiral-galaxy', name: 'Spiral Galaxy', description: 'Spiral galaxy formation' },
-      { type: 'fireworks', name: 'Fireworks', description: 'Gentle, calming particle expansion' },
-      { type: 'floating-particles', name: 'Floating Particles', description: 'Calming ocean wave patterns' },
-      { type: 'cosmic-dust', name: 'Cosmic Dust', description: 'Floating cosmic particles' },
-      { type: 'energy-field', name: 'Energy Field', description: 'Electric energy field' }
+      { type: 'spiral-galaxy', name: 'Spiral Galaxy', description: 'Spiral galaxy formation with physics' },
+      { type: 'fireworks', name: 'Fireworks', description: 'Physics-based particle explosions' },
+      { type: 'floating-particles', name: 'Floating Particles', description: 'Calming floating particle physics' },
+      { type: 'cosmic-dust', name: 'Cosmic Dust', description: 'Floating cosmic particles with gravity' },
+      { type: 'energy-field', name: 'Energy Field', description: 'Electric energy field physics' }
     ];
-  }
-
-  private getAnimationIndex(type: AnimationType): number {
-    const types = ['flowing-particles', 'wave-patterns', 'spiral-galaxy', 'fireworks', 'floating-particles', 'cosmic-dust', 'energy-field'];
-    return types.indexOf(type);
   }
 
   update(deltaTime: number, audioLevel: number = 0, serendipity: number = 0.1): void {
@@ -87,7 +360,52 @@ export class ParticleScene extends BaseScene {
       this.particleProgram.uniforms.time.value = this.time;
       this.particleProgram.uniforms.audioLevel.value = audioLevel;
       this.particleProgram.uniforms.serendipity.value = serendipity;
+      
+      // Pass particle data to shader
+      this.updateShaderWithParticleData();
     }
+  }
+
+  private updateShaderWithParticleData(): void {
+    if (!this.particleProgram) return;
+
+    // Convert particle physics data to shader uniforms
+    const particlePositions: number[] = [];
+    const particleColors: number[] = [];
+    const particleLives: number[] = [];
+
+    this.particles.forEach(particle => {
+      // Normalize positions to 0-1 range
+      particlePositions.push(
+        particle.body.position.x / window.innerWidth,
+        particle.body.position.y / window.innerHeight
+      );
+      
+      particleColors.push(
+        particle.color.r,
+        particle.color.g,
+        particle.color.b
+      );
+      
+      particleLives.push(particle.life / particle.maxLife);
+    });
+
+    // Pad arrays to fixed size for shader
+    while (particlePositions.length < this.MAX_PARTICLES * 2) {
+      particlePositions.push(0, 0);
+    }
+    while (particleColors.length < this.MAX_PARTICLES * 3) {
+      particleColors.push(0, 0, 0);
+    }
+    while (particleLives.length < this.MAX_PARTICLES) {
+      particleLives.push(0);
+    }
+
+    // Update shader uniforms
+    this.particleProgram.uniforms.particlePositions = { value: new Float32Array(particlePositions) };
+    this.particleProgram.uniforms.particleColors = { value: new Float32Array(particleColors) };
+    this.particleProgram.uniforms.particleLives = { value: new Float32Array(particleLives) };
+    this.particleProgram.uniforms.particleCount = { value: this.particles.length };
   }
 
   private createParticleVertexShader(): string {
@@ -101,7 +419,7 @@ export class ParticleScene extends BaseScene {
       uniform float audioLevel;
       uniform float serendipity;
       uniform vec2 resolution;
-      uniform int animationType;
+      uniform int particleCount;
       
       varying vec2 vUv;
       varying float vTime;
@@ -128,180 +446,50 @@ export class ParticleScene extends BaseScene {
       varying float vAudioLevel;
       varying float vSerendipity;
       
-      // Noise functions for organic movement
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-      }
-      
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        
-        float a = hash(i);
-        float b = hash(i + vec2(1.0, 0.0));
-        float c = hash(i + vec2(0.0, 1.0));
-        float d = hash(i + vec2(1.0, 1.0));
-        
-        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-      }
-      
-      float fbm(vec2 p) {
-        float value = 0.0;
-        float amplitude = 0.5;
-        float frequency = 1.0;
-        
-        for (int i = 0; i < 5; i++) {
-          value += amplitude * noise(p * frequency);
-          amplitude *= 0.5;
-          frequency *= 2.0;
-        }
-        return value;
-      }
-      
-      // Create flowing particle streams
-      vec3 createFlowingParticles(vec2 uv, float time) {
-        vec3 color = vec3(0.0);
-        
-        // Create multiple particle streams
-        for (int i = 0; i < 8; i++) {
-          float stream = float(i);
-          
-          // Stream position and movement
-          vec2 streamPos = vec2(
-            mod(uv.x + time * 0.3 + stream * 0.1, 1.0),
-            mod(uv.y + time * 0.2 + stream * 0.15, 1.0)
-          );
-          
-          // Add organic flow with noise
-          vec2 flow = vec2(
-            noise(streamPos * 4.0 + time * 0.5),
-            noise(streamPos * 4.0 + time * 0.7 + 10.0)
-          );
-          
-          streamPos += flow * 0.1;
-          
-          // Create particle trail
-          float trail = 0.0;
-          for (int j = 0; j < 5; j++) {
-            float offset = float(j) * 0.02;
-            vec2 trailPos = streamPos + vec2(offset, offset);
-            trail += smoothstep(0.0, 0.1, 1.0 - length(trailPos - uv));
-          }
-          
-          // Particle color based on stream
-          vec3 particleColor = vec3(
-            0.2 + 0.3 * sin(stream * 0.8),
-            0.4 + 0.4 * sin(stream * 1.2),
-            0.6 + 0.3 * sin(stream * 0.6)
-          );
-          
-          // Add audio reactivity
-          particleColor *= 0.8 + vAudioLevel * 0.4;
-          
-          color += particleColor * trail * 0.3;
-        }
-        
-        return color;
-      }
-      
-      // Create wave patterns
-      vec3 createWavePatterns(vec2 uv, float time) {
-        vec3 color = vec3(0.0);
-        
-        // Multiple wave layers
-        for (int i = 0; i < 3; i++) {
-          float layer = float(i);
-          float frequency = 2.0 + layer * 2.0;
-          float amplitude = 0.1 + layer * 0.05;
-          float speed = 0.5 + layer * 0.3;
-          
-          // Create wave
-          float wave = sin(uv.x * frequency + time * speed) * 
-                      cos(uv.y * frequency * 0.7 + time * speed * 0.8);
-          
-          // Add noise for organic feel
-          wave += noise(uv * 3.0 + time * 0.5) * 0.2;
-          
-          // Wave color
-          vec3 waveColor = vec3(
-            0.1 + 0.2 * sin(layer * 2.0),
-            0.3 + 0.3 * sin(layer * 1.5),
-            0.5 + 0.2 * sin(layer * 1.8)
-          );
-          
-          color += waveColor * wave * amplitude;
-        }
-        
-        return color;
-      }
-      
-      // Create spiral galaxy
-      vec3 createSpiralGalaxy(vec2 uv, float time) {
-        vec2 center = vec2(0.5);
-        vec2 pos = uv - center;
-        
-        // Convert to polar coordinates
-        float angle = atan(pos.y, pos.x);
-        float radius = length(pos);
-        
-        // Create spiral arms
-        float spiral = sin(angle * 4.0 + radius * 10.0 + time * 0.5);
-        spiral += sin(angle * 6.0 - radius * 8.0 + time * 0.3);
-        
-        // Add noise for galaxy texture
-        float galaxyNoise = fbm(pos * 2.0 + time * 0.2);
-        
-        // Create galaxy color
-        vec3 galaxyColor = vec3(
-          0.1 + 0.2 * galaxyNoise,
-          0.2 + 0.3 * galaxyNoise,
-          0.4 + 0.3 * galaxyNoise
-        );
-        
-        // Apply spiral pattern
-        float intensity = smoothstep(0.0, 0.3, radius) * 
-                         smoothstep(0.8, 0.0, radius) * 
-                         (0.5 + spiral * 0.5);
-        
-        return galaxyColor * intensity;
-      }
+      uniform float particlePositions[400]; // MAX_PARTICLES * 2
+      uniform float particleColors[600];    // MAX_PARTICLES * 3
+      uniform float particleLives[200];     // MAX_PARTICLES
+      uniform int particleCount;
       
       void main() {
         vec2 uv = vUv;
         vec3 color = vec3(0.0);
         
-        // Choose animation based on uniform
-        if (vAudioLevel < 0.1) {
-          // Default to flowing particles
-          color = createFlowingParticles(uv, vTime);
-        } else if (vAudioLevel < 0.3) {
-          // Mix flowing particles and waves
-          color = mix(
-            createFlowingParticles(uv, vTime),
-            createWavePatterns(uv, vTime),
-            0.5
-          );
-        } else {
-          // Higher audio = more dynamic
-          color = mix(
-            createWavePatterns(uv, vTime),
-            createSpiralGalaxy(uv, vTime),
-            0.7
-          );
+        // Render physics-based particles
+        for (int i = 0; i < 200; i++) {
+          if (i >= particleCount) break;
+          
+          vec2 particlePos = vec2(particlePositions[i * 2], particlePositions[i * 2 + 1]);
+          vec3 particleColor = vec3(particleColors[i * 3], particleColors[i * 3 + 1], particleColors[i * 3 + 2]);
+          float life = particleLives[i];
+          
+          // Calculate distance to particle
+          float dist = length(uv - particlePos);
+          float radius = 0.02; // Particle radius
+          
+          // Create soft particle
+          float particle = smoothstep(radius, 0.0, dist) * life;
+          
+          // Add glow effect
+          float glow = smoothstep(radius * 2.0, 0.0, dist) * life * 0.3;
+          
+          color += particleColor * (particle + glow);
         }
         
-        // Add subtle pulsing
-        float pulse = sin(vTime * 1.5) * 0.1 + 0.9;
-        color *= pulse;
+        // Add subtle background
+        color += vec3(0.05, 0.1, 0.15) * 0.1;
+        
+        // Add audio reactivity
+        if (vAudioLevel > 0.0) {
+          color += vec3(0.1, 0.2, 0.3) * vAudioLevel * sin(vTime * 5.0 + uv.x * 10.0);
+        }
         
         // Add serendipity variation
-        color += vec3(0.05) * sin(vTime * 2.0 + uv.x * 20.0) * 
+        color += vec3(0.02) * sin(vTime * 2.0 + uv.x * 20.0) * 
                  sin(vTime * 1.8 + uv.y * 15.0) * vSerendipity;
         
-        // Final output with smooth alpha
-        float alpha = length(color) * 0.8;
-        gl_FragColor = vec4(color, alpha);
+        // Final output
+        gl_FragColor = vec4(color, 1.0);
       }
     `;
   }
@@ -310,6 +498,18 @@ export class ParticleScene extends BaseScene {
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
     }
+    
+    // Clean up physics engine
+    if (this.world) {
+      this.clearParticles();
+      this.bounds.forEach(bound => {
+        Matter.World.remove(this.world, bound);
+      });
+      this.forces.forEach(force => {
+        Matter.World.remove(this.world, force);
+      });
+    }
+    
     super.destroy();
   }
 }
