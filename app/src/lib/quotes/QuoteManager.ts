@@ -109,7 +109,7 @@ export class QuoteManager {
 	} {
 		const stats = {
 			total: quotes.length,
-			byPersona: { student: 0, working_adult: 0, creator: 0 } as Record<Persona, number>,
+			byPersona: { student: 0, working_adult: 0, creator: 0, teacher: 0, caregiver: 0 } as Record<Persona, number>,
 			byIntensity: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 } as Record<number, number>,
 			byProfanity: { safe: 0, unsafe: 0 }
 		};

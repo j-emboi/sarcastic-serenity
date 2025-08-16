@@ -1,7 +1,7 @@
 import { writable, type Writable } from 'svelte/store';
 import type { BreathingAnimationType } from '../breathing/types';
 
-export type Persona = 'student' | 'working_adult' | 'creator';
+export type Persona = 'student' | 'working_adult' | 'creator' | 'teacher' | 'caregiver';
 export type ProfanityLevel = 'off' | 'medium' | 'strict';
 
 export interface AppSettings {
@@ -22,9 +22,9 @@ export interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
-	durationMinutes: 10,
+	durationMinutes: 1, // Micro-wellness: start with 1 minute
 	persona: 'student',
-	roastIntensity: 2,
+	roastIntensity: 1, // Gentler by default for micro-moments
 	profanity: 'off',
 	serendipity: 0.1,
 	breathingEnabled: false,
