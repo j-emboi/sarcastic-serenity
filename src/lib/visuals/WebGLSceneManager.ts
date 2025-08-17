@@ -214,10 +214,13 @@ export class WebGLSceneManager {
       console.log('🎨 Wall positions - Left:', bounds.left - wallThickness, 'Right:', bounds.right + wallThickness, 'Top:', bounds.top - wallThickness, 'Bottom:', bounds.bottom + wallThickness);
 
       // Set up collision event handling for energy transfer
-      // Temporarily disabled to debug particle visibility
-      // Matter.Events.on(this.physics, 'collisionStart', (event) => {
-      //   this.handleCollision(event);
-      // });
+      Matter.Events.on(this.physics, 'collisionStart', (event) => {
+        try {
+          this.handleCollision(event);
+        } catch (error) {
+          console.warn('🎨 Collision handling error:', error);
+        }
+      });
 
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {
@@ -487,32 +490,44 @@ export class WebGLSceneManager {
 
   private handleCollision(event: Matter.IEventCollision<Matter.Engine>): void {
     // Handle particle-to-particle collisions for energy transfer
+    if (!event.pairs || event.pairs.length === 0) {
+      return;
+    }
+    
     event.pairs.forEach((pair) => {
-      const bodyA = pair.bodyA;
-      const bodyB = pair.bodyB;
-      
-      // Skip collisions with walls (static bodies)
-      if (bodyA.isStatic || bodyB.isStatic) {
-        return;
-      }
-      
-      // Calculate collision normal and add energy boost in opposite direction
-      const normal = pair.normal;
-      const energyBoost = 3; // Amount of energy to add
-      
-      // Add energy boost to both particles in opposite directions
-      if (bodyA.velocity && bodyB.velocity) {
-        // Boost particle A in the direction of the normal
-        Matter.Body.setVelocity(bodyA, {
-          x: bodyA.velocity.x + normal.x * energyBoost,
-          y: bodyA.velocity.y + normal.y * energyBoost
-        });
+      try {
+        const bodyA = pair.bodyA;
+        const bodyB = pair.bodyB;
         
-        // Boost particle B in the opposite direction
-        Matter.Body.setVelocity(bodyB, {
-          x: bodyB.velocity.x - normal.x * energyBoost,
-          y: bodyB.velocity.y - normal.y * energyBoost
-        });
+        // Skip collisions with walls (static bodies)
+        if (!bodyA || !bodyB || bodyA.isStatic || bodyB.isStatic) {
+          return;
+        }
+        
+        // Calculate collision normal and add energy boost in opposite direction
+        const normal = pair.normal;
+        if (!normal) {
+          return;
+        }
+        
+        const energyBoost = 2; // Reduced energy boost for more controlled movement
+        
+        // Add energy boost to both particles in opposite directions
+        if (bodyA.velocity && bodyB.velocity) {
+          // Boost particle A in the direction of the normal
+          Matter.Body.setVelocity(bodyA, {
+            x: bodyA.velocity.x + normal.x * energyBoost,
+            y: bodyA.velocity.y + normal.y * energyBoost
+          });
+          
+          // Boost particle B in the opposite direction
+          Matter.Body.setVelocity(bodyB, {
+            x: bodyB.velocity.x - normal.x * energyBoost,
+            y: bodyB.velocity.y - normal.y * energyBoost
+          });
+        }
+      } catch (error) {
+        console.warn('🎨 Error in collision pair handling:', error);
       }
     });
   }
