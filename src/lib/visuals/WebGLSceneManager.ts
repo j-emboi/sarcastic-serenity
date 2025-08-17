@@ -513,7 +513,9 @@ export class WebGLSceneManager {
         
         // Calculate collision normal and add energy boost in opposite direction
         const normal = pair.normal;
+        console.log('🎯 Collision normal:', normal);
         if (!normal) {
+          console.log('🎯 Skipping collision - no normal vector');
           return;
         }
         
