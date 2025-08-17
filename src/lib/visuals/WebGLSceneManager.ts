@@ -1,5 +1,21 @@
-import { Renderer, Scene, Camera, Program, Mesh, Plane, Box } from 'ogl';
+import { Renderer, Camera, Program, Mesh, Plane, Box } from 'ogl';
 import * as Matter from 'matter-js';
+
+// Simple Scene class for OGL compatibility
+class Scene {
+  children: any[] = [];
+  
+  addChild(child: any) {
+    this.children.push(child);
+  }
+  
+  removeChild(child: any) {
+    const index = this.children.indexOf(child);
+    if (index > -1) {
+      this.children.splice(index, 1);
+    }
+  }
+}
 
 export interface AudioData {
   frequency: number[];

@@ -5,7 +5,7 @@ export class AudioVisualBridge {
   private analyser: AnalyserNode | null = null;
   private dataArray: Uint8Array | null = null;
   private frequencyArray: Float32Array | null = null;
-  private isConnected = false;
+  private _isConnected = false;
 
   constructor() {
     this.audioContext = null;
@@ -36,7 +36,7 @@ export class AudioVisualBridge {
         this.analyser.connect(this.audioContext.destination);
       }
 
-      this.isConnected = true;
+      this._isConnected = true;
       console.log('🎵 Audio Visual Bridge connected successfully');
       return true;
     } catch (error) {
@@ -63,7 +63,7 @@ export class AudioVisualBridge {
       sourceNode.connect(this.analyser);
       this.analyser.connect(this.audioContext.destination);
 
-      this.isConnected = true;
+      this._isConnected = true;
       console.log('🎵 Audio Visual Bridge connected to existing audio context');
       return true;
     } catch (error) {
@@ -73,7 +73,7 @@ export class AudioVisualBridge {
   }
 
   getAudioData(): AudioData {
-    if (!this.isConnected || !this.analyser || !this.dataArray || !this.frequencyArray) {
+    if (!this._isConnected || !this.analyser || !this.dataArray || !this.frequencyArray) {
       return {
         frequency: new Array(64).fill(0),
         amplitude: 0,
@@ -149,7 +149,7 @@ export class AudioVisualBridge {
   }
 
   isConnected(): boolean {
-    return this.isConnected;
+    return this._isConnected;
   }
 
   disconnect(): void {
@@ -160,7 +160,7 @@ export class AudioVisualBridge {
       this.audioContext.close();
     }
     
-    this.isConnected = false;
+    this._isConnected = false;
     this.audioContext = null;
     this.analyser = null;
     this.dataArray = null;
