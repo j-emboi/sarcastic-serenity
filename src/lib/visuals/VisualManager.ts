@@ -113,19 +113,11 @@ export class VisualManager {
     
     console.log('🎭 Actual canvas dimensions:', actualWidth, 'x', actualHeight);
     
-    // Always use the canvas element dimensions for consistency
-    let canvasWidth = this.canvas?.width || window.innerWidth;
-    let canvasHeight = this.canvas?.height || window.innerHeight;
+    // Always use window dimensions for consistency - canvas dimensions are unreliable
+    const canvasWidth = window.innerWidth;
+    const canvasHeight = window.innerHeight;
     
-    // If canvas dimensions are zero or very small, use window dimensions
-    if (canvasWidth <= 0 || canvasHeight <= 0 || canvasWidth < 100 || canvasHeight < 100) {
-      console.log('🎭 Canvas dimensions too small, using window dimensions');
-      canvasWidth = window.innerWidth;
-      canvasHeight = window.innerHeight;
-    }
-    
-    console.log('🎭 Using canvas element dimensions:', canvasWidth, 'x', canvasHeight);
-    console.log('🎭 Window dimensions:', window.innerWidth, 'x', window.innerHeight);
+    console.log('🎭 Using window dimensions for scene bounds:', canvasWidth, 'x', canvasHeight);
     
     const bounds = {
       x: -canvasWidth / 2,

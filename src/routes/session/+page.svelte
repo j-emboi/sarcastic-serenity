@@ -181,27 +181,27 @@
     
           window.addEventListener('resize', handleResize);
       
-      // Add a monitoring interval to ensure canvas stays full screen (but less aggressive)
-      const canvasMonitor = setInterval(() => {
-        if (canvas) {
-          const currentWidth = parseInt(canvas.getAttribute('width') || '0');
-          const currentHeight = parseInt(canvas.getAttribute('height') || '0');
-          const expectedWidth = window.innerWidth;
-          const expectedHeight = window.innerHeight;
-          
-          // Force update if canvas is zero or significantly wrong
-          if (currentWidth === 0 || currentHeight === 0 || 
-              Math.abs(currentWidth - expectedWidth) > 10 || 
-              Math.abs(currentHeight - expectedHeight) > 10) {
-            console.log('🎨 Canvas size mismatch detected, forcing update...');
-            forceCanvasFullScreen();
-          }
-        }
-      }, 1000); // Check every second to catch zero dimensions quickly
+      // Disable canvas monitoring for now - it might be causing the issue
+      // const canvasMonitor = setInterval(() => {
+      //   if (canvas) {
+      //     const currentWidth = parseInt(canvas.getAttribute('width') || '0');
+      //     const currentHeight = parseInt(canvas.getAttribute('height') || '0');
+      //     const expectedWidth = window.innerWidth;
+      //     const expectedHeight = window.innerHeight;
+      //     
+      //     // Force update if canvas is zero or significantly wrong
+      //     if (currentWidth === 0 || currentHeight === 0 || 
+      //         Math.abs(currentWidth - expectedWidth) > 10 || 
+      //         Math.abs(currentHeight - expectedHeight) > 10) {
+      //       console.log('🎨 Canvas size mismatch detected, forcing update...');
+      //       forceCanvasFullScreen();
+      //     }
+      //   }
+      // }, 1000); // Check every second to catch zero dimensions quickly
       
-      // Clean up monitor on component destroy
+      // Clean up on component destroy
       return () => {
-        clearInterval(canvasMonitor);
+        // clearInterval(canvasMonitor); // Disabled canvas monitoring
         window.removeEventListener('resize', handleResize);
       };
 
