@@ -6,6 +6,7 @@
   import { quoteManager } from '$lib/quotes';
   import { aiVoiceService } from '$lib/audio/aiVoiceService';
   import { characterVoiceService } from '$lib/audio/characterVoiceService';
+  import { VisualManager } from '$lib/visuals/VisualManager';
   import type { AppSettings } from '$lib/stores/settings';
   
   let timeLeft = 60; // Start with 1 minute default
@@ -19,9 +20,17 @@
   let ended = false;
   let interval: number;
 
-
+  // WebGL Visual System
+  let visualManager: VisualManager;
+  let canvas: HTMLCanvasElement;
+  let isVisualSystemReady = false;
 
   onMount(() => {
+    // Stop any currently playing preview voice TTS immediately when session starts
+    speechSynthesis.cancel();
+    characterVoiceService.stop();
+    aiVoiceService.stop();
+
     // Subscribe to settings
     const unsub = settings.subscribe(value => {
       settingsValue = value;
@@ -31,7 +40,12 @@
       }
     });
 
-
+    // Initialize WebGL Visual System after a short delay to ensure canvas is ready
+    setTimeout(async () => {
+      if (canvas) {
+        await initializeVisualSystem();
+      }
+    }, 100);
 
     // Schedule first quote
     const initialDelay = quoteManager.getInitialDelay();
@@ -59,6 +73,10 @@
             clearTimeout(nextQuoteTimeout);
             nextQuoteTimeout = null;
           }
+          // Stop visual system when session ends
+          if (visualManager) {
+            visualManager.stop();
+          }
         }
       }
     }, 1000);
@@ -68,9 +86,39 @@
       if (nextQuoteTimeout) {
         clearTimeout(nextQuoteTimeout);
       }
+      // Cleanup visual system
+      if (visualManager) {
+        visualManager.stop();
+        visualManager.destroy();
+      }
       unsub();
     };
   });
+
+  async function initializeVisualSystem() {
+    try {
+      // Create visual manager with calming particle configuration
+      visualManager = new VisualManager({
+        sceneType: 'particles',
+        particleCount: 50,
+        audioReactivity: true,
+        quality: 'medium'
+      });
+
+      // Initialize with canvas
+      isVisualSystemReady = await visualManager.init(canvas);
+      
+      if (isVisualSystemReady) {
+        // Start the visual system
+        visualManager.start();
+        console.log('🎨 WebGL Visual System started for session');
+      } else {
+        console.warn('⚠️ WebGL Visual System failed to initialize');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize WebGL Visual System:', error);
+    }
+  }
 
   function scheduleNextQuoteWithJitter() {
     if (!settingsValue || timeLeft <= 0 || ended) return;
@@ -215,8 +263,16 @@
   <title>Micro-Break - Sarcastic Serenity</title>
 </svelte:head>
 
-<section class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col items-center justify-center p-4 text-white">
-  <div class="text-center space-y-8 max-w-2xl">
+<section class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col items-center justify-center p-4 text-white relative overflow-hidden">
+  <!-- WebGL Canvas Background -->
+  <canvas 
+    bind:this={canvas}
+    class="absolute inset-0 w-full h-full pointer-events-none"
+    style="z-index: 1;"
+  ></canvas>
+  
+  <!-- Content Layer -->
+  <div class="relative z-10 text-center space-y-8 max-w-2xl">
     <h1 class="text-4xl font-bold mb-8">🌊 Micro-Break</h1>
     
     <!-- Timer -->
@@ -224,18 +280,16 @@
       {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}
     </div>
 
-         <!-- Session Status -->
-     {#if ended}
-       <div class="text-2xl text-green-400 mb-8">
-         Break Complete! 🎉
-       </div>
-     {:else}
-       <div class="text-xl text-blue-300 mb-8">
-         Take a moment to breathe and reset...
-       </div>
-     {/if}
-
-
+    <!-- Session Status -->
+    {#if ended}
+      <div class="text-2xl text-green-400 mb-8">
+        Break Complete! 🎉
+      </div>
+    {:else}
+      <div class="text-xl text-blue-300 mb-8">
+        Take a moment to breathe and reset...
+      </div>
+    {/if}
 
     <!-- Quote Display - Fixed height to prevent layout shifts -->
     <div class="max-w-xl text-balance text-lg rounded-lg bg-white/10 p-6 shadow-lg backdrop-blur-sm min-h-[120px] flex items-center justify-center">
@@ -246,13 +300,13 @@
       {/if}
     </div>
 
-         <!-- End Session Button -->
-     <button 
-       class="mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-       on:click={handleEndSession}
-     >
-       End Break
-     </button>
+    <!-- End Session Button -->
+    <button 
+      class="mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+      on:click={handleEndSession}
+    >
+      End Break
+    </button>
   </div>
 </section>
 
