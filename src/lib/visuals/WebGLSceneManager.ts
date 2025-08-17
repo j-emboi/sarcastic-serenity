@@ -173,8 +173,8 @@ export class WebGLSceneManager {
       
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
-      // Scale the bounds to match the visual scaling (0.01) used in updatePhysicsObjects
-      const scale = 0.01;
+      // Use a larger scale for physics world to give particles more room to move
+      const scale = 0.1; // 10x larger than visual scale for more movement space
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -307,7 +307,7 @@ export class WebGLSceneManager {
     // Get canvas bounds for containment
     const canvasWidth = this.canvas?.width || 1792;
     const canvasHeight = this.canvas?.height || 894;
-    const scale = 0.01;
+    const scale = 0.1; // Match the physics world scale
     const bounds = {
       left: -canvasWidth * scale / 2,
       right: canvasWidth * scale / 2,
@@ -331,8 +331,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body
-        obj.mesh.position.x = obj.body.position.x * 0.01; // Scale down for visual
-        obj.mesh.position.y = obj.body.position.y * 0.01;
+        obj.mesh.position.x = obj.body.position.x * 0.1; // Scale down for visual (match physics scale)
+        obj.mesh.position.y = obj.body.position.y * 0.1;
         obj.mesh.rotation.z = obj.body.angle;
       }
     });
