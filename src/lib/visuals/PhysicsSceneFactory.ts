@@ -75,7 +75,7 @@ export class PhysicsSceneFactory {
     color: [number, number, number] = [0.2, 0.6, 1.0]
   ): PhysicsObject {
     // Create physics body - make it match visual size accurately
-    const body = Matter.Bodies.circle(x, y, size * 20, {
+    const body = Matter.Bodies.circle(x, y, size * 2, {
       restitution: 0.98, // Very high bounce (98%)
       friction: 0.001,   // Extremely low friction for maximum bouncing
       density: 0.001,
@@ -139,7 +139,7 @@ export class PhysicsSceneFactory {
     color: [number, number, number] = [0.2, 0.6, 0.9]
   ): PhysicsObject {
     // Create physics body with fluid-like properties - make it smaller to match visual size
-    const body = Matter.Bodies.circle(x, y, size * 8, {
+    const body = Matter.Bodies.circle(x, y, size * 1.5, {
       restitution: 0.3,
       friction: 0.8,
       density: 0.002,
