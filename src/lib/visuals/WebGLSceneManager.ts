@@ -215,7 +215,6 @@ export class WebGLSceneManager {
 
       // Set up collision event handling for energy transfer
       Matter.Events.on(this.physics, 'collisionStart', (event) => {
-        console.log('🎯 Collision event triggered!', event.pairs?.length, 'pairs');
         try {
           this.handleCollision(event);
         } catch (error) {
@@ -498,18 +497,10 @@ export class WebGLSceneManager {
         const bodyA = pair.bodyA;
         const bodyB = pair.bodyB;
         
-        // Debug: Log what types of bodies are colliding
-        if (!bodyA || !bodyB) {
-          console.log('🎯 Skipping collision - null body');
+        // Skip collisions with walls (static bodies)
+        if (!bodyA || !bodyB || bodyA.isStatic || bodyB.isStatic) {
           return;
         }
-        
-        if (bodyA.isStatic || bodyB.isStatic) {
-          console.log('🎯 Skipping collision - static body involved (wall collision)');
-          return;
-        }
-        
-        console.log('🎯 Processing particle-to-particle collision!');
         
         // Calculate collision direction between the two particles
         const dx = bodyB.position.x - bodyA.position.x;
@@ -517,7 +508,6 @@ export class WebGLSceneManager {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance === 0) {
-          console.log('🎯 Skipping collision - particles at same position');
           return;
         }
         
@@ -525,15 +515,10 @@ export class WebGLSceneManager {
         const normalX = dx / distance;
         const normalY = dy / distance;
         
-        console.log('🎯 Calculated collision direction:', { x: normalX, y: normalY });
-        
         const energyBoost = 8; // Increased energy boost to prevent sticking
-        
-        console.log('🎯 Checking velocities - bodyA velocity:', bodyA.velocity, 'bodyB velocity:', bodyB.velocity);
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
-          console.log('⚡ Collision detected! Adding energy boost:', energyBoost);
           
           // Boost particle A in the direction of the normal
           Matter.Body.setVelocity(bodyA, {
