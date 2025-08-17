@@ -161,6 +161,18 @@ export class WebGLSceneManager {
       // OGL renderer doesn't have setClearColor - background is handled by the scene
 
       // Create physics boundaries for particle containment
+      // Force canvas dimensions one more time before calculating bounds
+      const fullWidth = window.innerWidth;
+      const fullHeight = window.innerHeight;
+      
+      canvas.width = fullWidth;
+      canvas.height = fullHeight;
+      canvas.setAttribute('width', fullWidth.toString());
+      canvas.setAttribute('height', fullHeight.toString());
+      canvas.offsetHeight; // Force reflow
+      
+      console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
+      
       // Scale the bounds to match the visual scaling (0.01) used in updatePhysicsObjects
       const scale = 0.01;
       const bounds = {
