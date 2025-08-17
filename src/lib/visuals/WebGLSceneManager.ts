@@ -498,8 +498,14 @@ export class WebGLSceneManager {
         const bodyA = pair.bodyA;
         const bodyB = pair.bodyB;
         
-        // Skip collisions with walls (static bodies)
-        if (!bodyA || !bodyB || bodyA.isStatic || bodyB.isStatic) {
+        // Debug: Log what types of bodies are colliding
+        if (!bodyA || !bodyB) {
+          console.log('🎯 Skipping collision - null body');
+          return;
+        }
+        
+        if (bodyA.isStatic || bodyB.isStatic) {
+          console.log('🎯 Skipping collision - static body involved (wall collision)');
           return;
         }
         
