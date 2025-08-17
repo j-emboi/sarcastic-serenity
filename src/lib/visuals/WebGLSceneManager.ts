@@ -54,6 +54,7 @@ export class WebGLSceneManager {
   private renderer: Renderer;
   private scene: Scene;
   private camera: Camera;
+  private canvas: HTMLCanvasElement | null = null;
   private physics: Matter.Engine;
   private physicsObjects: PhysicsObject[] = [];
   private isRunning = false;
@@ -87,6 +88,7 @@ export class WebGLSceneManager {
   async init(canvas: HTMLCanvasElement): Promise<void> {
     try {
       console.log('🎨 Initializing WebGL Scene Manager...');
+      this.canvas = canvas; // Store canvas reference
       console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
       console.log('Canvas client dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
 
@@ -137,7 +139,7 @@ export class WebGLSceneManager {
       
       // Position camera to view the entire scene properly
       const aspect = canvas.width / canvas.height;
-      const distance = Math.max(canvas.width, canvas.height) / 2;
+      const distance = 10; // Fixed reasonable distance for particle viewing
       this.camera.position.z = distance;
       
       console.log('🎨 Scene and Camera created successfully');
@@ -309,11 +311,13 @@ export class WebGLSceneManager {
   }
   
   getCanvasWidth(): number {
-    return this.renderer?.canvas?.width || 0;
+    // Return the actual canvas width, not the renderer canvas width
+    return this.canvas?.width || 0;
   }
   
   getCanvasHeight(): number {
-    return this.renderer?.canvas?.height || 0;
+    // Return the actual canvas height, not the renderer canvas height
+    return this.canvas?.height || 0;
   }
   
   private boostParticleEnergy(): void {

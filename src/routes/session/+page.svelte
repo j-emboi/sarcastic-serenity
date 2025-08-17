@@ -31,18 +31,17 @@
   // Function to force canvas full screen
   function forceCanvasFullScreen() {
     if (canvas) {
-      // Use device pixel ratio for crisp rendering
-      const devicePixelRatio = window.devicePixelRatio || 1;
-      const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
-      const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
+      // Use CSS pixels for consistency (don't mix with device pixel ratio)
+      const fullWidth = window.innerWidth;
+      const fullHeight = window.innerHeight;
       
       // Force update BOTH HTML attributes AND CSS styles with !important
       canvas.setAttribute('width', fullWidth.toString());
       canvas.setAttribute('height', fullHeight.toString());
       canvas.width = fullWidth;
       canvas.height = fullHeight;
-      canvas.style.setProperty('width', window.innerWidth + 'px', 'important');
-      canvas.style.setProperty('height', window.innerHeight + 'px', 'important');
+      canvas.style.setProperty('width', fullWidth + 'px', 'important');
+      canvas.style.setProperty('height', fullHeight + 'px', 'important');
       canvas.style.setProperty('position', 'fixed', 'important');
       canvas.style.setProperty('top', '0', 'important');
       canvas.style.setProperty('left', '0', 'important');
@@ -52,7 +51,7 @@
       canvas.offsetHeight;
       
       console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
-      console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
+      console.log('🎨 Canvas style size:', fullWidth, 'x', fullHeight);
       console.log('🎨 Canvas attributes after update:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
       console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     }
@@ -107,18 +106,17 @@
           // Add window resize handler to keep canvas full screen
       const handleResize = () => {
         if (canvas) {
-          // Use device pixel ratio for crisp rendering
-          const devicePixelRatio = window.devicePixelRatio || 1;
-          const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
-          const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
+          // Use CSS pixels for consistency (don't mix with device pixel ratio)
+          const fullWidth = window.innerWidth;
+          const fullHeight = window.innerHeight;
           
           // Force update BOTH HTML attributes AND CSS styles with !important
           canvas.setAttribute('width', fullWidth.toString());
           canvas.setAttribute('height', fullHeight.toString());
           canvas.width = fullWidth;
           canvas.height = fullHeight;
-          canvas.style.setProperty('width', window.innerWidth + 'px', 'important');
-          canvas.style.setProperty('height', window.innerHeight + 'px', 'important');
+          canvas.style.setProperty('width', fullWidth + 'px', 'important');
+          canvas.style.setProperty('height', fullHeight + 'px', 'important');
           canvas.style.setProperty('position', 'fixed', 'important');
           canvas.style.setProperty('top', '0', 'important');
           canvas.style.setProperty('left', '0', 'important');
@@ -128,7 +126,7 @@
           canvas.offsetHeight;
           
           console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
-          console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
+          console.log('🎨 Canvas style size:', fullWidth, 'x', fullHeight);
           console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
           console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
         }
@@ -141,8 +139,8 @@
         if (canvas) {
           const currentWidth = parseInt(canvas.getAttribute('width') || '0');
           const currentHeight = parseInt(canvas.getAttribute('height') || '0');
-          const expectedWidth = Math.floor(window.innerWidth * (window.devicePixelRatio || 1));
-          const expectedHeight = Math.floor(window.innerHeight * (window.devicePixelRatio || 1));
+          const expectedWidth = window.innerWidth;
+          const expectedHeight = window.innerHeight;
           
           if (currentWidth !== expectedWidth || currentHeight !== expectedHeight) {
             console.log('🎨 Canvas size mismatch detected, forcing update...');
