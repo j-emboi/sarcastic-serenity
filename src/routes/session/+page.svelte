@@ -134,7 +134,7 @@
     
           window.addEventListener('resize', handleResize);
       
-      // Add a monitoring interval to ensure canvas stays full screen
+      // Add a monitoring interval to ensure canvas stays full screen (but less aggressive)
       const canvasMonitor = setInterval(() => {
         if (canvas) {
           const currentWidth = parseInt(canvas.getAttribute('width') || '0');
@@ -142,12 +142,13 @@
           const expectedWidth = window.innerWidth;
           const expectedHeight = window.innerHeight;
           
-          if (currentWidth !== expectedWidth || currentHeight !== expectedHeight) {
+          // Only force update if there's a significant mismatch (more than 10px difference)
+          if (Math.abs(currentWidth - expectedWidth) > 10 || Math.abs(currentHeight - expectedHeight) > 10) {
             console.log('🎨 Canvas size mismatch detected, forcing update...');
             forceCanvasFullScreen();
           }
         }
-      }, 1000); // Check every second
+      }, 2000); // Check every 2 seconds instead of 1
       
       // Clean up monitor on component destroy
       return () => {
@@ -239,7 +240,12 @@
       
       if (isVisualSystemReady) {
         console.log('🎨 WebGL Visual System started for session');
-        visualManager.start();
+        
+        // Add a small delay to ensure canvas is fully updated before starting
+        setTimeout(() => {
+          console.log('🎨 Starting Visual Manager after canvas update delay...');
+          visualManager.start();
+        }, 500);
       } else {
         console.warn('⚠️ WebGL Visual System failed to initialize');
       }
@@ -254,6 +260,7 @@
     
     // Don't schedule new quotes if we're currently speaking
     if (speaking) {
+      console.log('🎤 Currently speaking, will retry in 1 second...');
       // Wait a bit and try again
       nextQuoteTimeout = window.setTimeout(() => {
         if (!ended) {
@@ -264,6 +271,7 @@
     }
     
     const delay = quoteManager.getNextQuoteTime();
+    console.log('🎤 Scheduling next quote in', delay, 'ms');
     nextQuoteTimeout = window.setTimeout(() => {
       if (!ended) {
         scheduleNextQuote();
