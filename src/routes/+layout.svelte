@@ -8,13 +8,14 @@
 
 	onMount(async () => {
 		initSettingsFromStorage();
-		if ('serviceWorker' in navigator) {
-			try {
-				await navigator.serviceWorker.register('/sw.js');
-			} catch (err) {
-				console.error('SW registration failed', err);
-			}
-		}
+		// Temporarily disabled service worker registration for debugging
+		// if ('serviceWorker' in navigator) {
+		// 	try {
+		// 		await navigator.serviceWorker.register('/sw.js');
+		// 	} catch (err) {
+		// 		console.error('SW registration failed', err);
+		// 	}
+		// }
 	});
 </script>
 
