@@ -84,15 +84,15 @@ export class PhysicsSceneFactory {
     
     // Add some initial velocity for more dynamic movement
     Matter.Body.setVelocity(body, {
-      x: (Math.random() - 0.5) * 5,  // Random horizontal velocity (increased)
-      y: (Math.random() - 0.5) * 5   // Random vertical velocity (increased)
+      x: (Math.random() - 0.5) * 8,  // Random horizontal velocity (increased)
+      y: (Math.random() - 0.5) * 8   // Random vertical velocity (increased)
     });
     
     // Add a stronger upward bias to keep particles bouncing
-    if (Math.random() > 0.3) { // More particles get upward bias
+    if (Math.random() > 0.2) { // More particles get upward bias (80% chance)
       Matter.Body.setVelocity(body, {
         x: body.velocity.x,
-        y: body.velocity.y - 2  // Stronger upward bias
+        y: body.velocity.y - 3  // Even stronger upward bias
       });
     }
 

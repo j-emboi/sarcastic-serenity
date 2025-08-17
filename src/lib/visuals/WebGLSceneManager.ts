@@ -68,7 +68,7 @@ export class WebGLSceneManager {
   
   // Energy boost system
   private energyBoostTimer = 0;
-  private energyBoostInterval = 3000; // Boost every 3 seconds (less frequent)
+  private energyBoostInterval = 2000; // Boost every 2 seconds (more frequent)
   
   // Audio reactivity
   private audioData: AudioData = {
@@ -84,7 +84,7 @@ export class WebGLSceneManager {
 
   constructor() {
     this.physics = Matter.Engine.create({
-      gravity: { x: 0, y: -0.05, scale: 0.001 }  // Very light gravity to keep particles floating
+      gravity: { x: 0, y: -0.02, scale: 0.001 }  // Even lighter gravity to keep particles floating
     });
   }
 
