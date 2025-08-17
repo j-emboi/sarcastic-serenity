@@ -354,15 +354,12 @@ export class WebGLSceneManager {
           console.log('🎯 Contained particle at position:', obj.body.position.x, obj.body.position.y);
         }
         
-        // Update mesh position from physics body with dynamic scaling
-        // Calculate visual scale based on current canvas dimensions vs physics bounds
-        const currentCanvasWidth = this.canvas?.width || 1792;
-        const currentCanvasHeight = this.canvas?.height || 894;
-        const visualScaleX = (currentCanvasWidth / 2) / Math.abs(this.physicsBounds?.right || 219.2);
-        const visualScaleY = (currentCanvasHeight / 2) / Math.abs(this.physicsBounds?.bottom || 129.4);
+        // Update mesh position from physics body with consistent scaling
+        // Use a fixed scale that matches the physics world scale (0.2)
+        const visualScale = 0.2;
         
-        obj.mesh.position.x = obj.body.position.x * visualScaleX;
-        obj.mesh.position.y = obj.body.position.y * visualScaleY;
+        obj.mesh.position.x = obj.body.position.x * visualScale;
+        obj.mesh.position.y = obj.body.position.y * visualScale;
         obj.mesh.rotation.z = obj.body.angle;
       }
     });
