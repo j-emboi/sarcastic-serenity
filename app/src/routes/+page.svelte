@@ -1,9 +1,13 @@
 <script lang="ts">
+  console.log('🏠 Main page script loading...');
+  
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings, initSettingsFromStorage, getAvailablePersonas } from '$lib/stores/settings';
   import UnifiedVoiceSelector from '$lib/components/UnifiedVoiceSelector.svelte';
   import type { AppSettings } from '$lib/stores/settings';
+
+  console.log('🏠 Main page imports completed');
 
   let settingsValue: AppSettings | null = null;
 
