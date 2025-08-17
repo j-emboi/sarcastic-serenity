@@ -22,6 +22,11 @@
 
 
   onMount(() => {
+    // Stop any currently playing preview voice TTS immediately when session starts
+    speechSynthesis.cancel();
+    characterVoiceService.stop();
+    aiVoiceService.stop();
+
     // Subscribe to settings
     const unsub = settings.subscribe(value => {
       settingsValue = value;
