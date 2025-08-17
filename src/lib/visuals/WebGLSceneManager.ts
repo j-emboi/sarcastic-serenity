@@ -441,15 +441,28 @@ export class WebGLSceneManager {
     // Boost energy of all particles to maintain continuous movement
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.body.velocity) {
-        const boostMultiplier = 2; // Moderate boost for all particles
+        const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
         
-        Matter.Body.setVelocity(obj.body, {
-          x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
-          y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
-        });
+        // If particle is moving slowly, give it a strong directional boost
+        if (speed < 3) {
+          const boostMultiplier = 6; // Strong boost for slow particles
+          
+          Matter.Body.setVelocity(obj.body, {
+            x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
+            y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
+          });
+        } else {
+          // For faster particles, give a smaller boost to maintain momentum
+          const boostMultiplier = 1;
+          
+          Matter.Body.setVelocity(obj.body, {
+            x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
+            y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
+          });
+        }
       }
     });
-    console.log('⚡ Boosted all particle energy');
+    console.log('⚡ Boosted particle energy with speed-based boost');
   }
   
   private aggressiveContainmentCheck(): void {

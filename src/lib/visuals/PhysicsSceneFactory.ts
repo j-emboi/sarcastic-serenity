@@ -76,10 +76,10 @@ export class PhysicsSceneFactory {
   ): PhysicsObject {
     // Create physics body - make it smaller to match visual size
     const body = Matter.Bodies.circle(x, y, size * 10, {
-      restitution: 0.95, // Very high bounce (95%)
-      friction: 0.01,    // Very low friction for maximum bouncing
+      restitution: 0.98, // Very high bounce (98%)
+      friction: 0.001,   // Extremely low friction for maximum bouncing
       density: 0.001,
-      frictionAir: 0.0001 // Extremely low air resistance
+      frictionAir: 0.00001 // Extremely low air resistance
     });
     
     // Add some initial velocity for more dynamic movement
