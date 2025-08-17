@@ -233,7 +233,7 @@ export class PhysicsSceneFactory {
     for (let i = 0; i < count; i++) {
       const x = scaledBounds.x + Math.random() * scaledBounds.width;
       const y = scaledBounds.y + Math.random() * scaledBounds.height;
-      const size = 0.05 + Math.random() * 0.1;
+      const size = 0.4 + Math.random() * 0.4; // Much larger particles: 0.4 to 0.8
       
       let particle: PhysicsObject;
       
