@@ -186,14 +186,28 @@ export class WebGLSceneManager {
       console.log('🎨 Canvas dimensions for bounds:', canvas.width, 'x', canvas.height);
       
       // Add invisible boundaries with proper positioning (scaled)
-      const wallThickness = 50 * scale;
-      const leftWall = Matter.Bodies.rectangle(bounds.left - wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { isStatic: true });
-      const rightWall = Matter.Bodies.rectangle(bounds.right + wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { isStatic: true });
-      const topWall = Matter.Bodies.rectangle(0, bounds.top - wallThickness, canvas.width * scale * 2, wallThickness * 2, { isStatic: true });
-      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + wallThickness, canvas.width * scale * 2, wallThickness * 2, { isStatic: true });
+      // Make boundaries much thicker and positioned more aggressively
+      const wallThickness = 200 * scale; // Much thicker walls
+      const leftWall = Matter.Bodies.rectangle(bounds.left - wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { 
+        isStatic: true,
+        render: { fillStyle: 'transparent' }
+      });
+      const rightWall = Matter.Bodies.rectangle(bounds.right + wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { 
+        isStatic: true,
+        render: { fillStyle: 'transparent' }
+      });
+      const topWall = Matter.Bodies.rectangle(0, bounds.top - wallThickness, canvas.width * scale * 2, wallThickness * 2, { 
+        isStatic: true,
+        render: { fillStyle: 'transparent' }
+      });
+      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + wallThickness, canvas.width * scale * 2, wallThickness * 2, { 
+        isStatic: true,
+        render: { fillStyle: 'transparent' }
+      });
       
       Matter.Composite.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
       console.log('🎨 Added physics boundaries for particle containment');
+      console.log('🎨 Wall positions - Left:', bounds.left - wallThickness, 'Right:', bounds.right + wallThickness, 'Top:', bounds.top - wallThickness, 'Bottom:', bounds.bottom + wallThickness);
 
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {
@@ -290,8 +304,32 @@ export class WebGLSceneManager {
   }
 
   private updatePhysicsObjects(): void {
+    // Get canvas bounds for containment
+    const canvasWidth = this.canvas?.width || 1792;
+    const canvasHeight = this.canvas?.height || 894;
+    const scale = 0.01;
+    const bounds = {
+      left: -canvasWidth * scale / 2,
+      right: canvasWidth * scale / 2,
+      top: -canvasHeight * scale / 2,
+      bottom: canvasHeight * scale / 2
+    };
+    
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.mesh) {
+        // Check if particle is outside bounds and bring it back
+        if (obj.body.position.x < bounds.left) {
+          Matter.Body.setPosition(obj.body, { x: bounds.left + 1, y: obj.body.position.y });
+        } else if (obj.body.position.x > bounds.right) {
+          Matter.Body.setPosition(obj.body, { x: bounds.right - 1, y: obj.body.position.y });
+        }
+        
+        if (obj.body.position.y < bounds.top) {
+          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.top + 1 });
+        } else if (obj.body.position.y > bounds.bottom) {
+          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.bottom - 1 });
+        }
+        
         // Update mesh position from physics body
         obj.mesh.position.x = obj.body.position.x * 0.01; // Scale down for visual
         obj.mesh.position.y = obj.body.position.y * 0.01;
