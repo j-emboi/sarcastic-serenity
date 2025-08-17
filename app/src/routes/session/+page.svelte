@@ -26,6 +26,8 @@
   let isVisualSystemReady = false;
 
   onMount(() => {
+    console.log('🚀 Session page onMount started!');
+    
     // Stop any currently playing preview voice TTS immediately when session starts
     speechSynthesis.cancel();
     characterVoiceService.stop();
@@ -41,6 +43,7 @@
     });
 
     // Initialize WebGL Visual System after a short delay to ensure canvas is ready
+    console.log('🎨 Setting up WebGL initialization timeout...');
     setTimeout(async () => {
       console.log('🎨 Checking canvas availability...');
       console.log('Canvas element:', canvas);
