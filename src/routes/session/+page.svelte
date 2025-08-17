@@ -82,6 +82,31 @@
     // Force canvas full screen immediately
     forceCanvasFullScreen();
     
+    // Initialize timer and quote system
+    console.log('⏰ Initializing timer and quote system...');
+    
+    // Start the countdown timer
+    const timerInterval = setInterval(() => {
+      if (timeLeft > 0 && !ended) {
+        timeLeft--;
+        console.log('⏰ Timer tick:', timeLeft, 'seconds remaining');
+      } else if (timeLeft <= 0 && !ended) {
+        console.log('⏰ Session ended by timer');
+        ended = true;
+        clearInterval(timerInterval);
+        if (visualManager) {
+          visualManager.stop();
+          visualManager.destroy();
+        }
+        // Navigate back to main page
+        goto('/');
+      }
+    }, 1000);
+    
+    // Start the quote system
+    console.log('🎤 Starting quote system...');
+    scheduleNextQuoteWithJitter();
+    
     // Initialize WebGL Visual System after a short delay to ensure canvas is ready
     console.log('🎨 Setting up WebGL initialization timeout...');
     setTimeout(async () => {

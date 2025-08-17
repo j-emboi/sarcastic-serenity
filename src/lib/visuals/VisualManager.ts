@@ -114,10 +114,11 @@ export class VisualManager {
     console.log('🎭 Actual canvas dimensions:', actualWidth, 'x', actualHeight);
     
     // Always use the canvas element dimensions for consistency
-    const canvasWidth = this.canvas?.width || 1792;
-    const canvasHeight = this.canvas?.height || 894;
+    const canvasWidth = this.canvas?.width || window.innerWidth;
+    const canvasHeight = this.canvas?.height || window.innerHeight;
     
     console.log('🎭 Using canvas element dimensions:', canvasWidth, 'x', canvasHeight);
+    console.log('🎭 Window dimensions:', window.innerWidth, 'x', window.innerHeight);
     
     const bounds = {
       x: -canvasWidth / 2,
