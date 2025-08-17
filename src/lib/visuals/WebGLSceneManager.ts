@@ -252,6 +252,17 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
+    // Update physics bounds to match new canvas dimensions
+    const scale = 0.2;
+    this.physicsBounds = {
+      left: -width * scale / 2,
+      right: width * scale / 2,
+      top: -height * scale / 2,
+      bottom: height * scale / 2
+    };
+    
+    console.log('🎨 Updated physics bounds for new canvas size:', this.physicsBounds);
+    
     this.renderer.setSize(width, height);
     this.camera.perspective({
       aspect: width / height
