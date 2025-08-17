@@ -106,6 +106,7 @@ export class WebGLSceneManager {
       if (this.renderer && this.renderer.canvas) {
         this.renderer.canvas.width = targetWidth;
         this.renderer.canvas.height = targetHeight;
+        console.log('🎨 Updated renderer canvas to:', this.renderer.canvas.width, 'x', this.renderer.canvas.height);
       }
       
       console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);

@@ -31,21 +31,24 @@
   // Function to force canvas full screen
   function forceCanvasFullScreen() {
     if (canvas) {
-      const fullWidth = window.innerWidth;
-      const fullHeight = window.innerHeight;
+      // Use device pixel ratio for crisp rendering
+      const devicePixelRatio = window.devicePixelRatio || 1;
+      const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
+      const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
       
       // Update BOTH HTML attributes AND CSS styles
       canvas.setAttribute('width', fullWidth.toString());
       canvas.setAttribute('height', fullHeight.toString());
       canvas.width = fullWidth;
       canvas.height = fullHeight;
-      canvas.style.width = fullWidth + 'px';
-      canvas.style.height = fullHeight + 'px';
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
       canvas.style.position = 'fixed';
       canvas.style.top = '0';
       canvas.style.left = '0';
       
       console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
+      console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
       console.log('🎨 Canvas attributes after update:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
     }
   }
@@ -99,18 +102,21 @@
           // Add window resize handler to keep canvas full screen
       const handleResize = () => {
         if (canvas) {
-          const fullWidth = window.innerWidth;
-          const fullHeight = window.innerHeight;
+          // Use device pixel ratio for crisp rendering
+          const devicePixelRatio = window.devicePixelRatio || 1;
+          const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
+          const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
           
           // Update BOTH HTML attributes AND CSS styles
           canvas.setAttribute('width', fullWidth.toString());
           canvas.setAttribute('height', fullHeight.toString());
           canvas.width = fullWidth;
           canvas.height = fullHeight;
-          canvas.style.width = fullWidth + 'px';
-          canvas.style.height = fullHeight + 'px';
+          canvas.style.width = window.innerWidth + 'px';
+          canvas.style.height = window.innerHeight + 'px';
           
           console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
+          console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
           console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
         }
       };
@@ -190,7 +196,7 @@
     try {
       visualManager = new VisualManager({
         sceneType: 'particles',
-        particleCount: 100,
+        particleCount: 20,
         audioReactivity: true,
         quality: 'high'
       });
