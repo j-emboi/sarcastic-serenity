@@ -8,6 +8,10 @@
   let settingsValue: AppSettings | null = null;
 
   onMount(() => {
+    console.log('🏠 Main page onMount started!');
+    console.log('🏠 Current URL:', window.location.href);
+    console.log('🏠 Page pathname:', window.location.pathname);
+    
     initSettingsFromStorage();
     const unsub = settings.subscribe(value => {
       settingsValue = value;
@@ -17,6 +21,8 @@
   });
 
   function startSession() {
+    console.log('🚀 Start session button clicked!');
+    console.log('🚀 Navigating to /session...');
     goto('/session');
   }
 </script>
