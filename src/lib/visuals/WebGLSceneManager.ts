@@ -24,6 +24,16 @@ class Scene {
       }
     });
   }
+  
+  traverse(callback: (child: any) => void) {
+    // Traverse all children and call the callback
+    this.children.forEach(child => {
+      callback(child);
+      if (child.traverse) {
+        child.traverse(callback);
+      }
+    });
+  }
 }
 
 export interface AudioData {
