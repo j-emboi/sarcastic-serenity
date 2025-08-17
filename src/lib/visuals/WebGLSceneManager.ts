@@ -76,7 +76,7 @@ export class WebGLSceneManager {
 
   constructor() {
     this.physics = Matter.Engine.create({
-      gravity: { x: 0, y: -0.5, scale: 0.001 }
+      gravity: { x: 0, y: -0.3, scale: 0.001 }
     });
   }
 
@@ -90,15 +90,13 @@ export class WebGLSceneManager {
       const targetWidth = canvas.clientWidth || window.innerWidth;
       const targetHeight = canvas.clientHeight || window.innerHeight;
       
-      if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
-        // Also update the style dimensions to match
-        canvas.style.width = targetWidth + 'px';
-        canvas.style.height = targetHeight + 'px';
-        console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
-        console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
-      }
+      // Always update canvas dimensions and style
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      canvas.style.width = targetWidth + 'px';
+      canvas.style.height = targetHeight + 'px';
+      console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
+      console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
 
       // Initialize OGL renderer with simpler parameters
       console.log('🎨 Creating OGL Renderer with canvas:', canvas);
@@ -124,6 +122,23 @@ export class WebGLSceneManager {
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
       // OGL renderer doesn't have setClearColor - background is handled by the scene
+
+      // Create physics boundaries for particle containment
+      const bounds = {
+        left: -canvas.width / 2,
+        right: canvas.width / 2,
+        top: -canvas.height / 2,
+        bottom: canvas.height / 2
+      };
+      
+      // Add invisible boundaries
+      const leftWall = Matter.Bodies.rectangle(bounds.left - 50, 0, 100, canvas.height, { isStatic: true });
+      const rightWall = Matter.Bodies.rectangle(bounds.right + 50, 0, 100, canvas.height, { isStatic: true });
+      const topWall = Matter.Bodies.rectangle(0, bounds.top - 50, canvas.width, 100, { isStatic: true });
+      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + 50, canvas.width, 100, { isStatic: true });
+      
+      Matter.Composite.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
+      console.log('🎨 Added physics boundaries for particle containment');
 
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {

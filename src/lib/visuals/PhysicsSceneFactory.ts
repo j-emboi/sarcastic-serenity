@@ -76,9 +76,16 @@ export class PhysicsSceneFactory {
   ): PhysicsObject {
     // Create physics body
     const body = Matter.Bodies.circle(x, y, size * 50, {
-      restitution: 0.8,
-      friction: 0.1,
-      density: 0.001
+      restitution: 0.9,  // Higher bounce
+      friction: 0.05,     // Lower friction for more bouncing
+      density: 0.001,
+      frictionAir: 0.001  // Very low air resistance
+    });
+    
+    // Add some initial velocity for more dynamic movement
+    Matter.Body.setVelocity(body, {
+      x: (Math.random() - 0.5) * 2,  // Random horizontal velocity
+      y: (Math.random() - 0.5) * 2   // Random vertical velocity
     });
 
     // Randomize color for variety

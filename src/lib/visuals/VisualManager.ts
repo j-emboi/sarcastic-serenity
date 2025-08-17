@@ -24,7 +24,7 @@ export class VisualManager {
     this.audioBridge = new AudioVisualBridge();
     this.config = {
       sceneType: 'particles',
-      particleCount: 30,
+      particleCount: 20,
       audioReactivity: true,
       quality: 'medium',
       ...config
