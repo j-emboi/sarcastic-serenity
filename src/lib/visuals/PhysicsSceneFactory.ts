@@ -82,17 +82,17 @@ export class PhysicsSceneFactory {
       frictionAir: 0.00001 // Extremely low air resistance
     });
     
-    // Add some initial velocity for more dynamic movement
+    // Add gentle initial velocity for calming movement
     Matter.Body.setVelocity(body, {
-      x: (Math.random() - 0.5) * 8,  // Random horizontal velocity (increased)
-      y: (Math.random() - 0.5) * 8   // Random vertical velocity (increased)
+      x: (Math.random() - 0.5) * 3,  // Gentle horizontal velocity
+      y: (Math.random() - 0.5) * 3   // Gentle vertical velocity
     });
     
-    // Add a stronger upward bias to keep particles bouncing
-    if (Math.random() > 0.2) { // More particles get upward bias (80% chance)
+    // Add a gentle upward bias to keep particles floating
+    if (Math.random() > 0.3) { // Some particles get gentle upward bias (70% chance)
       Matter.Body.setVelocity(body, {
         x: body.velocity.x,
-        y: body.velocity.y - 3  // Even stronger upward bias
+        y: body.velocity.y - 1  // Gentle upward bias
       });
     }
 
@@ -219,8 +219,8 @@ export class PhysicsSceneFactory {
   ): PhysicsObject[] {
     const particles: PhysicsObject[] = [];
     
-    // Scale the bounds to match the physics world scale (0.08)
-    const scale = 0.08;
+    // Scale the bounds to match the physics world scale (0.12)
+    const scale = 0.12;
     const scaledBounds = {
       x: bounds.x * scale,
       y: bounds.y * scale,

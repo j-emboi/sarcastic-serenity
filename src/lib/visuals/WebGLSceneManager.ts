@@ -176,8 +176,8 @@ export class WebGLSceneManager {
       
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
-      // Use a balanced scale to cover most of the screen while preventing off-screen particles
-      const scale = 0.08; // Balanced scale = good coverage without escaping
+      // Use a larger scale to fill more of the screen while preventing off-screen particles
+      const scale = 0.12; // Larger scale = better screen coverage
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -253,7 +253,7 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     // Update physics bounds to match new canvas dimensions
-    const scale = 0.08;
+    const scale = 0.12;
     this.physicsBounds = {
       left: -width * scale / 2,
       right: width * scale / 2,
@@ -366,8 +366,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body with consistent scaling
-        // Use a fixed scale that matches the physics world scale (0.08)
-        const visualScale = 0.08;
+        // Use a fixed scale that matches the physics world scale (0.12)
+        const visualScale = 0.12;
         
         obj.mesh.position.x = obj.body.position.x * visualScale;
         obj.mesh.position.y = obj.body.position.y * visualScale;
@@ -443,17 +443,17 @@ export class WebGLSceneManager {
       if (obj.body && obj.body.velocity) {
         const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
         
-        // If particle is moving slowly, give it a strong directional boost
-        if (speed < 3) {
-          const boostMultiplier = 6; // Strong boost for slow particles
+        // If particle is moving slowly, give it a gentle boost for calming effect
+        if (speed < 2) {
+          const boostMultiplier = 1.5; // Gentle boost for slow particles
           
           Matter.Body.setVelocity(obj.body, {
             x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
             y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
           });
         } else {
-          // For faster particles, give a smaller boost to maintain momentum
-          const boostMultiplier = 1;
+          // For faster particles, give a very small boost to maintain gentle movement
+          const boostMultiplier = 0.3;
           
           Matter.Body.setVelocity(obj.body, {
             x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
