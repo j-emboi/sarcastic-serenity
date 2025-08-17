@@ -176,8 +176,9 @@ export class WebGLSceneManager {
     const deltaTime = currentTime - this.lastTime;
     this.lastTime = currentTime;
 
-    // Update physics
-    Matter.Engine.update(this.physics, deltaTime);
+    // Update physics with capped delta time (max 16.667ms for 60fps)
+    const cappedDeltaTime = Math.min(deltaTime, 16.667);
+    Matter.Engine.update(this.physics, cappedDeltaTime);
 
     // Update visual objects
     this.updatePhysicsObjects();

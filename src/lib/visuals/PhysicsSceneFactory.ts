@@ -71,8 +71,8 @@ export class PhysicsSceneFactory {
     gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
-    size: number = 0.1,
-    color: [number, number, number] = [0.5, 0.8, 1.0]
+    size: number = 0.2,
+    color: [number, number, number] = [0.2, 0.6, 1.0]
   ): PhysicsObject {
     // Create physics body
     const body = Matter.Bodies.circle(x, y, size * 50, {
@@ -81,6 +81,16 @@ export class PhysicsSceneFactory {
       density: 0.001
     });
 
+    // Randomize color for variety
+    const colors = [
+      [0.2, 0.6, 1.0], // Blue
+      [0.8, 0.3, 0.8], // Purple
+      [0.3, 0.8, 0.4], // Green
+      [1.0, 0.6, 0.2], // Orange
+      [0.8, 0.2, 0.2]  // Red
+    ];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
     // Create visual mesh
     const geometry = new Plane(gl);
     const program = new Program(gl, {
@@ -88,7 +98,7 @@ export class PhysicsSceneFactory {
       fragment: particleShader.fragment,
       uniforms: {
         time: { value: 0 },
-        color: { value: color }
+        color: { value: randomColor }
       }
     });
 
