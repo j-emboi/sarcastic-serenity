@@ -78,6 +78,9 @@ export class WebGLSceneManager {
     mid: 0,
     treble: 0
   };
+  
+  // Physics bounds storage
+  private physicsBounds: { left: number; right: number; top: number; bottom: number } | null = null;
 
   constructor() {
     this.physics = Matter.Engine.create({
@@ -181,6 +184,9 @@ export class WebGLSceneManager {
         top: -canvas.height * scale / 2,
         bottom: canvas.height * scale / 2
       };
+      
+      // Store the physics bounds for consistent containment
+      this.physicsBounds = bounds;
       
       console.log('🎨 Physics bounds (scaled):', bounds);
       console.log('🎨 Canvas dimensions for bounds:', canvas.width, 'x', canvas.height);
@@ -310,16 +316,13 @@ export class WebGLSceneManager {
   }
 
   private updatePhysicsObjects(): void {
-    // Calculate bounds dynamically based on canvas dimensions
-    const canvasWidth = this.canvas?.width || 1792;
-    const canvasHeight = this.canvas?.height || 894;
-    const scale = 0.2;
-    const bounds = {
-      left: -canvasWidth * scale / 2,
-      right: canvasWidth * scale / 2,
-      top: -canvasHeight * scale / 2,
-      bottom: canvasHeight * scale / 2
-    };
+    // Use the stored physics bounds for consistent containment
+    if (!this.physicsBounds) {
+      console.warn('🎨 No physics bounds available for containment');
+      return;
+    }
+    
+    const bounds = this.physicsBounds;
     
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.mesh) {
@@ -441,16 +444,13 @@ export class WebGLSceneManager {
   }
   
   private aggressiveContainmentCheck(): void {
-    // Calculate bounds dynamically based on canvas dimensions
-    const canvasWidth = this.canvas?.width || 1792;
-    const canvasHeight = this.canvas?.height || 894;
-    const scale = 0.2;
-    const bounds = {
-      left: -canvasWidth * scale / 2,
-      right: canvasWidth * scale / 2,
-      top: -canvasHeight * scale / 2,
-      bottom: canvasHeight * scale / 2
-    };
+    // Use the stored physics bounds for consistent containment
+    if (!this.physicsBounds) {
+      console.warn('🎨 No physics bounds available for aggressive containment');
+      return;
+    }
+    
+    const bounds = this.physicsBounds;
     
     let containedCount = 0;
     this.physicsObjects.forEach(obj => {
