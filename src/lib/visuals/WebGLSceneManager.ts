@@ -511,13 +511,21 @@ export class WebGLSceneManager {
         
         console.log('🎯 Processing particle-to-particle collision!');
         
-        // Calculate collision normal and add energy boost in opposite direction
-        const normal = pair.normal;
-        console.log('🎯 Collision normal:', normal);
-        if (!normal) {
-          console.log('🎯 Skipping collision - no normal vector');
+        // Calculate collision direction between the two particles
+        const dx = bodyB.position.x - bodyA.position.x;
+        const dy = bodyB.position.y - bodyA.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance === 0) {
+          console.log('🎯 Skipping collision - particles at same position');
           return;
         }
+        
+        // Normalize the direction vector
+        const normalX = dx / distance;
+        const normalY = dy / distance;
+        
+        console.log('🎯 Calculated collision direction:', { x: normalX, y: normalY });
         
         const energyBoost = 8; // Increased energy boost to prevent sticking
         
@@ -529,25 +537,25 @@ export class WebGLSceneManager {
           
           // Boost particle A in the direction of the normal
           Matter.Body.setVelocity(bodyA, {
-            x: bodyA.velocity.x + normal.x * energyBoost,
-            y: bodyA.velocity.y + normal.y * energyBoost
+            x: bodyA.velocity.x + normalX * energyBoost,
+            y: bodyA.velocity.y + normalY * energyBoost
           });
           
           // Boost particle B in the opposite direction
           Matter.Body.setVelocity(bodyB, {
-            x: bodyB.velocity.x - normal.x * energyBoost,
-            y: bodyB.velocity.y - normal.y * energyBoost
+            x: bodyB.velocity.x - normalX * energyBoost,
+            y: bodyB.velocity.y - normalY * energyBoost
           });
           
           // Add separation force to prevent sticking
           const separationForce = 0.5;
           Matter.Body.applyForce(bodyA, bodyA.position, {
-            x: normal.x * separationForce,
-            y: normal.y * separationForce
+            x: normalX * separationForce,
+            y: normalY * separationForce
           });
           Matter.Body.applyForce(bodyB, bodyB.position, {
-            x: -normal.x * separationForce,
-            y: -normal.y * separationForce
+            x: -normalX * separationForce,
+            y: -normalY * separationForce
           });
         }
       } catch (error) {
