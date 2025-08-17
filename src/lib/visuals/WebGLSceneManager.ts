@@ -509,6 +509,8 @@ export class WebGLSceneManager {
           return;
         }
         
+        console.log('🎯 Processing particle-to-particle collision!');
+        
         // Calculate collision normal and add energy boost in opposite direction
         const normal = pair.normal;
         if (!normal) {
@@ -516,6 +518,8 @@ export class WebGLSceneManager {
         }
         
         const energyBoost = 8; // Increased energy boost to prevent sticking
+        
+        console.log('🎯 Checking velocities - bodyA velocity:', bodyA.velocity, 'bodyB velocity:', bodyB.velocity);
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
