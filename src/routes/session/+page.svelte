@@ -1,4 +1,6 @@
 <script lang="ts">
+  console.log('📄 Session page script loading...');
+  
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings } from '$lib/stores/settings';
@@ -7,6 +9,8 @@
   import { aiVoiceService } from '$lib/audio/aiVoiceService';
   import { characterVoiceService } from '$lib/audio/characterVoiceService';
   import type { AppSettings } from '$lib/stores/settings';
+
+  console.log('📄 Session page imports completed');
   
   let timeLeft = 60; // Start with 1 minute default
   let quote = '';
@@ -22,6 +26,10 @@
 
 
   onMount(() => {
+    console.log('🚀 Session page onMount started!');
+    console.log('🚀 Current URL:', window.location.href);
+    console.log('🚀 Page pathname:', window.location.pathname);
+    
     // Stop any currently playing preview voice TTS immediately when session starts
     speechSynthesis.cancel();
     characterVoiceService.stop();
