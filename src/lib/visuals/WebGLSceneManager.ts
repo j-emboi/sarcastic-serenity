@@ -304,30 +304,31 @@ export class WebGLSceneManager {
   }
 
   private updatePhysicsObjects(): void {
-    // Get canvas bounds for containment
-    const canvasWidth = this.canvas?.width || 1792;
-    const canvasHeight = this.canvas?.height || 894;
-    const scale = 0.1; // Match the physics world scale
+    // Use the same bounds as the physics world (from initialization)
     const bounds = {
-      left: -canvasWidth * scale / 2,
-      right: canvasWidth * scale / 2,
-      top: -canvasHeight * scale / 2,
-      bottom: canvasHeight * scale / 2
+      left: -109.6,  // From wall positions log
+      right: 109.6,
+      top: -64.7,
+      bottom: 64.7
     };
     
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.mesh) {
-        // Check if particle is outside bounds and bring it back
+        // Check if particle is outside bounds and bring it back with velocity reversal
         if (obj.body.position.x < bounds.left) {
-          Matter.Body.setPosition(obj.body, { x: bounds.left + 1, y: obj.body.position.y });
+          Matter.Body.setPosition(obj.body, { x: bounds.left + 2, y: obj.body.position.y });
+          Matter.Body.setVelocity(obj.body, { x: Math.abs(obj.body.velocity.x), y: obj.body.velocity.y });
         } else if (obj.body.position.x > bounds.right) {
-          Matter.Body.setPosition(obj.body, { x: bounds.right - 1, y: obj.body.position.y });
+          Matter.Body.setPosition(obj.body, { x: bounds.right - 2, y: obj.body.position.y });
+          Matter.Body.setVelocity(obj.body, { x: -Math.abs(obj.body.velocity.x), y: obj.body.velocity.y });
         }
         
         if (obj.body.position.y < bounds.top) {
-          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.top + 1 });
+          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.top + 2 });
+          Matter.Body.setVelocity(obj.body, { x: obj.body.velocity.x, y: Math.abs(obj.body.velocity.y) });
         } else if (obj.body.position.y > bounds.bottom) {
-          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.bottom - 1 });
+          Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.bottom - 2 });
+          Matter.Body.setVelocity(obj.body, { x: obj.body.velocity.x, y: -Math.abs(obj.body.velocity.y) });
         }
         
         // Update mesh position from physics body
