@@ -57,15 +57,34 @@
       console.log('Canvas element:', canvas);
       if (canvas) {
         console.log('🎨 Canvas found, setting dimensions...');
-        // Ensure canvas has proper dimensions
-        canvas.width = canvas.clientWidth || window.innerWidth;
-        canvas.height = canvas.clientHeight || window.innerHeight;
+        // Force canvas to full screen
+        const fullWidth = window.innerWidth;
+        const fullHeight = window.innerHeight;
+        canvas.width = fullWidth;
+        canvas.height = fullHeight;
+        canvas.style.width = fullWidth + 'px';
+        canvas.style.height = fullHeight + 'px';
         console.log('🎨 Canvas dimensions set to:', canvas.width, 'x', canvas.height);
         await initializeVisualSystem();
       } else {
         console.error('❌ Canvas element not found after timeout!');
       }
     }, 100);
+    
+    // Add window resize handler to keep canvas full screen
+    const handleResize = () => {
+      if (canvas) {
+        const fullWidth = window.innerWidth;
+        const fullHeight = window.innerHeight;
+        canvas.width = fullWidth;
+        canvas.height = fullHeight;
+        canvas.style.width = fullWidth + 'px';
+        canvas.style.height = fullHeight + 'px';
+        console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
 
 
 
@@ -126,9 +145,16 @@
       return;
     }
     
-    // Ensure canvas has proper dimensions
-    canvas.width = canvas.clientWidth || window.innerWidth;
-    canvas.height = canvas.clientHeight || window.innerHeight;
+    // Force canvas to full screen size
+    const fullWidth = window.innerWidth;
+    const fullHeight = window.innerHeight;
+    
+    canvas.width = fullWidth;
+    canvas.height = fullHeight;
+    canvas.style.width = fullWidth + 'px';
+    canvas.style.height = fullHeight + 'px';
+    
+    console.log('🎨 Forced canvas to full screen:', fullWidth, 'x', fullHeight);
     
     try {
       visualManager = new VisualManager({

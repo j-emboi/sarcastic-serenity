@@ -65,6 +65,10 @@ export class WebGLSceneManager {
   private fps = 60;
   private qualityLevel = 1.0; // 1.0 = full quality, 0.5 = half quality
   
+  // Energy boost system
+  private energyBoostTimer = 0;
+  private energyBoostInterval = 3000; // Boost every 3 seconds
+  
   // Audio reactivity
   private audioData: AudioData = {
     frequency: new Array(64).fill(0),
@@ -197,6 +201,13 @@ export class WebGLSceneManager {
 
     // Update visual objects
     this.updatePhysicsObjects();
+    
+    // Energy boost system - periodically boost particle energy
+    this.energyBoostTimer += cappedDeltaTime;
+    if (this.energyBoostTimer >= this.energyBoostInterval) {
+      this.boostParticleEnergy();
+      this.energyBoostTimer = 0;
+    }
 
     // Render scene
     this.renderer.render({ scene: this.scene, camera: this.camera });
@@ -268,6 +279,23 @@ export class WebGLSceneManager {
 
   getGLContext(): WebGLRenderingContext | null {
     return this.renderer?.gl || null;
+  }
+  
+  private boostParticleEnergy(): void {
+    // Boost energy of particles that are moving slowly
+    this.physicsObjects.forEach(obj => {
+      if (obj.body && obj.body.velocity) {
+        const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
+        if (speed < 2) { // If particle is moving slowly
+          // Add random velocity boost
+          Matter.Body.setVelocity(obj.body, {
+            x: obj.body.velocity.x + (Math.random() - 0.5) * 4,
+            y: obj.body.velocity.y + (Math.random() - 0.5) * 4
+          });
+        }
+      }
+    });
+    console.log('⚡ Boosted particle energy');
   }
 
   destroy(): void {
