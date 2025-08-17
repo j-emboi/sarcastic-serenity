@@ -42,8 +42,17 @@
 
     // Initialize WebGL Visual System after a short delay to ensure canvas is ready
     setTimeout(async () => {
+      console.log('🎨 Checking canvas availability...');
+      console.log('Canvas element:', canvas);
       if (canvas) {
+        console.log('🎨 Canvas found, setting dimensions...');
+        // Ensure canvas has proper dimensions
+        canvas.width = canvas.clientWidth || window.innerWidth;
+        canvas.height = canvas.clientHeight || window.innerHeight;
+        console.log('🎨 Canvas dimensions set to:', canvas.width, 'x', canvas.height);
         await initializeVisualSystem();
+      } else {
+        console.error('❌ Canvas element not found after timeout!');
       }
     }, 100);
 
@@ -97,6 +106,15 @@
 
   async function initializeVisualSystem() {
     try {
+      console.log('🎨 Starting WebGL Visual System initialization...');
+      console.log('Canvas element:', canvas);
+      console.log('Canvas dimensions:', canvas?.width, 'x', canvas?.height);
+      
+      if (!canvas) {
+        console.error('❌ Canvas element not found!');
+        return;
+      }
+
       // Create visual manager with calming particle configuration
       visualManager = new VisualManager({
         sceneType: 'particles',
@@ -105,8 +123,12 @@
         quality: 'medium'
       });
 
+      console.log('🎨 Visual Manager created, initializing...');
+
       // Initialize with canvas
       isVisualSystemReady = await visualManager.init(canvas);
+      
+      console.log('🎨 Initialization result:', isVisualSystemReady);
       
       if (isVisualSystemReady) {
         // Start the visual system
@@ -117,6 +139,7 @@
       }
     } catch (error) {
       console.error('❌ Failed to initialize WebGL Visual System:', error);
+      console.error('Error details:', error);
     }
   }
 

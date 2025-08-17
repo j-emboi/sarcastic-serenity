@@ -47,6 +47,17 @@ export class WebGLSceneManager {
 
   async init(canvas: HTMLCanvasElement): Promise<void> {
     try {
+      console.log('🎨 Initializing WebGL Scene Manager...');
+      console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+      console.log('Canvas client dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
+
+      // Ensure canvas has proper dimensions
+      if (canvas.width === 0 || canvas.height === 0) {
+        canvas.width = canvas.clientWidth || window.innerWidth;
+        canvas.height = canvas.clientHeight || window.innerHeight;
+        console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
+      }
+
       // Initialize OGL renderer
       this.renderer = new Renderer({
         canvas,
