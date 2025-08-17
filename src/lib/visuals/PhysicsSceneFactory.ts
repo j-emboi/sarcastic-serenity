@@ -71,11 +71,11 @@ export class PhysicsSceneFactory {
     gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
-    size: number = 0.3,
+    size: number = 0.6,
     color: [number, number, number] = [0.2, 0.6, 1.0]
   ): PhysicsObject {
-    // Create physics body - make it match visual size better
-    const body = Matter.Bodies.circle(x, y, size * 15, {
+    // Create physics body - make it match visual size accurately
+    const body = Matter.Bodies.circle(x, y, size * 20, {
       restitution: 0.98, // Very high bounce (98%)
       friction: 0.001,   // Extremely low friction for maximum bouncing
       density: 0.001,
