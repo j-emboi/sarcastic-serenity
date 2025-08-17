@@ -145,6 +145,17 @@
     <!-- Voice Preview Text Section -->
     {#if selectedCharacterId && characterVoices.find((v: any) => v.id === selectedCharacterId)}
       <div class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-xl max-w-2xl mx-auto">
+        <!-- Selected Voice Info -->
+        <div class="flex items-center space-x-4 mb-4">
+          <div class="text-3xl">{getVoiceIcon(selectedCharacterId)}</div>
+          <div>
+            <h4 class="text-lg font-semibold text-blue-200">{characterVoices.find((v: any) => v.id === selectedCharacterId).name}</h4>
+            <p class="text-sm text-blue-300">Currently Selected</p>
+          </div>
+        </div>
+        <p class="text-sm text-blue-100 mb-4">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
+        
+        <!-- Voice Preview Text -->
         <div class="space-y-3">
           <label for="preview-text" class="text-sm text-blue-300 font-medium">Preview Text:</label>
           <textarea
@@ -364,19 +375,5 @@
         {currentIndex + 1} of {characterVoices.length}
       </div>
     </div>
-
-    <!-- Selected Voice Details -->
-    {#if selectedCharacterId && characterVoices.find((v: any) => v.id === selectedCharacterId)}
-      <div class="mt-8 p-6 bg-blue-900/20 border border-blue-600/30 rounded-xl max-w-2xl mx-auto">
-        <div class="flex items-center space-x-4 mb-4">
-          <div class="text-3xl">{getVoiceIcon(selectedCharacterId)}</div>
-          <div>
-            <h4 class="text-lg font-semibold text-blue-200">{characterVoices.find((v: any) => v.id === selectedCharacterId).name}</h4>
-            <p class="text-sm text-blue-300">Currently Selected</p>
-          </div>
-        </div>
-        <p class="text-sm text-blue-100">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
-      </div>
-    {/if}
   {/if}
 </div>
