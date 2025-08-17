@@ -143,21 +143,21 @@
     </div>
   {:else}
     <!-- Voice Carousel -->
-    <div class="relative max-w-4xl mx-auto">
+    <div class="relative max-w-3xl mx-auto">
       <!-- Carousel Container -->
       <div 
         bind:this={carouselContainer}
-        class="relative overflow-visible rounded-xl py-4"
+        class="relative overflow-hidden rounded-xl py-4"
       >
         <div 
           class="flex transition-transform duration-500 ease-in-out"
           style="transform: translateX(-{currentIndex * 100}%)"
         >
           {#each characterVoices as voice, index}
-            <div class="w-full flex-shrink-0 px-8">
+            <div class="w-full flex-shrink-0 px-4">
               {#if selectedCharacterId === voice.id}
                 <div 
-                  class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-6 ring-2 ring-blue-500 bg-gray-800/50 border-blue-500"
+                  class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-4 ring-2 ring-blue-500 bg-gray-800/50 border-blue-500"
                   on:click={() => selectVoice(voice.id)}
                 >
                   <!-- Selection Indicator -->
@@ -166,64 +166,64 @@
                   </div>
 
                   <!-- Voice Header -->
-                  <div class="flex items-center space-x-4 mb-4">
-                    <div class="text-4xl">{getVoiceIcon(voice.id)}</div>
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="text-3xl">{getVoiceIcon(voice.id)}</div>
                     <div class="flex-1">
-                      <h4 class="text-xl font-semibold text-gray-200">{voice.name}</h4>
-                      <p class="text-sm text-gray-400">{voice.voicePreferences.gender} • {voice.voicePreferences.age}</p>
+                      <h4 class="text-lg font-semibold text-gray-200">{voice.name}</h4>
+                      <p class="text-xs text-gray-400">{voice.voicePreferences.gender} • {voice.voicePreferences.age}</p>
                     </div>
                   </div>
 
                   <!-- Description -->
-                  <p class="text-base text-gray-300 mb-6 leading-relaxed">{voice.description}</p>
+                  <p class="text-sm text-gray-300 mb-4 leading-relaxed">{voice.description}</p>
 
                   <!-- Personality Traits -->
-                  <div class="space-y-3 mb-6">
-                    <div class="flex items-center justify-between text-sm">
+                  <div class="space-y-2 mb-4">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Enthusiasm</span>
                       <span class="text-gray-300">{voice.personality.enthusiasm}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.enthusiasm > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-green-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-green-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {:else if voice.personality.enthusiasm > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-yellow-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-yellow-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-blue-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-blue-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {/if}
                     </div>
 
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Sarcasm</span>
                       <span class="text-gray-300">{voice.personality.sarcasm}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.sarcasm > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-purple-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-purple-500" style="width: {voice.personality.sarcasm}%"></div>
                       {:else if voice.personality.sarcasm > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-orange-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-orange-500" style="width: {voice.personality.sarcasm}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-gray-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-gray-500" style="width: {voice.personality.sarcasm}%"></div>
                       {/if}
                     </div>
 
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Warmth</span>
                       <span class="text-gray-300">{voice.personality.warmth}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.warmth > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-pink-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-pink-500" style="width: {voice.personality.warmth}%"></div>
                       {:else if voice.personality.warmth > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-red-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-red-500" style="width: {voice.personality.warmth}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-indigo-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-indigo-500" style="width: {voice.personality.warmth}%"></div>
                       {/if}
                     </div>
                   </div>
 
                   <!-- Voice Settings -->
-                  <div class="flex justify-between text-sm text-gray-400 mb-6">
+                  <div class="flex justify-between text-xs text-gray-400 mb-4">
                     <span>Pitch: {voice.voiceSettings.pitch.toFixed(1)}</span>
                     <span>Rate: {voice.voiceSettings.rate.toFixed(1)}</span>
                   </div>
@@ -232,75 +232,75 @@
                   <button
                     on:click|stopPropagation={() => previewVoice(voice.id)}
                     disabled={isPreviewingVoice}
-                    class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base font-medium"
+                    class="w-full py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                   >
                     {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
                   </button>
                 </div>
               {:else}
                 <div 
-                  class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-6 bg-gray-800/30 border-gray-700"
+                  class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-4 bg-gray-800/30 border-gray-700"
                   on:click={() => selectVoice(voice.id)}
                 >
                   <!-- Voice Header -->
-                  <div class="flex items-center space-x-4 mb-4">
-                    <div class="text-4xl">{getVoiceIcon(voice.id)}</div>
+                  <div class="flex items-center space-x-3 mb-3">
+                    <div class="text-3xl">{getVoiceIcon(voice.id)}</div>
                     <div class="flex-1">
-                      <h4 class="text-xl font-semibold text-gray-200">{voice.name}</h4>
-                      <p class="text-sm text-gray-400">{voice.voicePreferences.gender} • {voice.voicePreferences.age}</p>
+                      <h4 class="text-lg font-semibold text-gray-200">{voice.name}</h4>
+                      <p class="text-xs text-gray-400">{voice.voicePreferences.gender} • {voice.voicePreferences.age}</p>
                     </div>
                   </div>
 
                   <!-- Description -->
-                  <p class="text-base text-gray-300 mb-6 leading-relaxed">{voice.description}</p>
+                  <p class="text-sm text-gray-300 mb-4 leading-relaxed">{voice.description}</p>
 
                   <!-- Personality Traits -->
-                  <div class="space-y-3 mb-6">
-                    <div class="flex items-center justify-between text-sm">
+                  <div class="space-y-2 mb-4">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Enthusiasm</span>
                       <span class="text-gray-300">{voice.personality.enthusiasm}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.enthusiasm > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-green-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-green-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {:else if voice.personality.enthusiasm > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-yellow-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-yellow-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-blue-500" style="width: {voice.personality.enthusiasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-blue-500" style="width: {voice.personality.enthusiasm}%"></div>
                       {/if}
                     </div>
 
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Sarcasm</span>
                       <span class="text-gray-300">{voice.personality.sarcasm}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.sarcasm > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-purple-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-purple-500" style="width: {voice.personality.sarcasm}%"></div>
                       {:else if voice.personality.sarcasm > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-orange-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-orange-500" style="width: {voice.personality.sarcasm}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-gray-500" style="width: {voice.personality.sarcasm}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-gray-500" style="width: {voice.personality.sarcasm}%"></div>
                       {/if}
                     </div>
 
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center justify-between text-xs">
                       <span class="text-gray-400">Warmth</span>
                       <span class="text-gray-300">{voice.personality.warmth}%</span>
                     </div>
-                    <div class="w-full bg-gray-700 rounded-full h-3">
+                    <div class="w-full bg-gray-700 rounded-full h-2">
                       {#if voice.personality.warmth > 70}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-pink-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-pink-500" style="width: {voice.personality.warmth}%"></div>
                       {:else if voice.personality.warmth > 40}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-red-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-red-500" style="width: {voice.personality.warmth}%"></div>
                       {:else}
-                        <div class="h-3 rounded-full transition-all duration-300 bg-indigo-500" style="width: {voice.personality.warmth}%"></div>
+                        <div class="h-2 rounded-full transition-all duration-300 bg-indigo-500" style="width: {voice.personality.warmth}%"></div>
                       {/if}
                     </div>
                   </div>
 
                   <!-- Voice Settings -->
-                  <div class="flex justify-between text-sm text-gray-400 mb-6">
+                  <div class="flex justify-between text-xs text-gray-400 mb-4">
                     <span>Pitch: {voice.voiceSettings.pitch.toFixed(1)}</span>
                     <span>Rate: {voice.voiceSettings.rate.toFixed(1)}</span>
                   </div>
@@ -309,7 +309,7 @@
                   <button
                     on:click|stopPropagation={() => previewVoice(voice.id)}
                     disabled={isPreviewingVoice}
-                    class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-base font-medium"
+                    class="w-full py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                   >
                     {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
                   </button>
