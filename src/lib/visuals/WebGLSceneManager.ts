@@ -515,7 +515,7 @@ export class WebGLSceneManager {
         const normalX = dx / distance;
         const normalY = dy / distance;
         
-        const energyBoost = 2; // Gentle energy boost for calming effect
+        const energyBoost = 0.3; // Very gentle energy boost for calming effect
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
@@ -533,7 +533,7 @@ export class WebGLSceneManager {
           });
           
           // Add separation force to prevent sticking
-          const separationForce = 0.1;
+          const separationForce = 0.02; // Very gentle separation
           Matter.Body.applyForce(bodyA, bodyA.position, {
             x: normalX * separationForce,
             y: normalY * separationForce
