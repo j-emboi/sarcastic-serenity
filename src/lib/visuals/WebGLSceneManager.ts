@@ -173,8 +173,8 @@ export class WebGLSceneManager {
       
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
-      // Use a larger scale for physics world to give particles more room to move
-      const scale = 0.1; // 10x larger than visual scale for more movement space
+      // Use a much larger scale for physics world to give particles more room to move
+      const scale = 0.05; // Smaller scale = larger bounds for more movement space
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -312,10 +312,10 @@ export class WebGLSceneManager {
   private updatePhysicsObjects(): void {
     // Use the same bounds as the physics world (from initialization)
     const bounds = {
-      left: -109.6,  // From wall positions log
-      right: 109.6,
-      top: -64.7,
-      bottom: 64.7
+      left: -89.6,   // Adjusted for new scale (0.05)
+      right: 89.6,
+      top: -44.7,
+      bottom: 44.7
     };
     
     this.physicsObjects.forEach(obj => {
@@ -349,8 +349,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body
-        obj.mesh.position.x = obj.body.position.x * 0.1; // Scale down for visual (match physics scale)
-        obj.mesh.position.y = obj.body.position.y * 0.1;
+        obj.mesh.position.x = obj.body.position.x * 0.05; // Scale down for visual (match physics scale)
+        obj.mesh.position.y = obj.body.position.y * 0.05;
         obj.mesh.rotation.z = obj.body.angle;
       }
     });
@@ -439,10 +439,10 @@ export class WebGLSceneManager {
   
   private aggressiveContainmentCheck(): void {
     const bounds = {
-      left: -109.6,
-      right: 109.6,
-      top: -64.7,
-      bottom: 64.7
+      left: -89.6,
+      right: 89.6,
+      top: -44.7,
+      bottom: 44.7
     };
     
     let containedCount = 0;
