@@ -142,6 +142,29 @@
       </button>
     </div>
   {:else}
+    <!-- Voice Preview Text Section -->
+    {#if selectedCharacterId && characterVoices.find((v: any) => v.id === selectedCharacterId)}
+      <div class="mb-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-xl max-w-2xl mx-auto">
+        <div class="space-y-3">
+          <label for="preview-text" class="text-sm text-blue-300 font-medium">Preview Text:</label>
+          <textarea
+            id="preview-text"
+            bind:value={previewText}
+            class="w-full p-3 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 resize-none"
+            rows="3"
+            placeholder="Enter text to preview the voice..."
+          ></textarea>
+          <button
+            on:click={() => previewVoice(selectedCharacterId)}
+            disabled={isPreviewingVoice}
+            class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
+          </button>
+        </div>
+      </div>
+    {/if}
+
     <!-- Voice Carousel -->
     <div class="relative max-w-2xl mx-auto">
       <!-- Carousel Container -->
@@ -223,19 +246,10 @@
                   </div>
 
                   <!-- Voice Settings -->
-                  <div class="flex justify-between text-xs text-gray-400 mb-3">
+                  <div class="flex justify-between text-xs text-gray-400">
                     <span>Pitch: {voice.voiceSettings.pitch.toFixed(1)}</span>
                     <span>Rate: {voice.voiceSettings.rate.toFixed(1)}</span>
                   </div>
-
-                  <!-- Preview Button -->
-                  <button
-                    on:click|stopPropagation={() => previewVoice(voice.id)}
-                    disabled={isPreviewingVoice}
-                    class="w-full py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                  >
-                    {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
-                  </button>
                 </div>
               {:else}
                 <div 
@@ -300,19 +314,10 @@
                   </div>
 
                   <!-- Voice Settings -->
-                  <div class="flex justify-between text-xs text-gray-400 mb-3">
+                  <div class="flex justify-between text-xs text-gray-400">
                     <span>Pitch: {voice.voiceSettings.pitch.toFixed(1)}</span>
                     <span>Rate: {voice.voiceSettings.rate.toFixed(1)}</span>
                   </div>
-
-                  <!-- Preview Button -->
-                  <button
-                    on:click|stopPropagation={() => previewVoice(voice.id)}
-                    disabled={isPreviewingVoice}
-                    class="w-full py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                  >
-                    {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
-                  </button>
                 </div>
               {/if}
             </div>
@@ -370,26 +375,7 @@
             <p class="text-sm text-blue-300">Currently Selected</p>
           </div>
         </div>
-        <p class="text-sm text-blue-100 mb-4">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
-        
-        <!-- Voice Preview Text -->
-        <div class="space-y-3">
-          <label for="preview-text" class="text-sm text-blue-300 font-medium">Preview Text:</label>
-          <textarea
-            id="preview-text"
-            bind:value={previewText}
-            class="w-full p-3 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 resize-none"
-            rows="3"
-            placeholder="Enter text to preview the voice..."
-          ></textarea>
-          <button
-            on:click={() => previewVoice(selectedCharacterId)}
-            disabled={isPreviewingVoice}
-            class="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
-          >
-            {isPreviewingVoice ? 'Playing...' : '🎵 Preview'}
-          </button>
-        </div>
+        <p class="text-sm text-blue-100">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
       </div>
     {/if}
   {/if}
