@@ -81,7 +81,7 @@ export class WebGLSceneManager {
 
   constructor() {
     this.physics = Matter.Engine.create({
-      gravity: { x: 0, y: -0.1, scale: 0.001 }  // Much lighter gravity
+      gravity: { x: 0, y: -0.05, scale: 0.001 }  // Very light gravity to keep particles floating
     });
   }
 

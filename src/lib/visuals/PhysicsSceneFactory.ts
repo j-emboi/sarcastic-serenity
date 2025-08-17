@@ -74,8 +74,8 @@ export class PhysicsSceneFactory {
     size: number = 0.2,
     color: [number, number, number] = [0.2, 0.6, 1.0]
   ): PhysicsObject {
-    // Create physics body
-    const body = Matter.Bodies.circle(x, y, size * 50, {
+    // Create physics body - make it smaller to match visual size
+    const body = Matter.Bodies.circle(x, y, size * 10, {
       restitution: 0.95, // Very high bounce (95%)
       friction: 0.01,    // Very low friction for maximum bouncing
       density: 0.001,
@@ -84,15 +84,15 @@ export class PhysicsSceneFactory {
     
     // Add some initial velocity for more dynamic movement
     Matter.Body.setVelocity(body, {
-      x: (Math.random() - 0.5) * 3,  // Random horizontal velocity
-      y: (Math.random() - 0.5) * 3   // Random vertical velocity
+      x: (Math.random() - 0.5) * 5,  // Random horizontal velocity (increased)
+      y: (Math.random() - 0.5) * 5   // Random vertical velocity (increased)
     });
     
-    // Add a small upward bias to keep particles bouncing
-    if (Math.random() > 0.5) {
+    // Add a stronger upward bias to keep particles bouncing
+    if (Math.random() > 0.3) { // More particles get upward bias
       Matter.Body.setVelocity(body, {
         x: body.velocity.x,
-        y: body.velocity.y - 1  // Upward bias
+        y: body.velocity.y - 2  // Stronger upward bias
       });
     }
 
@@ -138,8 +138,8 @@ export class PhysicsSceneFactory {
     size: number = 0.15,
     color: [number, number, number] = [0.2, 0.6, 0.9]
   ): PhysicsObject {
-    // Create physics body with fluid-like properties
-    const body = Matter.Bodies.circle(x, y, size * 40, {
+    // Create physics body with fluid-like properties - make it smaller to match visual size
+    const body = Matter.Bodies.circle(x, y, size * 8, {
       restitution: 0.3,
       friction: 0.8,
       density: 0.002,
