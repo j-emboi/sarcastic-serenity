@@ -107,12 +107,16 @@ export class VisualManager {
       return;
     }
 
-    console.log('🎭 Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
+    // Use the actual canvas dimensions from the renderer
+    const actualWidth = this.sceneManager.getCanvasWidth();
+    const actualHeight = this.sceneManager.getCanvasHeight();
+    
+    console.log('🎭 Actual canvas dimensions:', actualWidth, 'x', actualHeight);
     const bounds = {
-      x: -this.canvas.width / 2,
-      y: -this.canvas.height / 2,
-      width: this.canvas.width,
-      height: this.canvas.height
+      x: -actualWidth / 2,
+      y: -actualHeight / 2,
+      width: actualWidth,
+      height: actualHeight
     };
     console.log('🎭 Scene bounds:', bounds);
 
@@ -141,6 +145,7 @@ export class VisualManager {
     }
 
     // Create particles based on scene type
+    console.log('🎭 Creating particles with count:', this.config.particleCount);
     let particles;
     switch (sceneType) {
       case 'fluid':

@@ -99,6 +99,13 @@ export class WebGLSceneManager {
       canvas.height = targetHeight;
       canvas.style.width = targetWidth + 'px';
       canvas.style.height = targetHeight + 'px';
+      
+      // Also update the renderer canvas reference
+      if (this.renderer && this.renderer.canvas) {
+        this.renderer.canvas.width = targetWidth;
+        this.renderer.canvas.height = targetHeight;
+      }
+      
       console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
       console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
 
@@ -279,6 +286,14 @@ export class WebGLSceneManager {
 
   getGLContext(): WebGLRenderingContext | null {
     return this.renderer?.gl || null;
+  }
+  
+  getCanvasWidth(): number {
+    return this.renderer?.canvas?.width || 0;
+  }
+  
+  getCanvasHeight(): number {
+    return this.renderer?.canvas?.height || 0;
   }
   
   private boostParticleEnergy(): void {
