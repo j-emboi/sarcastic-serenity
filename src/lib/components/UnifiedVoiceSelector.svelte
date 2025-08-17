@@ -147,14 +147,14 @@
       <!-- Carousel Container -->
       <div 
         bind:this={carouselContainer}
-        class="relative overflow-hidden rounded-xl"
+        class="relative overflow-visible rounded-xl py-4"
       >
         <div 
           class="flex transition-transform duration-500 ease-in-out"
           style="transform: translateX(-{currentIndex * 100}%)"
         >
           {#each characterVoices as voice, index}
-            <div class="w-full flex-shrink-0 px-4">
+            <div class="w-full flex-shrink-0 px-8">
               {#if selectedCharacterId === voice.id}
                 <div 
                   class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-6 ring-2 ring-blue-500 bg-gray-800/50 border-blue-500"
@@ -323,7 +323,7 @@
       <!-- Navigation Arrows -->
       <button
         on:click={prevVoice}
-        class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-full p-3 transition-colors"
+        class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-full p-3 transition-colors z-10"
         aria-label="Previous voice"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -333,7 +333,7 @@
 
       <button
         on:click={nextVoice}
-        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-full p-3 transition-colors"
+        class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-full p-3 transition-colors z-10"
         aria-label="Next voice"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
