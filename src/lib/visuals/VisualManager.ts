@@ -133,11 +133,19 @@ export class VisualManager {
     // Add boundaries to physics world
     // Note: We'll need to modify the scene manager to handle boundaries properly
 
+    // Get GL context from scene manager
+    const gl = this.sceneManager.getGLContext();
+    if (!gl) {
+      console.error('❌ No GL context available for particle creation');
+      return;
+    }
+
     // Create particles based on scene type
     let particles;
     switch (sceneType) {
       case 'fluid':
         particles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           this.config.particleCount,
           bounds,
           'fluid'
@@ -145,6 +153,7 @@ export class VisualManager {
         break;
       case 'softBody':
         particles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           this.config.particleCount,
           bounds,
           'softBody'
@@ -153,16 +162,19 @@ export class VisualManager {
       case 'mixed':
         // Create a mix of different particle types
         const fluidParticles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           Math.floor(this.config.particleCount / 3),
           bounds,
           'fluid'
         );
         const softParticles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           Math.floor(this.config.particleCount / 3),
           bounds,
           'softBody'
         );
         const regularParticles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           this.config.particleCount - fluidParticles.length - softParticles.length,
           bounds,
           'particle'
@@ -171,6 +183,7 @@ export class VisualManager {
         break;
       default:
         particles = PhysicsSceneFactory.createParticleSystem(
+          gl,
           this.config.particleCount,
           bounds,
           'particle'

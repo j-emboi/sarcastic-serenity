@@ -68,6 +68,7 @@ export class PhysicsSceneFactory {
   }
 
   static createParticle(
+    gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
     size: number = 0.1,
@@ -82,7 +83,7 @@ export class PhysicsSceneFactory {
 
     // Create visual mesh
     const geometry = new Plane();
-    const program = new Program({
+    const program = new Program(gl, {
       vertex: particleShader.vertex,
       fragment: particleShader.fragment,
       uniforms: {
@@ -91,7 +92,7 @@ export class PhysicsSceneFactory {
       }
     });
 
-    const mesh = new Mesh({
+    const mesh = new Mesh(gl, {
       geometry,
       program
     });
@@ -106,6 +107,7 @@ export class PhysicsSceneFactory {
   }
 
   static createFluidParticle(
+    gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
     size: number = 0.15,
@@ -121,7 +123,7 @@ export class PhysicsSceneFactory {
 
     // Create visual mesh with fluid shader
     const geometry = new Plane();
-    const program = new Program({
+    const program = new Program(gl, {
       vertex: fluidShader.vertex,
       fragment: fluidShader.fragment,
       uniforms: {
@@ -130,7 +132,7 @@ export class PhysicsSceneFactory {
       }
     });
 
-    const mesh = new Mesh({
+    const mesh = new Mesh(gl, {
       geometry,
       program
     });
@@ -145,6 +147,7 @@ export class PhysicsSceneFactory {
   }
 
   static createSoftBody(
+    gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
     size: number = 0.2,
@@ -160,7 +163,7 @@ export class PhysicsSceneFactory {
 
     // Create visual mesh
     const geometry = new Box();
-    const program = new Program({
+    const program = new Program(gl, {
       vertex: particleShader.vertex,
       fragment: particleShader.fragment,
       uniforms: {
@@ -169,7 +172,7 @@ export class PhysicsSceneFactory {
       }
     });
 
-    const mesh = new Mesh({
+    const mesh = new Mesh(gl, {
       geometry,
       program
     });
@@ -184,6 +187,7 @@ export class PhysicsSceneFactory {
   }
 
   static createParticleSystem(
+    gl: WebGLRenderingContext,
     count: number = 20,
     bounds: { x: number; y: number; width: number; height: number },
     type: 'particle' | 'fluid' | 'softBody' = 'particle'
@@ -199,13 +203,13 @@ export class PhysicsSceneFactory {
       
       switch (type) {
         case 'fluid':
-          particle = this.createFluidParticle(x, y, size);
+          particle = this.createFluidParticle(gl, x, y, size);
           break;
         case 'softBody':
-          particle = this.createSoftBody(x, y, size);
+          particle = this.createSoftBody(gl, x, y, size);
           break;
         default:
-          particle = this.createParticle(x, y, size);
+          particle = this.createParticle(gl, x, y, size);
           break;
       }
       

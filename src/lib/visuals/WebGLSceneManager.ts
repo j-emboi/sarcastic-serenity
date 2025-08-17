@@ -227,6 +227,10 @@ export class WebGLSceneManager {
     };
   }
 
+  getGLContext(): WebGLRenderingContext | null {
+    return this.renderer?.gl || null;
+  }
+
   destroy(): void {
     this.stop();
     
