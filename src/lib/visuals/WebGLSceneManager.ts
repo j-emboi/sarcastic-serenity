@@ -157,10 +157,10 @@ export class WebGLSceneManager {
       console.log('🎨 Camera distance:', distance);
       console.log('🎨 Canvas aspect ratio:', aspect);
 
-      // Create beautiful gradient background matching the app theme
-      console.log('🎨 Creating gradient background...');
+      // Create simple background matching the app theme
+      console.log('🎨 Creating background...');
       
-      // Create a large background plane
+      // Create a large background plane with simple color
       const backgroundGeometry = new Plane(gl);
       const backgroundProgram = new Program(gl, {
         vertex: `
@@ -168,44 +168,19 @@ export class WebGLSceneManager {
           attribute vec2 uv;
           uniform mat4 modelViewMatrix;
           uniform mat4 projectionMatrix;
-          varying vec2 vUv;
           
           void main() {
-            vUv = uv;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           }
         `,
         fragment: `
           precision highp float;
-          varying vec2 vUv;
-          uniform float time;
           
           void main() {
-            // Create a beautiful gradient from blue-900 via purple-900 to indigo-900
-            vec3 color1 = vec3(0.1, 0.4, 0.9); // Deep Blue
-            vec3 color2 = vec3(0.3, 0.2, 0.8); // Purple
-            vec3 color3 = vec3(0.2, 0.3, 0.9); // Indigo
-            
-            // Create diagonal gradient
-            float t = vUv.x + vUv.y;
-            t = fract(t + sin(time * 0.1) * 0.1);
-            
-            vec3 color;
-            if (t < 0.5) {
-              color = mix(color1, color2, t * 2.0);
-            } else {
-              color = mix(color2, color3, (t - 0.5) * 2.0);
-            }
-            
-            // Add subtle animation
-            color += sin(time * 0.5 + vUv.x * 10.0) * 0.02;
-            
-            gl_FragColor = vec4(color, 1.0);
+            // Deep blue-purple background matching the app theme
+            gl_FragColor = vec4(0.1, 0.2, 0.8, 1.0);
           }
-        `,
-        uniforms: {
-          time: { value: 0 }
-        }
+        `
       });
       
       const backgroundMesh = new Mesh(gl, {
@@ -219,7 +194,7 @@ export class WebGLSceneManager {
       
       this.scene.addChild(backgroundMesh);
       this.backgroundMesh = backgroundMesh;
-      console.log('🎨 Gradient background created successfully');
+      console.log('🎨 Background created successfully');
 
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
@@ -370,10 +345,7 @@ export class WebGLSceneManager {
     const cappedDeltaTime = Math.min(deltaTime, 16.667);
     Matter.Engine.update(this.physics, cappedDeltaTime);
 
-    // Update background time for gradient animation
-    if (this.backgroundMesh && this.backgroundMesh.program.uniforms.time) {
-      this.backgroundMesh.program.uniforms.time.value = currentTime * 0.001;
-    }
+
     
     // Update visual objects
     this.updatePhysicsObjects();
