@@ -214,9 +214,10 @@ export class WebGLSceneManager {
       console.log('🎨 Wall positions - Left:', bounds.left - wallThickness, 'Right:', bounds.right + wallThickness, 'Top:', bounds.top - wallThickness, 'Bottom:', bounds.bottom + wallThickness);
 
       // Set up collision event handling for energy transfer
-      Matter.Events.on(this.physics, 'collisionStart', (event) => {
-        this.handleCollision(event);
-      });
+      // Temporarily disabled to debug particle visibility
+      // Matter.Events.on(this.physics, 'collisionStart', (event) => {
+      //   this.handleCollision(event);
+      // });
 
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {
@@ -398,9 +399,11 @@ export class WebGLSceneManager {
 
   // Physics object management
   addPhysicsObject(obj: PhysicsObject): void {
+    console.log('🎨 Adding physics object:', obj.type, 'at position:', obj.body.position);
     this.physicsObjects.push(obj);
     Matter.Composite.add(this.physics.world, obj.body);
     this.scene.addChild(obj.mesh);
+    console.log('🎨 Total physics objects:', this.physicsObjects.length);
   }
 
   removePhysicsObject(obj: PhysicsObject): void {
