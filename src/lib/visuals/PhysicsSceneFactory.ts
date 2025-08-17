@@ -219,8 +219,8 @@ export class PhysicsSceneFactory {
   ): PhysicsObject[] {
     const particles: PhysicsObject[] = [];
     
-    // Scale the bounds to match the physics world scale (0.2)
-    const scale = 0.2;
+    // Scale the bounds to match the physics world scale (0.1)
+    const scale = 0.1;
     const scaledBounds = {
       x: bounds.x * scale,
       y: bounds.y * scale,

@@ -176,8 +176,8 @@ export class WebGLSceneManager {
       
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
-      // Use a larger scale for physics world to give particles more room to move
-      const scale = 0.2; // Larger scale = more room for particles to move
+      // Use a smaller, fixed scale to ensure particles stay well within bounds
+      const scale = 0.1; // Smaller scale = particles stay well within canvas
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -253,7 +253,7 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     // Update physics bounds to match new canvas dimensions
-    const scale = 0.2;
+    const scale = 0.1;
     this.physicsBounds = {
       left: -width * scale / 2,
       right: width * scale / 2,
@@ -366,8 +366,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body with consistent scaling
-        // Use a fixed scale that matches the physics world scale (0.2)
-        const visualScale = 0.2;
+        // Use a fixed scale that matches the physics world scale (0.1)
+        const visualScale = 0.1;
         
         obj.mesh.position.x = obj.body.position.x * visualScale;
         obj.mesh.position.y = obj.body.position.y * visualScale;
