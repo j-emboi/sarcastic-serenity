@@ -219,9 +219,20 @@ export class PhysicsSceneFactory {
   ): PhysicsObject[] {
     const particles: PhysicsObject[] = [];
     
+    // Scale the bounds to match the physics world scale (0.01)
+    const scale = 0.01;
+    const scaledBounds = {
+      x: bounds.x * scale,
+      y: bounds.y * scale,
+      width: bounds.width * scale,
+      height: bounds.height * scale
+    };
+    
+    console.log('🎭 Creating particles with scaled bounds:', scaledBounds);
+    
     for (let i = 0; i < count; i++) {
-      const x = bounds.x + Math.random() * bounds.width;
-      const y = bounds.y + Math.random() * bounds.height;
+      const x = scaledBounds.x + Math.random() * scaledBounds.width;
+      const y = scaledBounds.y + Math.random() * scaledBounds.height;
       const size = 0.05 + Math.random() * 0.1;
       
       let particle: PhysicsObject;

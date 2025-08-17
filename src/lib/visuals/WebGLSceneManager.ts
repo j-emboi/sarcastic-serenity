@@ -155,20 +155,24 @@ export class WebGLSceneManager {
       // OGL renderer doesn't have setClearColor - background is handled by the scene
 
       // Create physics boundaries for particle containment
+      // Scale the bounds to match the visual scaling (0.01) used in updatePhysicsObjects
+      const scale = 0.01;
       const bounds = {
-        left: -canvas.width / 2,
-        right: canvas.width / 2,
-        top: -canvas.height / 2,
-        bottom: canvas.height / 2
+        left: -canvas.width * scale / 2,
+        right: canvas.width * scale / 2,
+        top: -canvas.height * scale / 2,
+        bottom: canvas.height * scale / 2
       };
       
-      console.log('🎨 Physics bounds:', bounds);
+      console.log('🎨 Physics bounds (scaled):', bounds);
+      console.log('🎨 Canvas dimensions for bounds:', canvas.width, 'x', canvas.height);
       
-      // Add invisible boundaries with proper positioning
-      const leftWall = Matter.Bodies.rectangle(bounds.left - 50, 0, 100, canvas.height * 2, { isStatic: true });
-      const rightWall = Matter.Bodies.rectangle(bounds.right + 50, 0, 100, canvas.height * 2, { isStatic: true });
-      const topWall = Matter.Bodies.rectangle(0, bounds.top - 50, canvas.width * 2, 100, { isStatic: true });
-      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + 50, canvas.width * 2, 100, { isStatic: true });
+      // Add invisible boundaries with proper positioning (scaled)
+      const wallThickness = 50 * scale;
+      const leftWall = Matter.Bodies.rectangle(bounds.left - wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { isStatic: true });
+      const rightWall = Matter.Bodies.rectangle(bounds.right + wallThickness, 0, wallThickness * 2, canvas.height * scale * 2, { isStatic: true });
+      const topWall = Matter.Bodies.rectangle(0, bounds.top - wallThickness, canvas.width * scale * 2, wallThickness * 2, { isStatic: true });
+      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + wallThickness, canvas.width * scale * 2, wallThickness * 2, { isStatic: true });
       
       Matter.Composite.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
       console.log('🎨 Added physics boundaries for particle containment');
