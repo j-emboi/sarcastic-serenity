@@ -402,11 +402,9 @@ export class WebGLSceneManager {
 
   // Physics object management
   addPhysicsObject(obj: PhysicsObject): void {
-    console.log('🎨 Adding physics object:', obj.type, 'at position:', obj.body.position);
     this.physicsObjects.push(obj);
     Matter.Composite.add(this.physics.world, obj.body);
     this.scene.addChild(obj.mesh);
-    console.log('🎨 Total physics objects:', this.physicsObjects.length);
   }
 
   removePhysicsObject(obj: PhysicsObject): void {
