@@ -74,15 +74,14 @@ export class WebGLSceneManager {
         console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
       }
 
-      // Initialize OGL renderer
+      // Initialize OGL renderer with simpler parameters
+      console.log('🎨 Creating OGL Renderer with canvas:', canvas);
+      console.log('🎨 Canvas element type:', typeof canvas);
+      console.log('🎨 Canvas element:', canvas);
       this.renderer = new Renderer({
-        canvas,
-        width: canvas.clientWidth,
-        height: canvas.clientHeight,
-        alpha: true,
-        antialias: true,
-        premultipliedAlpha: false
+        canvas: canvas
       });
+      console.log('🎨 OGL Renderer created successfully');
 
       // Create scene and camera
       this.scene = new Scene();
