@@ -146,6 +146,7 @@ export class VisualManager {
 
     // Create particles based on scene type
     console.log('🎭 Creating particles with count:', this.config.particleCount);
+    console.log('🎭 Config object:', this.config);
     let particles;
     switch (sceneType) {
       case 'fluid':

@@ -95,6 +95,8 @@ export class WebGLSceneManager {
       const targetHeight = canvas.clientHeight || window.innerHeight;
       
       // Always update canvas dimensions and style
+      canvas.setAttribute('width', targetWidth.toString());
+      canvas.setAttribute('height', targetHeight.toString());
       canvas.width = targetWidth;
       canvas.height = targetHeight;
       canvas.style.width = targetWidth + 'px';
@@ -108,6 +110,7 @@ export class WebGLSceneManager {
       
       console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
       console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
+      console.log('🎨 Updated canvas attributes to:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
 
       // Initialize OGL renderer with simpler parameters
       console.log('🎨 Creating OGL Renderer with canvas:', canvas);

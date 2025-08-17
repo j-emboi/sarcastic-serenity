@@ -33,6 +33,10 @@
     if (canvas) {
       const fullWidth = window.innerWidth;
       const fullHeight = window.innerHeight;
+      
+      // Update BOTH HTML attributes AND CSS styles
+      canvas.setAttribute('width', fullWidth.toString());
+      canvas.setAttribute('height', fullHeight.toString());
       canvas.width = fullWidth;
       canvas.height = fullHeight;
       canvas.style.width = fullWidth + 'px';
@@ -40,7 +44,9 @@
       canvas.style.position = 'fixed';
       canvas.style.top = '0';
       canvas.style.left = '0';
+      
       console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
+      console.log('🎨 Canvas attributes after update:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
     }
   }
   let isVisualSystemReady = false;
@@ -90,18 +96,24 @@
       }
     }, 100);
     
-    // Add window resize handler to keep canvas full screen
-    const handleResize = () => {
-      if (canvas) {
-        const fullWidth = window.innerWidth;
-        const fullHeight = window.innerHeight;
-        canvas.width = fullWidth;
-        canvas.height = fullHeight;
-        canvas.style.width = fullWidth + 'px';
-        canvas.style.height = fullHeight + 'px';
-        console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
-      }
-    };
+          // Add window resize handler to keep canvas full screen
+      const handleResize = () => {
+        if (canvas) {
+          const fullWidth = window.innerWidth;
+          const fullHeight = window.innerHeight;
+          
+          // Update BOTH HTML attributes AND CSS styles
+          canvas.setAttribute('width', fullWidth.toString());
+          canvas.setAttribute('height', fullHeight.toString());
+          canvas.width = fullWidth;
+          canvas.height = fullHeight;
+          canvas.style.width = fullWidth + 'px';
+          canvas.style.height = fullHeight + 'px';
+          
+          console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
+          console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
+        }
+      };
     
     window.addEventListener('resize', handleResize);
 
