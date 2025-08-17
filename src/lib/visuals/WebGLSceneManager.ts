@@ -89,9 +89,36 @@ export class WebGLSceneManager {
       this.camera = new Camera();
       this.camera.position.z = 5;
 
+      // Create a simple background (OGL doesn't have setClearColor)
+      const backgroundGeometry = new Plane();
+      const backgroundMaterial = new Program({
+        vertex: `
+          attribute vec3 position;
+          attribute vec2 uv;
+          uniform mat4 modelViewMatrix;
+          uniform mat4 projectionMatrix;
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragment: `
+          precision highp float;
+          varying vec2 vUv;
+          void main() {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+          }
+        `
+      });
+      const background = new Mesh({ geometry: backgroundGeometry, program: backgroundMaterial });
+      background.scale.set(10, 10, 1);
+      background.position.z = -1;
+      this.scene.addChild(background);
+
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-      this.renderer.setClearColor(0x000000, 0);
+      // OGL renderer doesn't have setClearColor - background is handled by the scene
 
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {
