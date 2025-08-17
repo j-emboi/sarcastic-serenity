@@ -1,43 +1,35 @@
 <script lang="ts">
-  // Voice selector component - handles character voice selection
   import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
   import { characterVoiceService } from '$lib/audio/characterVoiceService';
   
   let settingsValue: any = null;
+  let characterVoices: any[] = [];
+  let voicesLoaded = false;
+  let isLoading = false;
+  let isPreviewingVoice = false;
+  let previewText = "Hello! I'm your sarcastic wellness companion. Ready for some savage self-reflection?";
   
   onMount(() => {
     const unsubscribe = settings.subscribe(value => {
       settingsValue = value;
     });
-    
     return unsubscribe;
   });
   
-  // Get values from settings store
   $: selectedCharacterId = settingsValue?.selectedVoiceId || 'sarcastic_narrator';
-  
-  let characterVoices: any[] = [];
-  let voicesLoaded = false;
-  let isLoading = false;
-  let voiceSystemStatus: any = null;
-  let consistencyTestResults: any = null;
-  let isTestingConsistency = false;
   
   onMount(async () => {
     await loadCharacterVoices();
-    await getVoiceSystemStatus();
   });
   
   async function loadCharacterVoices() {
     if (isLoading) return;
-    
     isLoading = true;
     try {
       characterVoices = await characterVoiceService.getAvailableCharacterVoices();
       voicesLoaded = true;
       
-      // Ensure we have the correct voice type and ID set
       if (settingsValue && (!settingsValue.selectedVoiceType || settingsValue.selectedVoiceType !== 'character')) {
         settings.update(s => ({ 
           ...s, 
@@ -52,189 +44,195 @@
     }
   }
 
-  async function getVoiceSystemStatus() {
+  async function previewVoice(characterId: string) {
+    if (isPreviewingVoice) return;
+    isPreviewingVoice = true;
     try {
-      voiceSystemStatus = characterVoiceService.getVoiceSystemStatus();
+      await characterVoiceService.speakWithCharacter(previewText, characterId);
+      const checkInterval = setInterval(() => {
+        if (!characterVoiceService.isCurrentlyPlaying()) {
+          clearInterval(checkInterval);
+          isPreviewingVoice = false;
+        }
+      }, 100);
     } catch (error) {
-      console.error('Failed to get voice system status:', error);
+      console.error('Failed to preview voice:', error);
+      isPreviewingVoice = false;
     }
   }
 
-  async function testVoiceConsistency() {
-    if (isTestingConsistency || !selectedCharacterId) return;
-    
-    isTestingConsistency = true;
-    try {
-      consistencyTestResults = await characterVoiceService.testVoiceConsistency(selectedCharacterId);
-    } catch (error) {
-      console.error('Failed to test voice consistency:', error);
-      consistencyTestResults = { error: error.message };
-    } finally {
-      isTestingConsistency = false;
-    }
+  function selectVoice(characterId: string) {
+    settings.update(s => ({ 
+      ...s, 
+      selectedVoiceType: 'character',
+      selectedVoiceId: characterId
+    }));
+  }
+
+  function getVoiceIcon(characterId: string): string {
+    const icons = {
+      'sarcastic_narrator': '🎭',
+      'cheerful_host': '🌟',
+      'wise_mentor': '🧙‍♂️',
+      'comedic_sidekick': '🤡',
+      'dramatic_announcer': '🎪',
+      'smooth_operator': '🕴️',
+      'energetic_coach': '💪'
+    };
+    return icons[characterId] || '🎤';
   }
 </script>
 
-<div class="space-y-4">
-  <!-- Character Voice Selection -->
-  <div class="space-y-2">
-    <h3 class="text-sm font-medium">Character Voice</h3>
-    
-    {#if isLoading}
-      <div class="text-sm text-gray-500">Loading character voices...</div>
-    {:else if !voicesLoaded || characterVoices.length === 0}
-      <div class="text-sm text-red-500">
-        Failed to load character voices. Please try refreshing.
-      </div>
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="text-center space-y-2">
+    <h3 class="text-lg font-semibold text-gray-200">Choose Your Voice Companion</h3>
+    <p class="text-sm text-gray-400">Select a character voice that matches your mood and personality</p>
+  </div>
+
+  <!-- Loading State -->
+  {#if isLoading}
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <span class="ml-3 text-gray-400">Loading voices...</span>
+    </div>
+  {:else if !voicesLoaded || characterVoices.length === 0}
+    <div class="text-center py-8 space-y-4">
+      <div class="text-red-400 text-lg">⚠️</div>
+      <div class="text-red-300">Failed to load character voices</div>
       <button 
         on:click={loadCharacterVoices}
-        class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
       >
-        Retry
+        Try Again
       </button>
-    {:else}
-      <select 
-        value={selectedCharacterId || 'sarcastic_narrator'}
-        on:change={(e) => {
-          const target = e.target as HTMLSelectElement;
-          if (target) {
-            settings.update(s => ({ 
-              ...s, 
-              selectedVoiceType: 'character',
-              selectedVoiceId: target.value || 'sarcastic_narrator'
-            }));
-          }
-        }}
-        class="w-full p-2 rounded bg-gray-800 text-white border-gray-600"
-      >
-        {#each characterVoices as voice}
-          <option value={voice.id}>
-            {voice.name}
-          </option>
-        {/each}
-      </select>
-    {/if}
-  </div>
-  
-  <!-- Character Voice Details -->
-  {#if selectedCharacterId}
-    {@const selectedVoice = characterVoices.find((v: any) => v.id === selectedCharacterId)}
-    {#if selectedVoice}
-      <div class="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="font-semibold text-blue-200">🎭 {selectedVoice.name}</h4>
+    </div>
+  {:else}
+    <!-- Voice Selection Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {#each characterVoices as voice}
+        <div 
+          class="relative group cursor-pointer transition-all duration-300 hover:scale-105 border-2 rounded-xl p-4"
+          class:ring-2={selectedCharacterId === voice.id}
+          class:ring-blue-500={selectedCharacterId === voice.id}
+          class:bg-gray-800/50={selectedCharacterId === voice.id}
+          class:bg-gray-800/30={selectedCharacterId !== voice.id}
+          class:border-blue-500={selectedCharacterId === voice.id}
+          class:border-gray-700={selectedCharacterId !== voice.id}
+          on:click={() => selectVoice(voice.id)}
+        >
+          <!-- Selection Indicator -->
+          {#if selectedCharacterId === voice.id}
+            <div class="absolute -top-2 -right-2 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+              ✓
+            </div>
+          {/if}
+
+          <!-- Voice Header -->
+          <div class="flex items-center space-x-3 mb-3">
+            <div class="text-2xl">{getVoiceIcon(voice.id)}</div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-200">{voice.name}</h4>
+              <p class="text-xs text-gray-400">{voice.voicePreferences.gender} • {voice.voicePreferences.age}</p>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <p class="text-sm text-gray-300 mb-4 leading-relaxed">{voice.description}</p>
+
+          <!-- Personality Traits -->
+          <div class="space-y-2 mb-4">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">Enthusiasm</span>
+              <span class="text-gray-300">{voice.personality.enthusiasm}%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300"
+                class:bg-green-500={voice.personality.enthusiasm > 70}
+                class:bg-yellow-500={voice.personality.enthusiasm > 40 && voice.personality.enthusiasm <= 70}
+                class:bg-blue-500={voice.personality.enthusiasm <= 40}
+                style="width: {voice.personality.enthusiasm}%"
+              ></div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">Sarcasm</span>
+              <span class="text-gray-300">{voice.personality.sarcasm}%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300"
+                class:bg-purple-500={voice.personality.sarcasm > 70}
+                class:bg-orange-500={voice.personality.sarcasm > 40 && voice.personality.sarcasm <= 70}
+                class:bg-gray-500={voice.personality.sarcasm <= 40}
+                style="width: {voice.personality.sarcasm}%"
+              ></div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">Warmth</span>
+              <span class="text-gray-300">{voice.personality.warmth}%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+              <div 
+                class="h-2 rounded-full transition-all duration-300"
+                class:bg-pink-500={voice.personality.warmth > 70}
+                class:bg-red-500={voice.personality.warmth > 40 && voice.personality.warmth <= 70}
+                class:bg-indigo-500={voice.personality.warmth <= 40}
+                style="width: {voice.personality.warmth}%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Voice Settings -->
+          <div class="flex justify-between text-xs text-gray-400 mb-4">
+            <span>Pitch: {voice.voiceSettings.pitch.toFixed(1)}</span>
+            <span>Rate: {voice.voiceSettings.rate.toFixed(1)}</span>
+          </div>
+
+          <!-- Preview Button -->
+          <button
+            on:click|stopPropagation={() => previewVoice(voice.id)}
+            disabled={isPreviewingVoice}
+            class="w-full py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          >
+            {isPreviewingVoice ? 'Playing...' : '🎵 Preview Voice'}
+          </button>
         </div>
+      {/each}
+    </div>
+
+    <!-- Selected Voice Details -->
+    {#if selectedCharacterId && characterVoices.find((v: any) => v.id === selectedCharacterId)}
+      <div class="mt-6 p-4 bg-blue-900/20 border border-blue-600/30 rounded-xl">
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="text-2xl">{getVoiceIcon(selectedCharacterId)}</div>
+          <div>
+            <h4 class="font-semibold text-blue-200">{characterVoices.find((v: any) => v.id === selectedCharacterId).name}</h4>
+            <p class="text-sm text-blue-300">Currently Selected</p>
+          </div>
+        </div>
+        <p class="text-sm text-blue-100 mb-3">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
         
-        <p class="text-sm text-blue-100">{selectedVoice.description}</p>
-        
-        <!-- Personality Traits -->
+        <!-- Voice Preview Text -->
         <div class="space-y-2">
-          <div class="text-xs text-blue-300">
-            <div class="flex justify-between">
-              <span>Enthusiasm</span>
-              <span>{selectedVoice.personality.enthusiasm}%</span>
-            </div>
-            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
-              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.enthusiasm}%"></div>
-            </div>
-          </div>
-          
-          <div class="text-xs text-blue-300">
-            <div class="flex justify-between">
-              <span>Sarcasm</span>
-              <span>{selectedVoice.personality.sarcasm}%</span>
-            </div>
-            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
-              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.sarcasm}%"></div>
-            </div>
-          </div>
-          
-          <div class="text-xs text-blue-300">
-            <div class="flex justify-between">
-              <span>Warmth</span>
-              <span>{selectedVoice.personality.warmth}%</span>
-            </div>
-            <div class="w-full bg-blue-800/30 rounded-full h-1.5">
-              <div class="bg-blue-400 h-1.5 rounded-full" style="width: {selectedVoice.personality.warmth}%"></div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Voice Settings -->
-        <div class="text-xs text-blue-300">
-          <div><strong>Pitch:</strong> {selectedVoice.voiceSettings.pitch.toFixed(1)}</div>
-          <div><strong>Rate:</strong> {selectedVoice.voiceSettings.rate.toFixed(1)}</div>
+          <label class="text-xs text-blue-300 font-medium">Preview Text:</label>
+          <textarea
+            bind:value={previewText}
+            class="w-full p-2 bg-gray-800 border border-gray-600 rounded text-sm text-gray-200 resize-none"
+            rows="2"
+            placeholder="Enter text to preview the voice..."
+          ></textarea>
+          <button
+            on:click={() => previewVoice(selectedCharacterId)}
+            disabled={isPreviewingVoice}
+            class="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {isPreviewingVoice ? 'Playing...' : '🎵 Preview'}
+          </button>
         </div>
       </div>
     {/if}
   {/if}
-
-  <!-- Voice System Testing (Debug) -->
-  <div class="space-y-2">
-    <h3 class="text-sm font-medium text-yellow-400">🔧 Voice System Testing</h3>
-    
-    <div class="space-y-2">
-      <button 
-        on:click={testVoiceConsistency}
-        disabled={isTestingConsistency || !selectedCharacterId}
-        class="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 disabled:opacity-50"
-      >
-        {isTestingConsistency ? 'Testing...' : 'Test Voice Consistency'}
-      </button>
-      
-      <button 
-        on:click={getVoiceSystemStatus}
-        class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-      >
-        Get Voice System Status
-      </button>
-    </div>
-
-    <!-- Voice System Status -->
-    {#if voiceSystemStatus}
-      <div class="bg-green-900/20 border border-green-600/30 rounded-lg p-3 space-y-2">
-        <h4 class="text-sm font-semibold text-green-200">Voice System Status</h4>
-        <div class="text-xs text-green-300 space-y-1">
-          <div><strong>Voices Loaded:</strong> {voiceSystemStatus.voicesLoaded ? '✅' : '❌'}</div>
-          <div><strong>Voice Cache Size:</strong> {voiceSystemStatus.voiceCacheSize}</div>
-          <div><strong>Available Voices:</strong> {voiceSystemStatus.availableVoices}</div>
-          <div><strong>Character Voices:</strong> {voiceSystemStatus.characterVoices.length}</div>
-        </div>
-        
-        {#if voiceSystemStatus.cachedVoices.length > 0}
-          <div class="text-xs text-green-300">
-            <div><strong>Cached Voices:</strong></div>
-            {#each voiceSystemStatus.cachedVoices as cached}
-              <div class="ml-2">• {cached.characterId}: {cached.voiceName} ({cached.voiceLang})</div>
-            {/each}
-          </div>
-        {/if}
-      </div>
-    {/if}
-
-    <!-- Consistency Test Results -->
-    {#if consistencyTestResults}
-      <div class="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3 space-y-2">
-        <h4 class="text-sm font-semibold text-yellow-200">Voice Consistency Test</h4>
-        {#if consistencyTestResults.error}
-          <div class="text-xs text-red-300">❌ {consistencyTestResults.error}</div>
-        {:else}
-          <div class="text-xs text-yellow-300 space-y-1">
-            <div><strong>Character:</strong> {consistencyTestResults.character.name}</div>
-            <div><strong>Consistent:</strong> {consistencyTestResults.isConsistent ? '✅' : '❌'}</div>
-            <div><strong>Total Voices:</strong> {consistencyTestResults.totalVoices}</div>
-            <div><strong>English Voices:</strong> {consistencyTestResults.englishVoices}</div>
-            
-            {#if consistencyTestResults.cachedVoice}
-              <div><strong>Cached Voice:</strong> {consistencyTestResults.cachedVoice.name} ({consistencyTestResults.cachedVoice.lang})</div>
-            {/if}
-            
-            {#if consistencyTestResults.freshVoice}
-              <div><strong>Fresh Voice:</strong> {consistencyTestResults.freshVoice.name} ({consistencyTestResults.freshVoice.lang})</div>
-            {/if}
-          </div>
-        {/if}
-      </div>
-    {/if}
-  </div>
 </div>
