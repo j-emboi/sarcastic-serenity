@@ -95,36 +95,8 @@ export class WebGLSceneManager {
       this.camera.position.z = 5;
       console.log('🎨 Scene and Camera created successfully');
 
-      // Create a simple background (OGL doesn't have setClearColor)
-      console.log('🎨 Creating background geometry...');
-      const backgroundGeometry = new Plane();
-      console.log('🎨 Creating background material...');
-      const backgroundMaterial = new Program({
-        vertex: `
-          attribute vec3 position;
-          attribute vec2 uv;
-          uniform mat4 modelViewMatrix;
-          uniform mat4 projectionMatrix;
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragment: `
-          precision highp float;
-          varying vec2 vUv;
-          void main() {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-          }
-        `
-      });
-      console.log('🎨 Creating background mesh...');
-      const background = new Mesh({ geometry: backgroundGeometry, program: backgroundMaterial });
-      background.scale.set(10, 10, 1);
-      background.position.z = -1;
-      this.scene.addChild(background);
-      console.log('🎨 Background created and added to scene');
+      // Skip background for now - focus on basic WebGL functionality
+      console.log('🎨 Skipping background creation for now');
 
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
