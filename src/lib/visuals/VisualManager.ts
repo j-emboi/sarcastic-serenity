@@ -113,11 +113,11 @@ export class VisualManager {
     
     console.log('🎭 Actual canvas dimensions:', actualWidth, 'x', actualHeight);
     
-    // Always use window dimensions for consistency - canvas dimensions are unreliable
-    const canvasWidth = window.innerWidth;
-    const canvasHeight = window.innerHeight;
+    // Use the actual canvas dimensions for scene bounds to match visible area
+    const canvasWidth = this.canvas?.width || 1237; // Use actual canvas width
+    const canvasHeight = this.canvas?.height || 894; // Use actual canvas height
     
-    console.log('🎭 Using window dimensions for scene bounds:', canvasWidth, 'x', canvasHeight);
+    console.log('🎭 Using actual canvas dimensions for scene bounds:', canvasWidth, 'x', canvasHeight);
     
     const bounds = {
       x: -canvasWidth / 2,
