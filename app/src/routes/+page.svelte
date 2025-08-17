@@ -1,5 +1,12 @@
 <script lang="ts">
   console.log('🏠 Main page script loading...');
+  console.log('🏠 Current URL at script start:', typeof window !== 'undefined' ? window.location.href : 'SSR');
+  
+  // Simple test to see if script runs
+  if (typeof window !== 'undefined') {
+    console.log('🏠 Window object available');
+    alert('Main page script is running!');
+  }
   
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
