@@ -50,10 +50,39 @@
       // Force a reflow to ensure changes take effect
       canvas.offsetHeight;
       
+      // Double-check that attributes were actually set
+      const actualWidth = canvas.getAttribute('width');
+      const actualHeight = canvas.getAttribute('height');
+      
       console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
       console.log('🎨 Canvas style size:', fullWidth, 'x', fullHeight);
-      console.log('🎨 Canvas attributes after update:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
+      console.log('🎨 Canvas attributes after update:', actualWidth, 'x', actualHeight);
       console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
+      
+      // If attributes are still wrong, try a more aggressive approach
+      if (actualWidth !== fullWidth.toString() || actualHeight !== fullHeight.toString()) {
+        console.log('🎨 Canvas attributes not updated properly, trying aggressive fix...');
+        // Remove and re-add the canvas element to force a complete reset
+        const parent = canvas.parentNode;
+        const newCanvas = canvas.cloneNode(true) as HTMLCanvasElement;
+        newCanvas.setAttribute('width', fullWidth.toString());
+        newCanvas.setAttribute('height', fullHeight.toString());
+        newCanvas.width = fullWidth;
+        newCanvas.height = fullHeight;
+        newCanvas.style.setProperty('width', fullWidth + 'px', 'important');
+        newCanvas.style.setProperty('height', fullHeight + 'px', 'important');
+        newCanvas.style.setProperty('position', 'fixed', 'important');
+        newCanvas.style.setProperty('top', '0', 'important');
+        newCanvas.style.setProperty('left', '0', 'important');
+        newCanvas.style.setProperty('z-index', '1', 'important');
+        
+        if (parent) {
+          parent.replaceChild(newCanvas, canvas);
+          // Update the canvas reference
+          canvas = newCanvas;
+          console.log('🎨 Canvas element replaced with new one');
+        }
+      }
     }
   }
   let isVisualSystemReady = false;
