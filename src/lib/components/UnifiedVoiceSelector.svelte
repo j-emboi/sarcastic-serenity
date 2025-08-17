@@ -153,7 +153,6 @@
             <p class="text-sm text-blue-300">Currently Selected</p>
           </div>
         </div>
-        <p class="text-sm text-blue-100 mb-4">{characterVoices.find((v: any) => v.id === selectedCharacterId).description}</p>
         
         <!-- Voice Preview Text -->
         <div class="space-y-3">
