@@ -188,8 +188,24 @@ export class WebGLSceneManager {
   }
 
   private handleResize(canvas: HTMLCanvasElement): void {
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
+    // Force canvas to correct dimensions
+    canvas.width = 1237;
+    canvas.height = 894;
+    canvas.setAttribute('width', '1237');
+    canvas.setAttribute('height', '894');
+    canvas.style.setProperty('width', '1237px', 'important');
+    canvas.style.setProperty('height', '894px', 'important');
+    
+    // Force reflow
+    canvas.offsetHeight;
+    
+    const width = 1237; // Use forced dimensions
+    const height = 894;
+    
+    console.log('🎨 Canvas resized to:', width, 'x', height);
+    console.log('🎨 Canvas style size:', canvas.style.width, 'x', canvas.style.height);
+    console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
+    console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     this.renderer.setSize(width, height);
     this.camera.perspective({

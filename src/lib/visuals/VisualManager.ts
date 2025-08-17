@@ -120,6 +120,19 @@ export class VisualManager {
       this.canvas.height = 894;
       this.canvas.setAttribute('width', '1237');
       this.canvas.setAttribute('height', '894');
+      
+      // Force a reflow to ensure the canvas internal dimensions are updated
+      this.canvas.offsetHeight;
+      
+      // Double-check and force again if needed
+      if (this.canvas.width !== 1237 || this.canvas.height !== 894) {
+        console.log('🎭 Canvas dimensions still wrong, forcing again...');
+        this.canvas.width = 1237;
+        this.canvas.height = 894;
+        this.canvas.offsetHeight; // Force reflow again
+      }
+      
+      console.log('🎭 Canvas internal dimensions after enforcement:', this.canvas.width, 'x', this.canvas.height);
     }
     
     const canvasWidth = 1237; // Use the correct canvas width
