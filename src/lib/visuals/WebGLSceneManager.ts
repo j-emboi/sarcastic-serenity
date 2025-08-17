@@ -511,36 +511,36 @@ export class WebGLSceneManager {
           return;
         }
         
-        // Normalize the direction vector
+        // Normalize the direction vector (from A to B)
         const normalX = dx / distance;
         const normalY = dy / distance;
         
-        const energyBoost = 0.5; // Gentle energy boost to maintain movement
+        const energyBoost = 0.3; // Gentle energy boost to maintain movement
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
           
-          // Boost particle A in the direction of the normal
+          // Boost particle A AWAY from B (opposite of normal)
           Matter.Body.setVelocity(bodyA, {
-            x: bodyA.velocity.x + normalX * energyBoost,
-            y: bodyA.velocity.y + normalY * energyBoost
+            x: bodyA.velocity.x - normalX * energyBoost,
+            y: bodyA.velocity.y - normalY * energyBoost
           });
           
-          // Boost particle B in the opposite direction
+          // Boost particle B AWAY from A (same as normal)
           Matter.Body.setVelocity(bodyB, {
-            x: bodyB.velocity.x - normalX * energyBoost,
-            y: bodyB.velocity.y - normalY * energyBoost
+            x: bodyB.velocity.x + normalX * energyBoost,
+            y: bodyB.velocity.y + normalY * energyBoost
           });
           
           // Add separation force to prevent sticking
-          const separationForce = 0.02; // Very gentle separation
+          const separationForce = 0.01; // Very gentle separation
           Matter.Body.applyForce(bodyA, bodyA.position, {
-            x: normalX * separationForce,
-            y: normalY * separationForce
-          });
-          Matter.Body.applyForce(bodyB, bodyB.position, {
             x: -normalX * separationForce,
             y: -normalY * separationForce
+          });
+          Matter.Body.applyForce(bodyB, bodyB.position, {
+            x: normalX * separationForce,
+            y: normalY * separationForce
           });
         }
       } catch (error) {
