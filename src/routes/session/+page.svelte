@@ -8,6 +8,7 @@
   import { quoteManager } from '$lib/quotes';
   import { aiVoiceService } from '$lib/audio/aiVoiceService';
   import { characterVoiceService } from '$lib/audio/characterVoiceService';
+  import { VisualManager } from '$lib/visuals/VisualManager';
   import type { AppSettings } from '$lib/stores/settings';
 
   console.log('📄 Session page imports completed');
@@ -22,6 +23,11 @@
 
   let ended = false;
   let interval: number;
+
+  // WebGL Visual System
+  let visualManager: VisualManager;
+  let canvas: HTMLCanvasElement;
+  let isVisualSystemReady = false;
 
 
 
@@ -43,6 +49,23 @@
         timeLeft = value.durationMinutes * 60;
       }
     });
+
+    // Initialize WebGL Visual System after a short delay to ensure canvas is ready
+    console.log('🎨 Setting up WebGL initialization timeout...');
+    setTimeout(async () => {
+      console.log('🎨 Checking canvas availability...');
+      console.log('Canvas element:', canvas);
+      if (canvas) {
+        console.log('🎨 Canvas found, setting dimensions...');
+        // Ensure canvas has proper dimensions
+        canvas.width = canvas.clientWidth || window.innerWidth;
+        canvas.height = canvas.clientHeight || window.innerHeight;
+        console.log('🎨 Canvas dimensions set to:', canvas.width, 'x', canvas.height);
+        await initializeVisualSystem();
+      } else {
+        console.error('❌ Canvas element not found after timeout!');
+      }
+    }, 100);
 
 
 
@@ -72,6 +95,10 @@
             clearTimeout(nextQuoteTimeout);
             nextQuoteTimeout = null;
           }
+          // Stop visual system when session ends
+          if (visualManager) {
+            visualManager.stop();
+          }
         }
       }
     }, 1000);
@@ -81,9 +108,51 @@
       if (nextQuoteTimeout) {
         clearTimeout(nextQuoteTimeout);
       }
+      if (visualManager) {
+        visualManager.stop();
+        visualManager.destroy();
+      }
       unsub();
     };
   });
+
+  async function initializeVisualSystem() {
+    console.log('🎨 Starting WebGL Visual System initialization...');
+    console.log('Canvas element:', canvas);
+    console.log('Canvas dimensions:', canvas?.width, 'x', canvas?.height);
+    
+    if (!canvas) {
+      console.error('❌ Canvas element not found!');
+      return;
+    }
+    
+    // Ensure canvas has proper dimensions
+    canvas.width = canvas.clientWidth || window.innerWidth;
+    canvas.height = canvas.clientHeight || window.innerHeight;
+    
+    try {
+      visualManager = new VisualManager({
+        sceneType: 'particles',
+        particleCount: 100,
+        audioReactivity: true,
+        quality: 'high'
+      });
+      
+      console.log('🎨 Visual Manager created, initializing...');
+      isVisualSystemReady = await visualManager.init(canvas);
+      console.log('🎨 Initialization result:', isVisualSystemReady);
+      
+      if (isVisualSystemReady) {
+        console.log('🎨 WebGL Visual System started for session');
+        visualManager.start();
+      } else {
+        console.warn('⚠️ WebGL Visual System failed to initialize');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize WebGL Visual System:', error);
+      console.error('Error details:', error);
+    }
+  }
 
   function scheduleNextQuoteWithJitter() {
     if (!settingsValue || timeLeft <= 0 || ended) return;
@@ -228,8 +297,15 @@
   <title>Micro-Break - Sarcastic Serenity</title>
 </svelte:head>
 
-<section class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col items-center justify-center p-4 text-white">
-  <div class="text-center space-y-8 max-w-2xl">
+<section class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col items-center justify-center p-4 text-white relative">
+  <!-- WebGL Canvas Background -->
+  <canvas 
+    bind:this={canvas}
+    class="absolute inset-0 w-full h-full pointer-events-none"
+    style="z-index: 1;"
+  ></canvas>
+  
+  <div class="text-center space-y-8 max-w-2xl relative" style="z-index: 2;">
     <h1 class="text-4xl font-bold mb-8">🌊 Micro-Break</h1>
     
     <!-- Timer -->
