@@ -74,7 +74,11 @@ export class WebGLSceneManager {
       if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
         canvas.width = targetWidth;
         canvas.height = targetHeight;
+        // Also update the style dimensions to match
+        canvas.style.width = targetWidth + 'px';
+        canvas.style.height = targetHeight + 'px';
         console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
+        console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
       }
 
       // Initialize OGL renderer with simpler parameters

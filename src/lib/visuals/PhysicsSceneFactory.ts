@@ -82,7 +82,7 @@ export class PhysicsSceneFactory {
     });
 
     // Create visual mesh
-    const geometry = new Plane();
+    const geometry = new Plane(gl);
     const program = new Program(gl, {
       vertex: particleShader.vertex,
       fragment: particleShader.fragment,
@@ -122,7 +122,7 @@ export class PhysicsSceneFactory {
     });
 
     // Create visual mesh with fluid shader
-    const geometry = new Plane();
+    const geometry = new Plane(gl);
     const program = new Program(gl, {
       vertex: fluidShader.vertex,
       fragment: fluidShader.fragment,
@@ -162,7 +162,7 @@ export class PhysicsSceneFactory {
     });
 
     // Create visual mesh
-    const geometry = new Box();
+    const geometry = new Box(gl);
     const program = new Program(gl, {
       vertex: particleShader.vertex,
       fragment: particleShader.fragment,
