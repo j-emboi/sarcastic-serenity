@@ -293,7 +293,7 @@
     try {
       visualManager = new VisualManager({
         sceneType: 'particles',
-        particleCount: 20,
+        particleCount: 35,
         audioReactivity: true,
         quality: 'high'
       });

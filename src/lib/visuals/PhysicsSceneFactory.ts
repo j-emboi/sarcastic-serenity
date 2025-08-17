@@ -71,28 +71,28 @@ export class PhysicsSceneFactory {
     gl: WebGLRenderingContext,
     x: number = 0,
     y: number = 0,
-    size: number = 0.2,
+    size: number = 0.3,
     color: [number, number, number] = [0.2, 0.6, 1.0]
   ): PhysicsObject {
-    // Create physics body - make it smaller to match visual size
-    const body = Matter.Bodies.circle(x, y, size * 10, {
+    // Create physics body - make it match visual size better
+    const body = Matter.Bodies.circle(x, y, size * 15, {
       restitution: 0.98, // Very high bounce (98%)
       friction: 0.001,   // Extremely low friction for maximum bouncing
       density: 0.001,
       frictionAir: 0.00001 // Extremely low air resistance
     });
     
-    // Add gentle initial velocity for calming movement
+    // Add moderate initial velocity for better movement
     Matter.Body.setVelocity(body, {
-      x: (Math.random() - 0.5) * 3,  // Gentle horizontal velocity
-      y: (Math.random() - 0.5) * 3   // Gentle vertical velocity
+      x: (Math.random() - 0.5) * 5,  // Moderate horizontal velocity
+      y: (Math.random() - 0.5) * 5   // Moderate vertical velocity
     });
     
-    // Add a gentle upward bias to keep particles floating
-    if (Math.random() > 0.3) { // Some particles get gentle upward bias (70% chance)
+    // Add a moderate upward bias to keep particles floating
+    if (Math.random() > 0.3) { // Some particles get moderate upward bias (70% chance)
       Matter.Body.setVelocity(body, {
         x: body.velocity.x,
-        y: body.velocity.y - 1  // Gentle upward bias
+        y: body.velocity.y - 2  // Moderate upward bias
       });
     }
 
