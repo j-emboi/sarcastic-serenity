@@ -68,7 +68,7 @@ export class WebGLSceneManager {
   
   // Energy boost system
   private energyBoostTimer = 0;
-  private energyBoostInterval = 2000; // Boost every 2 seconds (more frequent)
+  private energyBoostInterval = 1000; // Boost every 1 second (very frequent)
   
   // Audio reactivity
   private audioData: AudioData = {
@@ -84,7 +84,7 @@ export class WebGLSceneManager {
 
   constructor() {
     this.physics = Matter.Engine.create({
-      gravity: { x: 0, y: -0.02, scale: 0.001 }  // Even lighter gravity to keep particles floating
+      gravity: { x: 0, y: 0, scale: 0.001 }  // No gravity to keep particles floating freely
     });
   }
 
@@ -438,23 +438,18 @@ export class WebGLSceneManager {
   }
   
   private boostParticleEnergy(): void {
-    // Boost energy of slow particles only to maintain smooth movement
+    // Boost energy of all particles to maintain continuous movement
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.body.velocity) {
-        const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
+        const boostMultiplier = 2; // Moderate boost for all particles
         
-        // Only boost particles that are moving very slowly
-        if (speed < 2) {
-          const boostMultiplier = 3; // Reduced intensity
-          
-          Matter.Body.setVelocity(obj.body, {
-            x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
-            y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
-          });
-        }
+        Matter.Body.setVelocity(obj.body, {
+          x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
+          y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
+        });
       }
     });
-    console.log('⚡ Boosted slow particle energy');
+    console.log('⚡ Boosted all particle energy');
   }
   
   private aggressiveContainmentCheck(): void {
