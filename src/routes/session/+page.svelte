@@ -27,6 +27,22 @@
   // WebGL Visual System
   let visualManager: VisualManager;
   let canvas: HTMLCanvasElement;
+  
+  // Function to force canvas full screen
+  function forceCanvasFullScreen() {
+    if (canvas) {
+      const fullWidth = window.innerWidth;
+      const fullHeight = window.innerHeight;
+      canvas.width = fullWidth;
+      canvas.height = fullHeight;
+      canvas.style.width = fullWidth + 'px';
+      canvas.style.height = fullHeight + 'px';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
+    }
+  }
   let isVisualSystemReady = false;
 
 
@@ -50,6 +66,9 @@
       }
     });
 
+    // Force canvas full screen immediately
+    forceCanvasFullScreen();
+    
     // Initialize WebGL Visual System after a short delay to ensure canvas is ready
     console.log('🎨 Setting up WebGL initialization timeout...');
     setTimeout(async () => {
@@ -328,7 +347,7 @@
   <canvas 
     bind:this={canvas}
     class="absolute inset-0 w-full h-full pointer-events-none"
-    style="z-index: 1; width: 100vw !important; height: 100vh !important;"
+    style="z-index: 1; width: 100vw !important; height: 100vh !important; position: fixed !important; top: 0 !important; left: 0 !important;"
   ></canvas>
   
   <div class="text-center space-y-8 max-w-2xl relative" style="z-index: 2;">

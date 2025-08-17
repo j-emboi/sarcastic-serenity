@@ -67,7 +67,7 @@ export class WebGLSceneManager {
   
   // Energy boost system
   private energyBoostTimer = 0;
-  private energyBoostInterval = 3000; // Boost every 3 seconds
+  private energyBoostInterval = 1000; // Boost every 1 second
   
   // Audio reactivity
   private audioData: AudioData = {
@@ -282,17 +282,18 @@ export class WebGLSceneManager {
   }
   
   private boostParticleEnergy(): void {
-    // Boost energy of particles that are moving slowly
+    // Boost energy of ALL particles to maintain continuous movement
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.body.velocity) {
         const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
-        if (speed < 2) { // If particle is moving slowly
-          // Add random velocity boost
-          Matter.Body.setVelocity(obj.body, {
-            x: obj.body.velocity.x + (Math.random() - 0.5) * 4,
-            y: obj.body.velocity.y + (Math.random() - 0.5) * 4
-          });
-        }
+        
+        // Always add some energy, more if moving slowly
+        const boostMultiplier = speed < 3 ? 6 : 2;
+        
+        Matter.Body.setVelocity(obj.body, {
+          x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
+          y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
+        });
       }
     });
     console.log('⚡ Boosted particle energy');
