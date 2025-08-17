@@ -68,9 +68,12 @@ export class WebGLSceneManager {
       console.log('Canvas client dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
 
       // Ensure canvas has proper dimensions
-      if (canvas.width === 0 || canvas.height === 0) {
-        canvas.width = canvas.clientWidth || window.innerWidth;
-        canvas.height = canvas.clientHeight || window.innerHeight;
+      const targetWidth = canvas.clientWidth || window.innerWidth;
+      const targetHeight = canvas.clientHeight || window.innerHeight;
+      
+      if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
         console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
       }
 
@@ -78,18 +81,24 @@ export class WebGLSceneManager {
       console.log('🎨 Creating OGL Renderer with canvas:', canvas);
       console.log('🎨 Canvas element type:', typeof canvas);
       console.log('🎨 Canvas element:', canvas);
+      console.log('🎨 Final canvas dimensions before renderer creation:', canvas.width, 'x', canvas.height);
       this.renderer = new Renderer({
         canvas: canvas
       });
       console.log('🎨 OGL Renderer created successfully');
 
       // Create scene and camera
+      console.log('🎨 Creating Scene...');
       this.scene = new Scene();
+      console.log('🎨 Creating Camera...');
       this.camera = new Camera();
       this.camera.position.z = 5;
+      console.log('🎨 Scene and Camera created successfully');
 
       // Create a simple background (OGL doesn't have setClearColor)
+      console.log('🎨 Creating background geometry...');
       const backgroundGeometry = new Plane();
+      console.log('🎨 Creating background material...');
       const backgroundMaterial = new Program({
         vertex: `
           attribute vec3 position;
@@ -110,10 +119,12 @@ export class WebGLSceneManager {
           }
         `
       });
+      console.log('🎨 Creating background mesh...');
       const background = new Mesh({ geometry: backgroundGeometry, program: backgroundMaterial });
       background.scale.set(10, 10, 1);
       background.position.z = -1;
       this.scene.addChild(background);
+      console.log('🎨 Background created and added to scene');
 
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
