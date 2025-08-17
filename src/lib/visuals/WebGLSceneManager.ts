@@ -213,6 +213,11 @@ export class WebGLSceneManager {
       console.log('🎨 Added physics boundaries for particle containment');
       console.log('🎨 Wall positions - Left:', bounds.left - wallThickness, 'Right:', bounds.right + wallThickness, 'Top:', bounds.top - wallThickness, 'Bottom:', bounds.bottom + wallThickness);
 
+      // Set up collision event handling for energy transfer
+      Matter.Events.on(this.physics, 'collisionStart', (event) => {
+        this.handleCollision(event);
+      });
+
       // Handle resize
       const resizeObserver = new ResizeObserver(() => {
         this.handleResize(canvas);
@@ -475,6 +480,38 @@ export class WebGLSceneManager {
     if (containedCount > 0) {
       console.log('🚨 Aggressive containment: brought back', containedCount, 'particles');
     }
+  }
+
+  private handleCollision(event: Matter.IEventCollision<Matter.Engine>): void {
+    // Handle particle-to-particle collisions for energy transfer
+    event.pairs.forEach((pair) => {
+      const bodyA = pair.bodyA;
+      const bodyB = pair.bodyB;
+      
+      // Skip collisions with walls (static bodies)
+      if (bodyA.isStatic || bodyB.isStatic) {
+        return;
+      }
+      
+      // Calculate collision normal and add energy boost in opposite direction
+      const normal = pair.normal;
+      const energyBoost = 3; // Amount of energy to add
+      
+      // Add energy boost to both particles in opposite directions
+      if (bodyA.velocity && bodyB.velocity) {
+        // Boost particle A in the direction of the normal
+        Matter.Body.setVelocity(bodyA, {
+          x: bodyA.velocity.x + normal.x * energyBoost,
+          y: bodyA.velocity.y + normal.y * energyBoost
+        });
+        
+        // Boost particle B in the opposite direction
+        Matter.Body.setVelocity(bodyB, {
+          x: bodyB.velocity.x - normal.x * energyBoost,
+          y: bodyB.velocity.y - normal.y * energyBoost
+        });
+      }
+    });
   }
 
   destroy(): void {
