@@ -114,13 +114,8 @@
       console.log('Canvas element:', canvas);
       if (canvas) {
         console.log('🎨 Canvas found, setting dimensions...');
-        // Force canvas to full screen
-        const fullWidth = window.innerWidth;
-        const fullHeight = window.innerHeight;
-        canvas.width = fullWidth;
-        canvas.height = fullHeight;
-        canvas.style.width = fullWidth + 'px';
-        canvas.style.height = fullHeight + 'px';
+        // Force canvas to full screen immediately
+        forceCanvasFullScreen();
         console.log('🎨 Canvas dimensions set to:', canvas.width, 'x', canvas.height);
         await initializeVisualSystem();
       } else {
@@ -167,13 +162,15 @@
           const expectedWidth = window.innerWidth;
           const expectedHeight = window.innerHeight;
           
-          // Only force update if there's a significant mismatch (more than 10px difference)
-          if (Math.abs(currentWidth - expectedWidth) > 10 || Math.abs(currentHeight - expectedHeight) > 10) {
+          // Force update if canvas is zero or significantly wrong
+          if (currentWidth === 0 || currentHeight === 0 || 
+              Math.abs(currentWidth - expectedWidth) > 10 || 
+              Math.abs(currentHeight - expectedHeight) > 10) {
             console.log('🎨 Canvas size mismatch detected, forcing update...');
             forceCanvasFullScreen();
           }
         }
-      }, 2000); // Check every 2 seconds instead of 1
+      }, 1000); // Check every second to catch zero dimensions quickly
       
       // Clean up monitor on component destroy
       return () => {
