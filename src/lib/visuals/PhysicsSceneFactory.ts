@@ -76,10 +76,10 @@ export class PhysicsSceneFactory {
   ): PhysicsObject {
     // Create physics body - make it match visual size accurately
     const body = Matter.Bodies.circle(x, y, size * 4, {
-      restitution: 0.85, // Gentle bounce (85%)
-      friction: 0.05,    // Light friction for calming effect
+      restitution: 0.9,  // Gentle bounce (90%)
+      friction: 0.02,    // Very light friction for calming effect
       density: 0.001,
-      frictionAir: 0.001 // Very light air resistance to prevent sticking
+      frictionAir: 0.0001 // Extremely light air resistance to maintain movement
     });
     
     // Add gentle initial velocity for calming movement

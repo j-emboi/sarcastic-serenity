@@ -515,7 +515,7 @@ export class WebGLSceneManager {
         const normalX = dx / distance;
         const normalY = dy / distance;
         
-        const energyBoost = 0.3; // Very gentle energy boost for calming effect
+        const energyBoost = 0.5; // Gentle energy boost to maintain movement
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
