@@ -175,7 +175,7 @@ export class WebGLSceneManager {
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
       // Use a larger scale to fill more of the screen while preventing off-screen particles
-      const scale = 0.12; // Larger scale = better screen coverage
+      const scale = 0.08; // Smaller scale = more room for particles to move and collide
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -215,6 +215,7 @@ export class WebGLSceneManager {
 
       // Set up collision event handling for energy transfer
       Matter.Events.on(this.physics, 'collisionStart', (event) => {
+        console.log('🎯 Collision event triggered!', event.pairs?.length, 'pairs');
         try {
           this.handleCollision(event);
         } catch (error) {
@@ -260,7 +261,7 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     // Update physics bounds to match new canvas dimensions
-    const scale = 0.12;
+    const scale = 0.08;
     this.physicsBounds = {
       left: -width * scale / 2,
       right: width * scale / 2,
@@ -368,8 +369,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body with consistent scaling
-        // Use a fixed scale that matches the physics world scale (0.12)
-        const visualScale = 0.12;
+        // Use a fixed scale that matches the physics world scale (0.08)
+        const visualScale = 0.08;
         
         obj.mesh.position.x = obj.body.position.x * visualScale;
         obj.mesh.position.y = obj.body.position.y * visualScale;
