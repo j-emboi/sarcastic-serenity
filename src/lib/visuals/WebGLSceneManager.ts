@@ -80,8 +80,7 @@ export class WebGLSceneManager {
   // Physics bounds storage
   private physicsBounds: { left: number; right: number; top: number; bottom: number } | null = null;
   
-  // Background mesh for gradient
-  private backgroundMesh: any = null;
+
 
   constructor() {
     this.physics = Matter.Engine.create({
@@ -157,47 +156,11 @@ export class WebGLSceneManager {
       console.log('🎨 Camera distance:', distance);
       console.log('🎨 Canvas aspect ratio:', aspect);
 
-      // Create simple background matching the app theme
-      console.log('🎨 Creating background...');
-      
-      // Create a large background plane with simple color
-      const backgroundGeometry = new Plane(gl);
-      const backgroundProgram = new Program(gl, {
-        vertex: `
-          attribute vec3 position;
-          attribute vec2 uv;
-          uniform mat4 modelViewMatrix;
-          uniform mat4 projectionMatrix;
-          
-          void main() {
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragment: `
-          precision highp float;
-          
-          void main() {
-            // Deep blue-purple background matching the app theme
-            gl_FragColor = vec4(0.1, 0.2, 0.8, 1.0);
-          }
-        `
-      });
-      
-      const backgroundMesh = new Mesh(gl, {
-        geometry: backgroundGeometry,
-        program: backgroundProgram
-      });
-      
-      // Make background very large and position it behind everything
-      backgroundMesh.scale.set(20, 20, 1);
-      backgroundMesh.position.z = -5;
-      
-      this.scene.addChild(backgroundMesh);
-      this.backgroundMesh = backgroundMesh;
-      console.log('🎨 Background created successfully');
+      // Skip background for now to focus on particles
+      console.log('🎨 Skipping background creation for now');
 
-      // Set up renderer
-      this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      // Set up renderer with full dimensions
+      this.renderer.setSize(fullWidth, fullHeight);
 
       // Create physics boundaries for particle containment
       // Force canvas dimensions one more time before calculating bounds
@@ -442,9 +405,11 @@ export class WebGLSceneManager {
 
   // Physics object management
   addPhysicsObject(obj: PhysicsObject): void {
+    console.log('🎨 Adding physics object:', obj.type, 'at position:', obj.body.position.x, obj.body.position.y);
     this.physicsObjects.push(obj);
     Matter.Composite.add(this.physics.world, obj.body);
     this.scene.addChild(obj.mesh);
+    console.log('🎨 Total physics objects:', this.physicsObjects.length);
   }
 
   removePhysicsObject(obj: PhysicsObject): void {
