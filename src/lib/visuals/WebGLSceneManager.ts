@@ -175,7 +175,7 @@ export class WebGLSceneManager {
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
       // Use a larger scale to fill more of the screen while preventing off-screen particles
-      const scale = 0.08; // Smaller scale = more room for particles to move and collide
+      const scale = 0.15; // Larger scale = more room for particles to move and collide
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -260,7 +260,7 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     // Update physics bounds to match new canvas dimensions
-    const scale = 0.08;
+    const scale = 0.15;
     this.physicsBounds = {
       left: -width * scale / 2,
       right: width * scale / 2,
@@ -368,8 +368,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body with consistent scaling
-        // Use a fixed scale that matches the physics world scale (0.08)
-        const visualScale = 0.08;
+        // Use a fixed scale that matches the physics world scale (0.15)
+        const visualScale = 0.15;
         
         obj.mesh.position.x = obj.body.position.x * visualScale;
         obj.mesh.position.y = obj.body.position.y * visualScale;
@@ -515,7 +515,7 @@ export class WebGLSceneManager {
         const normalX = dx / distance;
         const normalY = dy / distance;
         
-        const energyBoost = 8; // Increased energy boost to prevent sticking
+        const energyBoost = 2; // Gentle energy boost for calming effect
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
@@ -533,7 +533,7 @@ export class WebGLSceneManager {
           });
           
           // Add separation force to prevent sticking
-          const separationForce = 0.5;
+          const separationForce = 0.1;
           Matter.Body.applyForce(bodyA, bodyA.position, {
             x: normalX * separationForce,
             y: normalY * separationForce
