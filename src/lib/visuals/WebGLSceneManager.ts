@@ -89,20 +89,26 @@ export class WebGLSceneManager {
     try {
       console.log('🎨 Initializing WebGL Scene Manager...');
       this.canvas = canvas; // Store canvas reference
-      console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
-      console.log('Canvas client dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
-
-      // Ensure canvas has proper dimensions
-      const targetWidth = canvas.clientWidth || window.innerWidth;
-      const targetHeight = canvas.clientHeight || window.innerHeight;
       
-      // Always update canvas dimensions and style
-      canvas.setAttribute('width', targetWidth.toString());
-      canvas.setAttribute('height', targetHeight.toString());
+      // Force canvas to full viewport dimensions immediately
+      const targetWidth = window.innerWidth;
+      const targetHeight = window.innerHeight;
+      
       canvas.width = targetWidth;
       canvas.height = targetHeight;
-      canvas.style.width = targetWidth + 'px';
-      canvas.style.height = targetHeight + 'px';
+      canvas.setAttribute('width', targetWidth.toString());
+      canvas.setAttribute('height', targetHeight.toString());
+      canvas.style.setProperty('width', '100vw', 'important');
+      canvas.style.setProperty('height', '100vh', 'important');
+      
+      // Force reflow to ensure dimensions are updated
+      canvas.offsetHeight;
+      
+      console.log('🎨 Canvas dimensions after enforcement:', canvas.width, 'x', canvas.height);
+      console.log('🎨 Canvas client dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
+      
+      // Canvas dimensions already set above, just verify
+      console.log('🎨 Verifying canvas dimensions:', canvas.width, 'x', canvas.height);
       
       // Also update the renderer canvas reference
       if (this.renderer && this.renderer.canvas) {
