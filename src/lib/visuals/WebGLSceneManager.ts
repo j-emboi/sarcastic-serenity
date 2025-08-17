@@ -79,6 +79,9 @@ export class WebGLSceneManager {
   
   // Physics bounds storage
   private physicsBounds: { left: number; right: number; top: number; bottom: number } | null = null;
+  
+  // Background mesh for gradient
+  private backgroundMesh: any = null;
 
   constructor() {
     this.physics = Matter.Engine.create({
@@ -154,12 +157,72 @@ export class WebGLSceneManager {
       console.log('🎨 Camera distance:', distance);
       console.log('🎨 Canvas aspect ratio:', aspect);
 
-      // Skip background for now - focus on basic WebGL functionality
-      console.log('🎨 Skipping background creation for now');
+      // Create beautiful gradient background matching the app theme
+      console.log('🎨 Creating gradient background...');
+      
+      // Create a large background plane
+      const backgroundGeometry = new Plane(gl);
+      const backgroundProgram = new Program(gl, {
+        vertex: `
+          attribute vec3 position;
+          attribute vec2 uv;
+          uniform mat4 modelViewMatrix;
+          uniform mat4 projectionMatrix;
+          varying vec2 vUv;
+          
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragment: `
+          precision highp float;
+          varying vec2 vUv;
+          uniform float time;
+          
+          void main() {
+            // Create a beautiful gradient from blue-900 via purple-900 to indigo-900
+            vec3 color1 = vec3(0.1, 0.4, 0.9); // Deep Blue
+            vec3 color2 = vec3(0.3, 0.2, 0.8); // Purple
+            vec3 color3 = vec3(0.2, 0.3, 0.9); // Indigo
+            
+            // Create diagonal gradient
+            float t = vUv.x + vUv.y;
+            t = fract(t + sin(time * 0.1) * 0.1);
+            
+            vec3 color;
+            if (t < 0.5) {
+              color = mix(color1, color2, t * 2.0);
+            } else {
+              color = mix(color2, color3, (t - 0.5) * 2.0);
+            }
+            
+            // Add subtle animation
+            color += sin(time * 0.5 + vUv.x * 10.0) * 0.02;
+            
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `,
+        uniforms: {
+          time: { value: 0 }
+        }
+      });
+      
+      const backgroundMesh = new Mesh(gl, {
+        geometry: backgroundGeometry,
+        program: backgroundProgram
+      });
+      
+      // Make background very large and position it behind everything
+      backgroundMesh.scale.set(20, 20, 1);
+      backgroundMesh.position.z = -5;
+      
+      this.scene.addChild(backgroundMesh);
+      this.backgroundMesh = backgroundMesh;
+      console.log('🎨 Gradient background created successfully');
 
       // Set up renderer
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-      // OGL renderer doesn't have setClearColor - background is handled by the scene
 
       // Create physics boundaries for particle containment
       // Force canvas dimensions one more time before calculating bounds
@@ -307,6 +370,11 @@ export class WebGLSceneManager {
     const cappedDeltaTime = Math.min(deltaTime, 16.667);
     Matter.Engine.update(this.physics, cappedDeltaTime);
 
+    // Update background time for gradient animation
+    if (this.backgroundMesh && this.backgroundMesh.program.uniforms.time) {
+      this.backgroundMesh.program.uniforms.time.value = currentTime * 0.001;
+    }
+    
     // Update visual objects
     this.updatePhysicsObjects();
     

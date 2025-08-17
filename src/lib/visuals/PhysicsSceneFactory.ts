@@ -96,13 +96,14 @@ export class PhysicsSceneFactory {
       });
     }
 
-    // Randomize color for variety
+    // Colors matching the blue-purple-indigo gradient theme
     const colors = [
-      [0.2, 0.6, 1.0], // Blue
-      [0.8, 0.3, 0.8], // Purple
-      [0.3, 0.8, 0.4], // Green
-      [1.0, 0.6, 0.2], // Orange
-      [0.8, 0.2, 0.2]  // Red
+      [0.1, 0.4, 0.9], // Deep Blue (blue-900)
+      [0.3, 0.2, 0.8], // Purple (purple-900)
+      [0.2, 0.3, 0.9], // Indigo (indigo-900)
+      [0.4, 0.3, 0.9], // Light Purple
+      [0.2, 0.5, 0.8], // Blue-Purple blend
+      [0.6, 0.4, 0.9]  // Bright Purple
     ];
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -136,7 +137,7 @@ export class PhysicsSceneFactory {
     x: number = 0,
     y: number = 0,
     size: number = 0.15,
-    color: [number, number, number] = [0.2, 0.6, 0.9]
+    color: [number, number, number] = [0.2, 0.3, 0.9]
   ): PhysicsObject {
     // Create physics body with fluid-like properties - make it smaller to match visual size
     const body = Matter.Bodies.circle(x, y, size * 3, {
