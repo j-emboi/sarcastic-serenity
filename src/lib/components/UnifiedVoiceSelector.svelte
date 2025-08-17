@@ -148,9 +148,9 @@
         <!-- Selected Voice Info -->
         <div class="flex items-center space-x-4 mb-4">
           <div class="text-3xl">{getVoiceIcon(selectedCharacterId)}</div>
-          <div>
+          <div class="flex items-center space-x-2">
             <h4 class="text-lg font-semibold text-blue-200">{characterVoices.find((v: any) => v.id === selectedCharacterId).name}</h4>
-            <p class="text-sm text-blue-300">Currently Selected</p>
+            <span class="text-sm text-blue-300">• Currently Selected</span>
           </div>
         </div>
         
@@ -369,10 +369,7 @@
         {/each}
       </div>
 
-      <!-- Voice Counter -->
-      <div class="text-center mt-2 text-sm text-gray-400">
-        {currentIndex + 1} of {characterVoices.length}
-      </div>
+
     </div>
   {/if}
 </div>
