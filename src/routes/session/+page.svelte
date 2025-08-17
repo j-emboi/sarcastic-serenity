@@ -302,7 +302,7 @@
   <canvas 
     bind:this={canvas}
     class="absolute inset-0 w-full h-full pointer-events-none"
-    style="z-index: 1;"
+    style="z-index: 1; width: 100vw !important; height: 100vh !important;"
   ></canvas>
   
   <div class="text-center space-y-8 max-w-2xl relative" style="z-index: 2;">

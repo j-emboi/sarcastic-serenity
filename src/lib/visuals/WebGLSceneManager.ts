@@ -76,7 +76,7 @@ export class WebGLSceneManager {
 
   constructor() {
     this.physics = Matter.Engine.create({
-      gravity: { x: 0, y: -0.3, scale: 0.001 }
+      gravity: { x: 0, y: -0.1, scale: 0.001 }  // Much lighter gravity
     });
   }
 
@@ -131,11 +131,11 @@ export class WebGLSceneManager {
         bottom: canvas.height / 2
       };
       
-      // Add invisible boundaries
-      const leftWall = Matter.Bodies.rectangle(bounds.left - 50, 0, 100, canvas.height, { isStatic: true });
-      const rightWall = Matter.Bodies.rectangle(bounds.right + 50, 0, 100, canvas.height, { isStatic: true });
-      const topWall = Matter.Bodies.rectangle(0, bounds.top - 50, canvas.width, 100, { isStatic: true });
-      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + 50, canvas.width, 100, { isStatic: true });
+      // Add invisible boundaries with proper positioning
+      const leftWall = Matter.Bodies.rectangle(bounds.left - 50, 0, 100, canvas.height * 2, { isStatic: true });
+      const rightWall = Matter.Bodies.rectangle(bounds.right + 50, 0, 100, canvas.height * 2, { isStatic: true });
+      const topWall = Matter.Bodies.rectangle(0, bounds.top - 50, canvas.width * 2, 100, { isStatic: true });
+      const bottomWall = Matter.Bodies.rectangle(0, bounds.bottom + 50, canvas.width * 2, 100, { isStatic: true });
       
       Matter.Composite.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
       console.log('🎨 Added physics boundaries for particle containment');
