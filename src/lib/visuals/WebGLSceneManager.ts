@@ -508,10 +508,12 @@ export class WebGLSceneManager {
           return;
         }
         
-        const energyBoost = 2; // Reduced energy boost for more controlled movement
+        const energyBoost = 8; // Increased energy boost to prevent sticking
         
         // Add energy boost to both particles in opposite directions
         if (bodyA.velocity && bodyB.velocity) {
+          console.log('⚡ Collision detected! Adding energy boost:', energyBoost);
+          
           // Boost particle A in the direction of the normal
           Matter.Body.setVelocity(bodyA, {
             x: bodyA.velocity.x + normal.x * energyBoost,
@@ -522,6 +524,17 @@ export class WebGLSceneManager {
           Matter.Body.setVelocity(bodyB, {
             x: bodyB.velocity.x - normal.x * energyBoost,
             y: bodyB.velocity.y - normal.y * energyBoost
+          });
+          
+          // Add separation force to prevent sticking
+          const separationForce = 0.5;
+          Matter.Body.applyForce(bodyA, bodyA.position, {
+            x: normal.x * separationForce,
+            y: normal.y * separationForce
+          });
+          Matter.Body.applyForce(bodyB, bodyB.position, {
+            x: -normal.x * separationForce,
+            y: -normal.y * separationForce
           });
         }
       } catch (error) {
