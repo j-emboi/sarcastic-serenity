@@ -112,12 +112,27 @@ export class VisualManager {
     const actualHeight = this.sceneManager.getCanvasHeight();
     
     console.log('🎭 Actual canvas dimensions:', actualWidth, 'x', actualHeight);
-    const bounds = {
-      x: -actualWidth / 2,
-      y: -actualHeight / 2,
-      width: actualWidth,
-      height: actualHeight
-    };
+    
+    // If renderer dimensions are zero, use the canvas element dimensions
+    let bounds;
+    if (actualWidth === 0 || actualHeight === 0) {
+      console.log('🎭 Using canvas element dimensions as fallback');
+      const canvasWidth = this.canvas?.width || 1792;
+      const canvasHeight = this.canvas?.height || 894;
+      bounds = {
+        x: -canvasWidth / 2,
+        y: -canvasHeight / 2,
+        width: canvasWidth,
+        height: canvasHeight
+      };
+    } else {
+      bounds = {
+        x: -actualWidth / 2,
+        y: -actualHeight / 2,
+        width: actualWidth,
+        height: actualHeight
+      };
+    }
     console.log('🎭 Scene bounds:', bounds);
 
     // Create boundaries

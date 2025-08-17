@@ -109,6 +109,12 @@ export class WebGLSceneManager {
         console.log('🎨 Updated renderer canvas to:', this.renderer.canvas.width, 'x', this.renderer.canvas.height);
       }
       
+      // Update renderer size to match canvas
+      if (this.renderer) {
+        this.renderer.setSize(targetWidth, targetHeight);
+        console.log('🎨 Updated renderer size to:', targetWidth, 'x', targetHeight);
+      }
+      
       console.log('🎨 Updated canvas dimensions to:', canvas.width, 'x', canvas.height);
       console.log('🎨 Updated canvas style to:', canvas.style.width, 'x', canvas.style.height);
       console.log('🎨 Updated canvas attributes to:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
@@ -128,8 +134,16 @@ export class WebGLSceneManager {
       this.scene = new Scene();
       console.log('🎨 Creating Camera...');
       this.camera = new Camera();
-      this.camera.position.z = 5;
+      
+      // Position camera to view the entire scene properly
+      const aspect = canvas.width / canvas.height;
+      const distance = Math.max(canvas.width, canvas.height) / 2;
+      this.camera.position.z = distance;
+      
       console.log('🎨 Scene and Camera created successfully');
+      console.log('🎨 Camera position:', this.camera.position);
+      console.log('🎨 Camera distance:', distance);
+      console.log('🎨 Canvas aspect ratio:', aspect);
 
       // Skip background for now - focus on basic WebGL functionality
       console.log('🎨 Skipping background creation for now');
@@ -145,6 +159,8 @@ export class WebGLSceneManager {
         top: -canvas.height / 2,
         bottom: canvas.height / 2
       };
+      
+      console.log('🎨 Physics bounds:', bounds);
       
       // Add invisible boundaries with proper positioning
       const leftWall = Matter.Bodies.rectangle(bounds.left - 50, 0, 100, canvas.height * 2, { isStatic: true });

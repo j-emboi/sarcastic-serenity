@@ -36,20 +36,25 @@
       const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
       const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
       
-      // Update BOTH HTML attributes AND CSS styles
+      // Force update BOTH HTML attributes AND CSS styles with !important
       canvas.setAttribute('width', fullWidth.toString());
       canvas.setAttribute('height', fullHeight.toString());
       canvas.width = fullWidth;
       canvas.height = fullHeight;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
-      canvas.style.position = 'fixed';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
+      canvas.style.setProperty('width', window.innerWidth + 'px', 'important');
+      canvas.style.setProperty('height', window.innerHeight + 'px', 'important');
+      canvas.style.setProperty('position', 'fixed', 'important');
+      canvas.style.setProperty('top', '0', 'important');
+      canvas.style.setProperty('left', '0', 'important');
+      canvas.style.setProperty('z-index', '1', 'important');
+      
+      // Force a reflow to ensure changes take effect
+      canvas.offsetHeight;
       
       console.log('🎨 Forced canvas full screen immediately:', fullWidth, 'x', fullHeight);
       console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
       console.log('🎨 Canvas attributes after update:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
+      console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     }
   }
   let isVisualSystemReady = false;
@@ -107,21 +112,50 @@
           const fullWidth = Math.floor(window.innerWidth * devicePixelRatio);
           const fullHeight = Math.floor(window.innerHeight * devicePixelRatio);
           
-          // Update BOTH HTML attributes AND CSS styles
+          // Force update BOTH HTML attributes AND CSS styles with !important
           canvas.setAttribute('width', fullWidth.toString());
           canvas.setAttribute('height', fullHeight.toString());
           canvas.width = fullWidth;
           canvas.height = fullHeight;
-          canvas.style.width = window.innerWidth + 'px';
-          canvas.style.height = window.innerHeight + 'px';
+          canvas.style.setProperty('width', window.innerWidth + 'px', 'important');
+          canvas.style.setProperty('height', window.innerHeight + 'px', 'important');
+          canvas.style.setProperty('position', 'fixed', 'important');
+          canvas.style.setProperty('top', '0', 'important');
+          canvas.style.setProperty('left', '0', 'important');
+          canvas.style.setProperty('z-index', '1', 'important');
+          
+          // Force a reflow to ensure changes take effect
+          canvas.offsetHeight;
           
           console.log('🎨 Canvas resized to:', fullWidth, 'x', fullHeight);
           console.log('🎨 Canvas style size:', window.innerWidth, 'x', window.innerHeight);
           console.log('🎨 Canvas attributes after resize:', canvas.getAttribute('width'), 'x', canvas.getAttribute('height'));
+          console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
         }
       };
     
-    window.addEventListener('resize', handleResize);
+          window.addEventListener('resize', handleResize);
+      
+      // Add a monitoring interval to ensure canvas stays full screen
+      const canvasMonitor = setInterval(() => {
+        if (canvas) {
+          const currentWidth = parseInt(canvas.getAttribute('width') || '0');
+          const currentHeight = parseInt(canvas.getAttribute('height') || '0');
+          const expectedWidth = Math.floor(window.innerWidth * (window.devicePixelRatio || 1));
+          const expectedHeight = Math.floor(window.innerHeight * (window.devicePixelRatio || 1));
+          
+          if (currentWidth !== expectedWidth || currentHeight !== expectedHeight) {
+            console.log('🎨 Canvas size mismatch detected, forcing update...');
+            forceCanvasFullScreen();
+          }
+        }
+      }, 1000); // Check every second
+      
+      // Clean up monitor on component destroy
+      return () => {
+        clearInterval(canvasMonitor);
+        window.removeEventListener('resize', handleResize);
+      };
 
 
 
