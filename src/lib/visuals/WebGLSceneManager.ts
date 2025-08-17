@@ -159,13 +159,13 @@ export class WebGLSceneManager {
       // Skip background for now to focus on particles
       console.log('🎨 Skipping background creation for now');
 
-      // Set up renderer with full dimensions
-      this.renderer.setSize(fullWidth, fullHeight);
-
       // Create physics boundaries for particle containment
       // Force canvas dimensions one more time before calculating bounds
       const fullWidth = window.innerWidth;
       const fullHeight = window.innerHeight;
+      
+      // Set up renderer with full dimensions
+      this.renderer.setSize(fullWidth, fullHeight);
       
       canvas.width = fullWidth;
       canvas.height = fullHeight;
