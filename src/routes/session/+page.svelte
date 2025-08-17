@@ -89,7 +89,6 @@
     const timerInterval = setInterval(() => {
       if (timeLeft > 0 && !ended) {
         timeLeft--;
-        console.log('⏰ Timer tick:', timeLeft, 'seconds remaining');
       } else if (timeLeft <= 0 && !ended) {
         console.log('⏰ Session ended by timer');
         ended = true;
@@ -104,7 +103,6 @@
     }, 1000);
     
     // Start the quote system
-    console.log('🎤 Starting quote system...');
     scheduleNextQuoteWithJitter();
     
     // Initialize WebGL Visual System after a short delay to ensure canvas is ready
@@ -282,7 +280,6 @@
     
     // Don't schedule new quotes if we're currently speaking
     if (speaking) {
-      console.log('🎤 Currently speaking, will retry in 1 second...');
       // Wait a bit and try again
       nextQuoteTimeout = window.setTimeout(() => {
         if (!ended) {
@@ -293,7 +290,6 @@
     }
     
     const delay = quoteManager.getNextQuoteTime();
-    console.log('🎤 Scheduling next quote in', delay, 'ms');
     nextQuoteTimeout = window.setTimeout(() => {
       if (!ended) {
         scheduleNextQuote();
