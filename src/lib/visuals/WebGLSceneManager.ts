@@ -188,19 +188,22 @@ export class WebGLSceneManager {
   }
 
   private handleResize(canvas: HTMLCanvasElement): void {
-    // Force canvas to correct dimensions
-    canvas.width = 1237;
-    canvas.height = 894;
-    canvas.setAttribute('width', '1237');
-    canvas.setAttribute('height', '894');
-    canvas.style.setProperty('width', '1237px', 'important');
-    canvas.style.setProperty('height', '894px', 'important');
+    // Force canvas to full viewport dimensions
+    const fullWidth = window.innerWidth;
+    const fullHeight = window.innerHeight;
+    
+    canvas.width = fullWidth;
+    canvas.height = fullHeight;
+    canvas.setAttribute('width', fullWidth.toString());
+    canvas.setAttribute('height', fullHeight.toString());
+    canvas.style.setProperty('width', '100vw', 'important');
+    canvas.style.setProperty('height', '100vh', 'important');
     
     // Force reflow
     canvas.offsetHeight;
     
-    const width = 1237; // Use forced dimensions
-    const height = 894;
+    const width = fullWidth; // Use full viewport dimensions
+    const height = fullHeight;
     
     console.log('🎨 Canvas resized to:', width, 'x', height);
     console.log('🎨 Canvas style size:', canvas.style.width, 'x', canvas.style.height);

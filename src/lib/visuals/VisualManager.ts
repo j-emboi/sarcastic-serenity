@@ -115,28 +115,31 @@ export class VisualManager {
     
     // Force canvas to have correct dimensions and use them for scene bounds
     if (this.canvas) {
-      // Force update canvas dimensions to match what we want
-      this.canvas.width = 1237;
-      this.canvas.height = 894;
-      this.canvas.setAttribute('width', '1237');
-      this.canvas.setAttribute('height', '894');
+      // Force update canvas dimensions to match the full viewport
+      const fullWidth = window.innerWidth;
+      const fullHeight = window.innerHeight;
+      
+      this.canvas.width = fullWidth;
+      this.canvas.height = fullHeight;
+      this.canvas.setAttribute('width', fullWidth.toString());
+      this.canvas.setAttribute('height', fullHeight.toString());
       
       // Force a reflow to ensure the canvas internal dimensions are updated
       this.canvas.offsetHeight;
       
       // Double-check and force again if needed
-      if (this.canvas.width !== 1237 || this.canvas.height !== 894) {
+      if (this.canvas.width !== fullWidth || this.canvas.height !== fullHeight) {
         console.log('🎭 Canvas dimensions still wrong, forcing again...');
-        this.canvas.width = 1237;
-        this.canvas.height = 894;
+        this.canvas.width = fullWidth;
+        this.canvas.height = fullHeight;
         this.canvas.offsetHeight; // Force reflow again
       }
       
       console.log('🎭 Canvas internal dimensions after enforcement:', this.canvas.width, 'x', this.canvas.height);
     }
     
-    const canvasWidth = 1237; // Use the correct canvas width
-    const canvasHeight = 894; // Use the correct canvas height
+    const canvasWidth = this.canvas?.width || window.innerWidth; // Use actual canvas width
+    const canvasHeight = this.canvas?.height || window.innerHeight; // Use actual canvas height
     
     console.log('🎭 Using forced canvas dimensions for scene bounds:', canvasWidth, 'x', canvasHeight);
     
