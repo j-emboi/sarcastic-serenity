@@ -66,9 +66,7 @@ export class WebGLSceneManager {
   private fps = 60;
   private qualityLevel = 1.0; // 1.0 = full quality, 0.5 = half quality
   
-  // Energy boost system
-  private energyBoostTimer = 0;
-  private energyBoostInterval = 1000; // Boost every 1 second (very frequent)
+
   
   // Audio reactivity
   private audioData: AudioData = {
@@ -303,12 +301,7 @@ export class WebGLSceneManager {
     // Update visual objects
     this.updatePhysicsObjects();
     
-    // Energy boost system - periodically boost particle energy
-    this.energyBoostTimer += cappedDeltaTime;
-    if (this.energyBoostTimer >= this.energyBoostInterval) {
-      this.boostParticleEnergy();
-      this.energyBoostTimer = 0;
-    }
+    // Removed energy boost system for natural particle movement
     
     // Aggressive containment check - run every 60 frames (about once per second)
     this.frameCount++;
@@ -437,33 +430,7 @@ export class WebGLSceneManager {
     return this.canvas?.height || 0;
   }
   
-  private boostParticleEnergy(): void {
-    // Boost energy of all particles to maintain continuous movement
-    this.physicsObjects.forEach(obj => {
-      if (obj.body && obj.body.velocity) {
-        const speed = Math.sqrt(obj.body.velocity.x ** 2 + obj.body.velocity.y ** 2);
-        
-        // If particle is moving slowly, give it a gentle boost for calming effect
-        if (speed < 2) {
-          const boostMultiplier = 1.5; // Gentle boost for slow particles
-          
-          Matter.Body.setVelocity(obj.body, {
-            x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
-            y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
-          });
-        } else {
-          // For faster particles, give a very small boost to maintain gentle movement
-          const boostMultiplier = 0.3;
-          
-          Matter.Body.setVelocity(obj.body, {
-            x: obj.body.velocity.x + (Math.random() - 0.5) * boostMultiplier,
-            y: obj.body.velocity.y + (Math.random() - 0.5) * boostMultiplier
-          });
-        }
-      }
-    });
-    console.log('⚡ Boosted particle energy with speed-based boost');
-  }
+
   
   private aggressiveContainmentCheck(): void {
     // Use the stored physics bounds for consistent containment
