@@ -33,13 +33,22 @@ export class VisualManager {
 
   async init(canvas: HTMLCanvasElement): Promise<boolean> {
     try {
+      console.log('🎨 Visual Manager init started...');
       this.canvas = canvas;
       
       // Initialize WebGL scene manager
+      console.log('🎨 Initializing WebGL scene manager...');
       await this.sceneManager.init(canvas);
+      console.log('🎨 WebGL scene manager initialized');
       
-      // Initialize audio bridge
-      await this.audioBridge.connect();
+      // Initialize audio bridge (optional - don't fail if it doesn't work)
+      console.log('🎨 Attempting to initialize audio bridge...');
+      try {
+        await this.audioBridge.connect();
+        console.log('🎨 Audio bridge initialized');
+      } catch (audioError) {
+        console.warn('⚠️ Audio bridge failed to initialize (this is optional):', audioError);
+      }
       
       this.isInitialized = true;
       console.log('🎨 Visual Manager initialized successfully');
@@ -56,6 +65,13 @@ export class VisualManager {
       return;
     }
 
+    console.log('🎬 Starting Visual Manager...');
+    
+    // Create the initial scene
+    console.log('🎬 Creating initial scene...');
+    this.createScene(this.currentScene);
+    
+    // Start the scene manager
     this.sceneManager.start();
     console.log('🎬 Visual Manager started');
   }
@@ -85,14 +101,20 @@ export class VisualManager {
   }
 
   private createScene(sceneType: SceneType): void {
-    if (!this.canvas) return;
+    console.log('🎭 Creating scene:', sceneType);
+    if (!this.canvas) {
+      console.error('❌ No canvas available for scene creation');
+      return;
+    }
 
+    console.log('🎭 Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
     const bounds = {
       x: -this.canvas.width / 2,
       y: -this.canvas.height / 2,
       width: this.canvas.width,
       height: this.canvas.height
     };
+    console.log('🎭 Scene bounds:', bounds);
 
     // Create boundaries
     const leftBoundary = PhysicsSceneFactory.createBoundary(
@@ -157,9 +179,14 @@ export class VisualManager {
     }
 
     // Add particles to scene
-    particles.forEach(particle => {
+    console.log('🎭 Adding', particles.length, 'particles to scene');
+    particles.forEach((particle, index) => {
       this.sceneManager.addPhysicsObject(particle);
+      if (index < 3) { // Log first few particles for debugging
+        console.log('🎭 Added particle', index, 'at position:', particle.body.position);
+      }
     });
+    console.log('🎭 Scene creation complete');
   }
 
   updateAudioData(audioData: AudioData): void {
