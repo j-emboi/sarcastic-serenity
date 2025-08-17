@@ -141,8 +141,20 @@
       console.log('Canvas element:', canvas);
       if (canvas) {
         console.log('🎨 Canvas found, setting dimensions...');
-        // Force canvas to full screen immediately
-        forceCanvasFullScreen();
+              // Force canvas to full screen immediately
+      forceCanvasFullScreen();
+      
+      // Additional canvas size enforcement
+      if (canvas) {
+        // Force the exact dimensions we want
+        canvas.width = 1237;
+        canvas.height = 894;
+        canvas.setAttribute('width', '1237');
+        canvas.setAttribute('height', '894');
+        canvas.style.setProperty('width', '1237px', 'important');
+        canvas.style.setProperty('height', '894px', 'important');
+        console.log('🎨 Additional canvas size enforcement applied');
+      }
         console.log('🎨 Canvas dimensions set to:', canvas.width, 'x', canvas.height);
         await initializeVisualSystem();
       } else {
