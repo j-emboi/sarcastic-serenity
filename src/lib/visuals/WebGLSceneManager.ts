@@ -1,7 +1,30 @@
-import { Renderer, Camera, Program, Mesh, Plane, Box, Scene } from 'ogl';
+import { Renderer, Camera, Program, Mesh, Plane, Box } from 'ogl';
 import * as Matter from 'matter-js';
 
-// Using OGL's Scene class instead of custom implementation
+// Custom Scene class for OGL compatibility
+class Scene {
+  children: any[] = [];
+  
+  addChild(child: any) {
+    this.children.push(child);
+  }
+  
+  removeChild(child: any) {
+    const index = this.children.indexOf(child);
+    if (index > -1) {
+      this.children.splice(index, 1);
+    }
+  }
+  
+  updateMatrixWorld() {
+    // Update matrix world for all children
+    this.children.forEach(child => {
+      if (child.updateMatrixWorld) {
+        child.updateMatrixWorld();
+      }
+    });
+  }
+}
 
 export interface AudioData {
   frequency: number[];
