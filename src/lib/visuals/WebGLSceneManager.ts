@@ -292,6 +292,12 @@ export class WebGLSceneManager {
       this.boostParticleEnergy();
       this.energyBoostTimer = 0;
     }
+    
+    // Aggressive containment check - run every 60 frames (about once per second)
+    this.frameCount++;
+    if (this.frameCount % 60 === 0) {
+      this.aggressiveContainmentCheck();
+    }
 
     // Render scene
     this.renderer.render({ scene: this.scene, camera: this.camera });
@@ -315,20 +321,31 @@ export class WebGLSceneManager {
     this.physicsObjects.forEach(obj => {
       if (obj.body && obj.mesh) {
         // Check if particle is outside bounds and bring it back with velocity reversal
+        let wasContained = false;
+        
         if (obj.body.position.x < bounds.left) {
           Matter.Body.setPosition(obj.body, { x: bounds.left + 2, y: obj.body.position.y });
           Matter.Body.setVelocity(obj.body, { x: Math.abs(obj.body.velocity.x), y: obj.body.velocity.y });
+          wasContained = true;
         } else if (obj.body.position.x > bounds.right) {
           Matter.Body.setPosition(obj.body, { x: bounds.right - 2, y: obj.body.position.y });
           Matter.Body.setVelocity(obj.body, { x: -Math.abs(obj.body.velocity.x), y: obj.body.velocity.y });
+          wasContained = true;
         }
         
         if (obj.body.position.y < bounds.top) {
           Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.top + 2 });
           Matter.Body.setVelocity(obj.body, { x: obj.body.velocity.x, y: Math.abs(obj.body.velocity.y) });
+          wasContained = true;
         } else if (obj.body.position.y > bounds.bottom) {
           Matter.Body.setPosition(obj.body, { x: obj.body.position.x, y: bounds.bottom - 2 });
           Matter.Body.setVelocity(obj.body, { x: obj.body.velocity.x, y: -Math.abs(obj.body.velocity.y) });
+          wasContained = true;
+        }
+        
+        // Debug: Log when particles are contained
+        if (wasContained) {
+          console.log('🎯 Contained particle at position:', obj.body.position.x, obj.body.position.y);
         }
         
         // Update mesh position from physics body
@@ -418,6 +435,50 @@ export class WebGLSceneManager {
       }
     });
     console.log('⚡ Boosted slow particle energy');
+  }
+  
+  private aggressiveContainmentCheck(): void {
+    const bounds = {
+      left: -109.6,
+      right: 109.6,
+      top: -64.7,
+      bottom: 64.7
+    };
+    
+    let containedCount = 0;
+    this.physicsObjects.forEach(obj => {
+      if (obj.body) {
+        let needsContainment = false;
+        
+        // Check if particle is way outside bounds
+        if (obj.body.position.x < bounds.left - 10 || obj.body.position.x > bounds.right + 10 ||
+            obj.body.position.y < bounds.top - 10 || obj.body.position.y > bounds.bottom + 10) {
+          
+          // Teleport particle back to center of bounds
+          Matter.Body.setPosition(obj.body, {
+            x: (bounds.left + bounds.right) / 2,
+            y: (bounds.top + bounds.bottom) / 2
+          });
+          
+          // Give it a random velocity
+          Matter.Body.setVelocity(obj.body, {
+            x: (Math.random() - 0.5) * 4,
+            y: (Math.random() - 0.5) * 4
+          });
+          
+          needsContainment = true;
+          containedCount++;
+        }
+        
+        if (needsContainment) {
+          console.log('🚨 Aggressively contained runaway particle');
+        }
+      }
+    });
+    
+    if (containedCount > 0) {
+      console.log('🚨 Aggressive containment: brought back', containedCount, 'particles');
+    }
   }
 
   destroy(): void {
