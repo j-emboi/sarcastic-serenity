@@ -310,12 +310,15 @@ export class WebGLSceneManager {
   }
 
   private updatePhysicsObjects(): void {
-    // Use the same bounds as the physics world (from initialization)
+    // Calculate bounds dynamically based on canvas dimensions
+    const canvasWidth = this.canvas?.width || 1792;
+    const canvasHeight = this.canvas?.height || 894;
+    const scale = 0.2;
     const bounds = {
-      left: -179.2,  // Adjusted for new scale (0.2)
-      right: 179.2,
-      top: -89.4,
-      bottom: 89.4
+      left: -canvasWidth * scale / 2,
+      right: canvasWidth * scale / 2,
+      top: -canvasHeight * scale / 2,
+      bottom: canvasHeight * scale / 2
     };
     
     this.physicsObjects.forEach(obj => {
@@ -438,11 +441,15 @@ export class WebGLSceneManager {
   }
   
   private aggressiveContainmentCheck(): void {
+    // Calculate bounds dynamically based on canvas dimensions
+    const canvasWidth = this.canvas?.width || 1792;
+    const canvasHeight = this.canvas?.height || 894;
+    const scale = 0.2;
     const bounds = {
-      left: -179.2,
-      right: 179.2,
-      top: -89.4,
-      bottom: 89.4
+      left: -canvasWidth * scale / 2,
+      right: canvasWidth * scale / 2,
+      top: -canvasHeight * scale / 2,
+      bottom: canvasHeight * scale / 2
     };
     
     let containedCount = 0;
