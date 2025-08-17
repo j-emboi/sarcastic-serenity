@@ -175,7 +175,7 @@ export class WebGLSceneManager {
       console.log('🎨 Final canvas dimensions before physics bounds:', canvas.width, 'x', canvas.height);
       
       // Use a larger scale to fill more of the screen while preventing off-screen particles
-      const scale = 0.15; // Tighter scale to prevent particles from escaping
+      const scale = 0.12; // Very tight scale to prevent particles from escaping
       const bounds = {
         left: -canvas.width * scale / 2,
         right: canvas.width * scale / 2,
@@ -209,7 +209,7 @@ export class WebGLSceneManager {
         render: { fillStyle: 'transparent' }
       });
       
-      Matter.Composite.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
+      Matter.World.add(this.physics.world, [leftWall, rightWall, topWall, bottomWall]);
       console.log('🎨 Added physics boundaries for particle containment');
       console.log('🎨 Wall positions - Left:', bounds.left, 'Right:', bounds.right, 'Top:', bounds.top, 'Bottom:', bounds.bottom);
 
@@ -260,7 +260,7 @@ export class WebGLSceneManager {
     console.log('🎨 Canvas computed style:', getComputedStyle(canvas).width, 'x', getComputedStyle(canvas).height);
     
     // Update physics bounds to match new canvas dimensions
-    const scale = 0.15;
+    const scale = 0.12;
     this.physicsBounds = {
       left: -width * scale / 2,
       right: width * scale / 2,
@@ -312,9 +312,9 @@ export class WebGLSceneManager {
     
     // Removed energy boost system for natural particle movement
     
-    // Aggressive containment check - run every 60 frames (about once per second)
+    // Aggressive containment check - run every 10 frames (much more frequent)
     this.frameCount++;
-    if (this.frameCount % 60 === 0) {
+    if (this.frameCount % 10 === 0) {
       this.aggressiveContainmentCheck();
     }
 
@@ -368,8 +368,8 @@ export class WebGLSceneManager {
         }
         
         // Update mesh position from physics body with consistent scaling
-        // Use a fixed scale that matches the physics world scale (0.15)
-        const visualScale = 0.15;
+        // Use a fixed scale that matches the physics world scale (0.12)
+        const visualScale = 0.12;
         
         obj.mesh.position.x = obj.body.position.x * visualScale;
         obj.mesh.position.y = obj.body.position.y * visualScale;
@@ -455,9 +455,9 @@ export class WebGLSceneManager {
       if (obj.body) {
         let needsContainment = false;
         
-        // Check if particle is way outside bounds
-        if (obj.body.position.x < bounds.left - 10 || obj.body.position.x > bounds.right + 10 ||
-            obj.body.position.y < bounds.top - 10 || obj.body.position.y > bounds.bottom + 10) {
+        // Check if particle is outside bounds (very small tolerance)
+        if (obj.body.position.x < bounds.left - 2 || obj.body.position.x > bounds.right + 2 ||
+            obj.body.position.y < bounds.top - 2 || obj.body.position.y > bounds.bottom + 2) {
           
           // Teleport particle back to center of bounds
           Matter.Body.setPosition(obj.body, {
