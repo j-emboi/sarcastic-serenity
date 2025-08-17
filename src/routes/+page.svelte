@@ -1,13 +1,22 @@
 <script lang="ts">
+  console.log('🏠 Main page script loading...');
+  console.log('🏠 Current URL at script start:', typeof window !== 'undefined' ? window.location.href : 'SSR');
+  
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { settings, initSettingsFromStorage, getAvailablePersonas } from '$lib/stores/settings';
   import UnifiedVoiceSelector from '$lib/components/UnifiedVoiceSelector.svelte';
   import type { AppSettings } from '$lib/stores/settings';
 
+  console.log('🏠 Main page imports completed');
+
   let settingsValue: AppSettings | null = null;
 
   onMount(() => {
+    console.log('🏠 Main page onMount started!');
+    console.log('🏠 Current URL:', window.location.href);
+    console.log('🏠 Page pathname:', window.location.pathname);
+    
     initSettingsFromStorage();
     const unsub = settings.subscribe(value => {
       settingsValue = value;
@@ -17,6 +26,8 @@
   });
 
   function startSession() {
+    console.log('🚀 Start session button clicked!');
+    console.log('🚀 Navigating to /session...');
     goto('/session');
   }
 </script>
