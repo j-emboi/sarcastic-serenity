@@ -90,7 +90,7 @@
 
              <!-- Persona -->
        <div class="space-y-2">
-         <label for="persona-select" class="block text-sm font-medium">Persona</label>
+         <label for="persona-select" class="block text-sm font-medium">Persona (Who you are)</label>
          <select 
            id="persona-select"
            value={settingsValue?.persona || 'student'}
